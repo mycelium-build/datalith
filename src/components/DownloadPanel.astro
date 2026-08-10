@@ -1,0 +1,178 @@
+---
+import releaseData from '../data/releases.json';
+
+const releases = releaseData.releases ?? [];
+const stableReleases = releases.filter((release) => !release.prerelease);
+const rcReleases = releases.filter((release) => release.prerelease);
+const initialChannel = stableReleases.length > 0 ? 'stable' : 'rc';
+const initialReleases = initialChannel === 'stable' ? stableReleases : rcReleases;
+const initialRelease = stableReleases[0] ?? rcReleases[0];
+const initialAsset = initialRelease?.assets.find((asset) => asset.platform === 'macos') ?? initialRelease?.assets[0];
+---
+
+<section class="download-panel" data-download-panel>
+	<div class="download-controls">
+		<label>
+			<span>Channel</span>
+			<select data-channel>
+				<option value="stable" selected={initialChannel === 'stable'}>Stable</option>
+				{rcReleases.length > 0 && <option value="rc" selected={initialChannel === 'rc'}>Release candidate</option>}
+			</select>
+		</label>
+		<label>
+			<span>Version</span>
+			<select data-version>
+				{initialReleases.map((release) => <option value={release.tagName}>{release.tagName}</option>)}
+				{initialReleases.length === 0 && <option>No releases available</option>}
+			</select>
+		</label>
+	</div>
+
+	<div class="download-main">
+		<p class="download-eyebrow" data-host-label>Recommended for your system</p>
+		<h2 data-release-name>{initialRelease?.name ?? 'Datalith releases'}</h2>
+		<p class="download-description" data-release-description>
+			{initialAsset ? `${initialAsset.name} · ${initialRelease.tagName}` : 'Published downloads will appear here.'}
+		</p>
+		<div class="download-actions">
+			<a
+				class="download-button"
+				href={initialAsset?.browserDownloadUrl ?? `https://github.com/${releaseData.repository}/releases`}
+				target="_blank"
+				rel="noreferrer"
+				data-download-link
+			>
+				<span data-download-label>Download</span>
+				<span aria-hidden="true">↓</span>
+			</a>
+			<button class="other-button" type="button" popovertarget="other-downloads">Other platforms</button>
+		</div>
+		<p class="download-meta">
+			<a href={initialRelease?.htmlUrl ?? `https://github.com/${releaseData.repository}/releases`} target="_blank" rel="noreferrer" data-release-link>Release notes</a>
+			<span aria-hidden="true">·</span>
+			<span data-release-date>{initialRelease ? new Date(initialRelease.publishedAt).toLocaleDateString() : 'Waiting for a release'}</span>
+		</p>
+	</div>
+
+	<div id="other-downloads" class="other-downloads" popover>
+		<div class="popover-heading">
+			<h2>Other platforms</h2>
+			<button type="button" popovertarget="other-downloads" popovertargetaction="hide" aria-label="Close">×</button>
+		</div>
+		<p data-popover-version>{initialRelease?.tagName ?? 'No release selected'}</p>
+		<div class="asset-list" data-asset-list>
+			{(initialRelease?.assets ?? []).map((asset) => (
+				<a href={asset.browserDownloadUrl} target="_blank" rel="noreferrer" data-asset data-platform={asset.platform}>
+					<span>{asset.name}</span>
+					<span aria-hidden="true">↓</span>
+				</a>
+			))}
+		</div>
+	</div>
+
+	<script type="application/json" id="release-data" set:html={JSON.stringify(releases)}></script>
+</section>
+
+<script>
+	const panel = document.querySelector('[data-download-panel]');
+	if (panel) {
+		const releases = JSON.parse(document.querySelector('#release-data')?.textContent ?? '[]');
+		const channelSelect = panel.querySelector('[data-channel]');
+		const versionSelect = panel.querySelector('[data-version]');
+		const downloadLink = panel.querySelector('[data-download-link]');
+		const downloadLabel = panel.querySelector('[data-download-label]');
+		const releaseName = panel.querySelector('[data-release-name]');
+		const releaseDescription = panel.querySelector('[data-release-description]');
+		const releaseLink = panel.querySelector('[data-release-link]');
+		const releaseDate = panel.querySelector('[data-release-date]');
+		const hostLabel = panel.querySelector('[data-host-label]');
+		const assetList = panel.querySelector('[data-asset-list]');
+		const popoverVersion = panel.querySelector('[data-popover-version]');
+
+		const platformLabels = { macos: 'macOS', windows: 'Windows', linux: 'Linux', other: 'your system' };
+		const detectPlatform = () => {
+			const value = `${navigator.userAgentData?.platform ?? ''} ${navigator.platform ?? ''} ${navigator.userAgent}`.toLowerCase();
+			if (value.includes('mac') || value.includes('iphone') || value.includes('ipad')) return 'macos';
+			if (value.includes('win')) return 'windows';
+			if (value.includes('linux')) return 'linux';
+			return 'other';
+		};
+		const hostPlatform = detectPlatform();
+		hostLabel.textContent = `Recommended for ${platformLabels[hostPlatform]}`;
+
+		const updateVersionOptions = () => {
+			const channel = channelSelect.value;
+			const channelReleases = releases.filter((release) => channel === 'rc' ? release.prerelease : !release.prerelease);
+			versionSelect.replaceChildren(...channelReleases.map((release) => {
+				const option = document.createElement('option');
+				option.value = release.tagName;
+				option.textContent = release.tagName;
+				return option;
+			}));
+			if (channelReleases[0]) updateRelease(channelReleases[0]);
+		};
+		const updateRelease = (release) => {
+			if (!release) return;
+			const asset = release.assets.find((candidate) => candidate.platform === hostPlatform);
+			releaseName.textContent = release.name;
+			releaseDescription.textContent = asset ? `${asset.name} · ${release.tagName}` : 'No download is available for this host yet.';
+			downloadLink.href = asset?.browserDownloadUrl ?? release.htmlUrl;
+			downloadLink.setAttribute('aria-disabled', asset ? 'false' : 'true');
+			downloadLabel.textContent = asset ? `Download for ${platformLabels[hostPlatform]}` : 'View release';
+			releaseLink.href = release.htmlUrl;
+			releaseDate.textContent = release.publishedAt ? new Date(release.publishedAt).toLocaleDateString() : '';
+			popoverVersion.textContent = release.tagName;
+			assetList.replaceChildren(...release.assets.map((candidate) => {
+				const link = document.createElement('a');
+				link.href = candidate.browserDownloadUrl;
+				link.target = '_blank';
+				link.rel = 'noreferrer';
+				link.innerHTML = `<span>${candidate.name}</span><span aria-hidden="true">↓</span>`;
+				return link;
+			}));
+		};
+
+		channelSelect.addEventListener('change', updateVersionOptions);
+		versionSelect.addEventListener('change', () => updateRelease(releases.find((release) => release.tagName === versionSelect.value)));
+		updateRelease(releases.find((release) => release.tagName === versionSelect.value));
+	}
+</script>
+
+<style>
+	.download-panel {
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 1.25rem;
+		background: linear-gradient(135deg, var(--sl-color-gray-6), var(--sl-color-gray-7));
+		box-shadow: 0 1.5rem 4rem #0002;
+		margin: 1.5rem 0 3rem;
+		overflow: hidden;
+	}
+	.download-controls {
+		display: flex;
+		gap: 1rem;
+		padding: 1.25rem;
+		border-bottom: 1px solid var(--sl-color-gray-5);
+	}
+	.download-controls label { display: grid; gap: .35rem; flex: 1; font-size: .8rem; color: var(--sl-color-gray-2); }
+	.download-controls select { border: 1px solid var(--sl-color-gray-5); border-radius: .5rem; padding: .6rem .7rem; color: inherit; background: var(--sl-color-black); }
+	.download-main { padding: 2.25rem; }
+	.download-eyebrow { color: var(--sl-color-accent-high); font-size: .85rem; font-weight: 650; margin: 0 0 .75rem; }
+	.download-main h2 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.25rem); }
+	.download-description { color: var(--sl-color-gray-2); min-height: 1.5rem; }
+	.download-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1.5rem; }
+	.download-button, .other-button { border: 0; border-radius: .6rem; padding: .75rem 1rem; font: inherit; cursor: pointer; }
+	.download-button { display: inline-flex; gap: .75rem; align-items: center; background: var(--sl-color-accent); color: var(--sl-color-black); font-weight: 700; text-decoration: none; }
+	.download-button[aria-disabled="true"] { opacity: .7; }
+	.other-button { color: inherit; background: var(--sl-color-gray-5); }
+	.download-meta { display: flex; gap: .5rem; color: var(--sl-color-gray-3); font-size: .85rem; margin: 1.25rem 0 0; }
+	.other-downloads { width: min(32rem, calc(100vw - 2rem)); padding: 1.25rem; border: 1px solid var(--sl-color-gray-5); border-radius: .8rem; background: var(--sl-color-black); color: var(--sl-color-white); box-shadow: 0 1.5rem 4rem #0005; }
+	.other-downloads::backdrop { background: #0008; }
+	.popover-heading { display: flex; justify-content: space-between; align-items: center; }
+	.popover-heading h2 { margin: 0; font-size: 1.1rem; }
+	.popover-heading button { border: 0; background: transparent; color: inherit; font-size: 1.5rem; cursor: pointer; }
+	.other-downloads p { color: var(--sl-color-gray-2); }
+	.asset-list { display: grid; gap: .5rem; }
+	.asset-list a { display: flex; justify-content: space-between; gap: 1rem; padding: .7rem; border-radius: .5rem; color: inherit; background: var(--sl-color-gray-7); text-decoration: none; }
+	.asset-list a:hover { background: var(--sl-color-gray-6); }
+	@media (max-width: 30rem) { .download-controls { flex-direction: column; } .download-main { padding: 1.5rem; } }
+</style>
