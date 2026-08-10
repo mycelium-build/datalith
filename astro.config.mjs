@@ -9,7 +9,7 @@ export default defineConfig({
 	integrations: [
 	starlight({
 			title: 'Datalith',
-			favicon: '/datalith.png',
+			favicon: `${process.env.SITE_BASE ?? ''}/datalith.png`,
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/mycelium-build/datalith' }],
 			sidebar: [
 				{

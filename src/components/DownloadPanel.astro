@@ -1,292 +1,185 @@
 ---
 import releaseData from '../data/releases.json';
 
-const releases = releaseData.releases ?? [];
-const stableReleases = releases.filter((release) => !release.prerelease);
-const initialReleases = stableReleases.length > 0 ? stableReleases : releases;
-const initialRelease = initialReleases[0];
-const initialPlatform = 'macos';
-const platformOptions = [
-	{ id: 'linux', label: 'Linux (x64)' },
-	{ id: 'windows', label: 'Windows (x64)' },
-	{ id: 'macos', label: 'MacOS (Apple Silicon)' },
+const repositoryUrl = `https://github.com/${releaseData.repository}`;
+const sourceReleases = releaseData.releases ?? [];
+// Keep the two channels deliberately disjoint: stable downloads must never fall back to a RC.
+const stableReleases = sourceReleases.filter((release) => release.prerelease === false);
+const previewReleases = sourceReleases.filter((release) => release.prerelease === true);
+const realStable = stableReleases[0];
+const latestPreview = previewReleases[0];
+const hasStableRelease = Boolean(realStable);
+const stable = realStable;
+const platforms = [
+	{ id: 'macos', label: 'macOS', detail: 'Apple silicon', extension: '.dmg' },
+	{ id: 'windows', label: 'Windows', detail: '64-bit', extension: '.exe' },
+	{ id: 'linux', label: 'Linux', detail: 'x86_64', extension: '.AppImage' },
 ];
-
-function displayVersion(tagName) {
-	return tagName?.replace(/-rc(?:\.\d+)?$/i, '') ?? '';
-}
-
-function assetForPlatform(release, platform) {
-	return release?.assets.find((asset) => asset.platform === platform);
-}
-
-const initialAsset = assetForPlatform(initialRelease, initialPlatform);
+const version = (tagName) => tagName?.replace(/^v/, '') ?? '';
+const asset = (release, platform) => release?.assets.find((item) => item.platform === platform);
 ---
 
-<section class="download-panel" data-download-panel>
-	<div class="download-main">
-		<p class="download-eyebrow" data-host-label>Download for MacOS (Apple Silicon)</p>
-		<h2 data-release-name>{initialRelease ? `Datalith ${displayVersion(initialRelease.tagName)}` : 'Datalith'}</h2>
-		<p class="download-description" data-release-description>
-			{initialAsset ? `${platformOptions.find(({ id }) => id === initialPlatform)?.label} · ${displayVersion(initialRelease.tagName)}` : 'Published downloads will appear here.'}
-		</p>
-		<div class="download-actions">
-			<a
-				class="download-button"
-				href={initialAsset?.browserDownloadUrl ?? `https://github.com/${releaseData.repository}/releases`}
-				target="_blank"
-				rel="noreferrer"
-				data-download-link
-			>
-				<span class="button-icon" data-download-icon aria-hidden="true">
-					<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
-				</span>
-				<span data-download-label>{initialAsset ? `Download for ${platformOptions.find(({ id }) => id === initialPlatform)?.label}` : 'View release'}</span>
-			</a>
-			<button class="other-button" type="button" popovertarget="platform-picker">Other platform</button>
-			<button class="other-button" type="button" popovertarget="release-picker">Other release</button>
+
+<section class="download-prototype" data-download-panel>
+	<div class="variant variant-c">
+		<div class="compact-heading">
+			<div><p class="overline">Desktop app</p><h3>{hasStableRelease ? `Datalith ${version(stable?.tagName)}` : 'Datalith'}</h3></div>
+			<span class:list={["stable-badge", { unavailable: !hasStableRelease }]}>{hasStableRelease ? 'Stable' : 'Coming soon'}</span>
 		</div>
-		<p class="download-meta">
-			<a href={initialRelease?.htmlUrl ?? `https://github.com/${releaseData.repository}/releases`} target="_blank" rel="noreferrer" data-release-link>Release notes</a>
-			<span aria-hidden="true">·</span>
-			<span data-release-date>{initialRelease?.publishedAt ? new Date(initialRelease.publishedAt).toLocaleDateString() : 'Waiting for a release'}</span>
-		</p>
+		<div class="download-controls"><Fragment set:html={''} /></div>
 	</div>
 
-	<div id="platform-picker" class="download-picker" popover>
-		<div class="picker-heading">
-			<div>
-				<p class="picker-eyebrow">Choose a platform</p>
-				<h2>Other platform</h2>
+	<template data-controls-template>
+		<div class="control-stack">
+			<div class="primary-row">
+				<a class="primary-download" data-stable-download href={asset(stable, 'macos')?.browserDownloadUrl}>
+					<span class="platform-logo" data-current-logo aria-hidden="true"></span>
+					<span><strong data-stable-label>Download for macOS</strong><small data-stable-meta>{version(stable?.tagName)} · Apple silicon · .dmg</small></span>
+					<svg class="download-glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+				</a>
+				<details class:list={["download-menu", "stable-menu", { disabled: !hasStableRelease }]}>
+					<summary aria-disabled={String(!hasStableRelease)} tabindex={hasStableRelease ? undefined : '-1'}>Other platforms <span aria-hidden="true">⌄</span></summary>
+					<div class="menu-card"><p class="menu-title">Other platforms{hasStableRelease ? ` · ${version(stable?.tagName)}` : ''}</p><div data-other-platforms></div></div>
+				</details>
 			</div>
-			<button type="button" popovertarget="platform-picker" popovertargetaction="hide" aria-label="Close">×</button>
-		</div>
-		<p class="picker-description">The download button will update for your selection.</p>
-		<div class="platform-list" data-platform-list>
-			{platformOptions.map(({ id, label }) => {
-				const asset = assetForPlatform(initialRelease, id);
-				return (
-					<button type="button" class="platform-option" data-platform-option data-platform={id} disabled={!asset} aria-pressed={id === initialPlatform}>
-						<span class={`platform-icon platform-icon--${id}`} aria-hidden="true">
-							{ id === 'windows' && <svg viewBox="0 0 24 24"><path d="M3 4.6 10.8 3.5v7.4H3zM12.2 3.3 21 2v8.9h-8.8zM3 12.1h7.8v7.4L3 18.4zM12.2 12.1H21V21l-8.8-1.2z" /></svg> }
-							{ id === 'macos' && <svg viewBox="0 0 24 24"><path d="M16.8 12.8c0-2 1.6-3 1.7-3.1a3.8 3.8 0 0 0-3-1.6c-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.8-2.8-.8a4.2 4.2 0 0 0-3.5 2.2c-1.5 2.6-.4 6.5 1 8.7.7 1.1 1.5 2.3 2.6 2.3 1 0 1.4-.7 2.7-.7s1.7.7 2.8.7 1.8-1.1 2.5-2.2c.8-1.2 1.1-2.4 1.1-2.5-.1 0-2-.8-2-3.8Zm-2-6c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.5-.9 2.4.9.1 1.8-.4 2.4-1.1Z" /></svg> }
-							{ id === 'linux' && <svg viewBox="0 0 24 24"><path d="M12 2.3c-2.2 0-3.7 2.1-3.7 4.7 0 1.7-.9 2.8-1.6 4.1-.8 1.4-1.5 3.1-1.5 5.4 0 3.1 2.7 4.9 6.8 4.9s6.8-1.8 6.8-4.9c0-2.3-.7-4-1.5-5.4-.7-1.3-1.6-2.4-1.6-4.1 0-2.6-1.5-4.7-3.7-4.7Z" /><circle cx="10" cy="7.4" r=".7" fill="currentColor" /><circle cx="14" cy="7.4" r=".7" fill="currentColor" /><path d="m10 10 2 1.4 2-1.4-.3 2.2h-3.4L10 10Z" fill="currentColor" /></svg> }
-						</span>
-						<span class="platform-copy">
-							<strong>{label}</strong>
-							<small data-platform-file>{asset?.name ?? 'Not available for this release'}</small>
-						</span>
-						<span class="platform-arrow" aria-hidden="true">→</span>
-					</button>
-				);
-			})}
-		</div>
-	</div>
-
-	<div id="release-picker" class="download-picker release-picker" popover>
-		<div class="picker-heading">
-			<div>
-				<p class="picker-eyebrow">Choose a version</p>
-				<h2>Other release</h2>
+			<div class="secondary-row">
+				<details class="download-menu preview-menu">
+					<summary><span class="spark" aria-hidden="true">✦</span> Download preview <span class="rc-badge">RC</span><span aria-hidden="true">⌄</span></summary>
+					<div class="menu-card">
+						<div class="preview-heading"><div><p class="menu-title">Preview {version(latestPreview?.tagName)}</p><small>Try upcoming features before release.</small></div><span class="rc-badge">RC</span></div>
+						<div data-preview-platforms></div>
+					</div>
+				</details>
+				<nav class="release-links" aria-label="Release links">
+					<a href={`${repositoryUrl}/blob/main/CHANGELOG.md`} target="_blank" rel="noreferrer">Changelog <span aria-hidden="true">↗</span></a>
+					<a href={`${repositoryUrl}/releases`} target="_blank" rel="noreferrer">All releases <span aria-hidden="true">↗</span></a>
+				</nav>
 			</div>
-			<button type="button" popovertarget="release-picker" popovertargetaction="hide" aria-label="Close">×</button>
 		</div>
-		<label class="prerelease-toggle">
-			<input type="checkbox" data-prerelease-toggle />
-			<span>Pre-release</span>
-		</label>
-		<div class="release-list" data-release-list>
-			{initialReleases.map((release) => (
-				<button type="button" class="release-option" data-release-option data-release={release.tagName} aria-pressed={release.tagName === initialRelease?.tagName}>
-					<span>{displayVersion(release.tagName)}</span>
-					{release.prerelease && <small>Pre-release</small>}
-				</button>
-			))}
-			{initialReleases.length === 0 && <p class="empty-state">No releases available yet.</p>}
-		</div>
-	</div>
+	</template>
 
-	<script type="application/json" id="release-data" set:html={JSON.stringify({ releases, hasStableReleases: stableReleases.length > 0 })}></script>
+	<script type="application/json" data-download-data set:html={JSON.stringify({ stable, hasStableRelease, latestPreview, platforms })}></script>
 </section>
 
 <script>
+	const logos = {
+		macos: '<svg viewBox="0 0 24 24"><path d="M16.8 12.8c0-2 1.6-3 1.7-3.1a3.8 3.8 0 0 0-3-1.6c-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.8-2.8-.8a4.2 4.2 0 0 0-3.5 2.2c-1.5 2.6-.4 6.5 1 8.7.7 1.1 1.5 2.3 2.6 2.3 1 0 1.4-.7 2.7-.7s1.7.7 2.8.7 1.8-1.1 2.5-2.2c.8-1.2 1.1-2.4 1.1-2.5-.1 0-2-.8-2-3.8Zm-2-6c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.5-.9 2.4.9.1 1.8-.4 2.4-1.1Z"/></svg>',
+		windows: '<svg viewBox="0 0 24 24"><path d="M2.5 4.6 10.7 3.5v7.7H2.5V4.6Zm9.5-1.3L21.5 2v9.2H12V3.3ZM2.5 12.5h8.2v7.8l-8.2-1.1v-6.7Zm9.5 0h9.5V22L12 20.7v-8.2Z"/></svg>',
+		linux: '<img src="https://cdn.simpleicons.org/linux/000000" alt="" width="24" height="24" />',
+	};
 	const panel = document.querySelector('[data-download-panel]');
 	if (panel) {
-		const releaseData = JSON.parse(document.querySelector('#release-data')?.textContent ?? '{}');
-		const releases = releaseData.releases ?? [];
-		const hasStableReleases = releaseData.hasStableReleases ?? false;
-		const downloadLink = panel.querySelector('[data-download-link]');
-		const downloadLabel = panel.querySelector('[data-download-label]');
-		const releaseName = panel.querySelector('[data-release-name]');
-		const releaseDescription = panel.querySelector('[data-release-description]');
-		const releaseLink = panel.querySelector('[data-release-link]');
-		const releaseDate = panel.querySelector('[data-release-date]');
-		const hostLabel = panel.querySelector('[data-host-label]');
-		const platformList = panel.querySelector('[data-platform-list]');
-		const releaseList = panel.querySelector('[data-release-list]');
-		const prereleaseToggle = panel.querySelector('[data-prerelease-toggle]');
-		const platformPicker = panel.querySelector('#platform-picker');
-		const releasePicker = panel.querySelector('#release-picker');
-		const platformLabels = {
-			macos: 'MacOS (Apple Silicon)',
-			windows: 'Windows (x64)',
-			linux: 'Linux (x64)',
-			other: 'your platform',
-		};
-
-		const displayVersion = (tagName) => tagName?.replace(/-rc(?:\.\d+)?$/i, '') ?? '';
+		const data = JSON.parse(panel.querySelector('[data-download-data]')?.textContent ?? '{}');
 		const detectPlatform = () => {
-			const value = `${navigator.userAgentData?.platform ?? ''} ${navigator.platform ?? ''} ${navigator.userAgent}`.toLowerCase();
-			if (value.includes('mac') || value.includes('iphone') || value.includes('ipad')) return 'macos';
-			if (value.includes('win')) return 'windows';
-			if (value.includes('linux')) return 'linux';
-			return 'other';
+			const agent = `${navigator.userAgentData?.platform ?? ''} ${navigator.platform ?? ''} ${navigator.userAgent}`.toLowerCase();
+			if (agent.includes('win')) return 'windows';
+			if (agent.includes('linux')) return 'linux';
+			return 'macos';
 		};
-		const assetForPlatform = (release, platform) => release?.assets.find((asset) => asset.platform === platform);
-		const findRelease = (tagName) => releases.find((release) => release.tagName === tagName);
-		let selectedPlatform = detectPlatform();
-		let selectedRelease = releases[0];
-
-		const availableAsset = selectedRelease?.assets.find((asset) => asset.platform === selectedPlatform);
-		if (!availableAsset && selectedRelease?.assets[0]) selectedPlatform = selectedRelease.assets[0].platform;
-
-		const updatePlatformOptions = (release) => {
-			platformList?.querySelectorAll('[data-platform-option]').forEach((option) => {
-				const platform = option.dataset.platform;
-				const asset = assetForPlatform(release, platform);
-				const fileName = option.querySelector('[data-platform-file]');
-				option.disabled = !asset;
-				option.setAttribute('aria-pressed', String(platform === selectedPlatform));
-				if (fileName) fileName.textContent = asset?.name ?? 'Not available for this release';
-			});
+		const current = detectPlatform();
+		const info = (id) => data.platforms.find((item) => item.id === id);
+		const releaseAsset = (release, id) => release?.assets.find((item) => item.platform === id);
+		const cleanVersion = (tag) => tag?.replace(/^v/, '') ?? '';
+		const platformLink = (release, platform, isPreview = false, enabled = true) => {
+			const item = releaseAsset(release, platform.id);
+			if (!item) return '';
+			const state = enabled ? `href="${item.browserDownloadUrl}"` : 'aria-disabled="true" tabindex="-1"';
+			return `<a class="platform-option" ${state}><span class="platform-logo">${logos[platform.id]}</span><span><strong>${platform.label}</strong><small>${isPreview ? cleanVersion(release.tagName) + ' · ' : ''}${platform.detail} · ${platform.extension}</small></span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></a>`;
 		};
 
-		const updateReleaseOptions = () => {
-			releaseList?.querySelectorAll('[data-release-option]').forEach((option) => {
-				option.setAttribute('aria-pressed', String(option.dataset.release === selectedRelease?.tagName));
-			});
-		};
-
-		const updateRelease = (release) => {
-			if (!release) return;
-			selectedRelease = release;
-			const asset = assetForPlatform(release, selectedPlatform);
-			const version = displayVersion(release.tagName);
-			if (releaseName) releaseName.textContent = `Datalith ${version}`;
-			if (releaseDescription) releaseDescription.textContent = asset ? `${platformLabels[selectedPlatform] ?? 'Your platform'} · ${version}` : 'No download is available for this platform yet.';
-			if (downloadLink) {
-				downloadLink.href = asset?.browserDownloadUrl ?? release.htmlUrl;
-				downloadLink.setAttribute('aria-disabled', String(!asset));
+		const template = panel.querySelector('[data-controls-template]');
+		panel.querySelectorAll('.download-controls').forEach((slot) => slot.replaceChildren(template.content.cloneNode(true)));
+		panel.querySelectorAll('[data-current-logo]').forEach((node) => node.innerHTML = logos[current]);
+		const currentInfo = info(current);
+		const stableAsset = releaseAsset(data.stable, current);
+		panel.querySelectorAll('[data-stable-download]').forEach((link) => {
+			if (data.hasStableRelease && stableAsset) {
+				link.href = stableAsset.browserDownloadUrl;
+				link.removeAttribute('aria-disabled');
+				link.removeAttribute('tabindex');
+			} else {
+				link.removeAttribute('href');
+				link.setAttribute('aria-disabled', 'true');
+				link.setAttribute('tabindex', '-1');
 			}
-			if (downloadLabel) downloadLabel.textContent = asset ? `Download for ${platformLabels[selectedPlatform] ?? 'your platform'}` : 'View release';
-			if (hostLabel) hostLabel.textContent = `Download for ${platformLabels[selectedPlatform] ?? 'your platform'}`;
-			if (releaseLink) releaseLink.href = release.htmlUrl;
-			if (releaseDate) releaseDate.textContent = release.publishedAt ? new Date(release.publishedAt).toLocaleDateString() : '';
-			updatePlatformOptions(release);
-			updateReleaseOptions();
-		};
-
-		const renderReleaseList = () => {
-			const includePrereleases = prereleaseToggle?.checked ?? false;
-			const visibleReleases = hasStableReleases && !includePrereleases
-				? releases.filter((release) => !release.prerelease)
-				: releases;
-			releaseList?.replaceChildren(...visibleReleases.map((release) => {
-				const option = document.createElement('button');
-				option.type = 'button';
-				option.className = 'release-option';
-				option.dataset.releaseOption = '';
-				option.dataset.release = release.tagName;
-				option.setAttribute('aria-pressed', String(release.tagName === selectedRelease?.tagName));
-				const version = document.createElement('span');
-				version.textContent = includePrereleases ? release.tagName : displayVersion(release.tagName);
-				option.append(version);
-				if (release.prerelease) {
-					const badge = document.createElement('small');
-					badge.textContent = 'Pre-release';
-					option.append(badge);
-				}
-				return option;
-			}));
-		};
-
-		platformList?.addEventListener('click', (event) => {
-			const option = event.target.closest('[data-platform-option]');
-			if (!(option instanceof HTMLButtonElement) || option.disabled) return;
-			selectedPlatform = option.dataset.platform;
-			updateRelease(selectedRelease);
-			platformPicker?.hidePopover?.();
 		});
-		releaseList?.addEventListener('click', (event) => {
-			const option = event.target.closest('[data-release-option]');
-			if (!(option instanceof HTMLButtonElement)) return;
-			updateRelease(findRelease(option.dataset.release));
-			releasePicker?.hidePopover?.();
+		panel.querySelectorAll('[data-stable-label]').forEach((node) => node.textContent = data.hasStableRelease ? `Download for ${currentInfo.label}` : 'No stable release yet');
+		panel.querySelectorAll('[data-stable-meta]').forEach((node) => node.textContent = data.hasStableRelease ? `${cleanVersion(data.stable.tagName)} · ${currentInfo.detail} · ${currentInfo.extension}` : 'Check back soon');
+		panel.querySelectorAll('[data-other-platforms]').forEach((list) => {
+			list.innerHTML = data.platforms.filter((platform) => platform.id !== current).map((platform) => platformLink(data.stable, platform, false, data.hasStableRelease)).join('');
 		});
-		prereleaseToggle?.addEventListener('change', renderReleaseList);
+		panel.querySelectorAll('[data-preview-platforms]').forEach((list) => {
+			list.innerHTML = data.latestPreview ? data.platforms.map((platform) => platformLink(data.latestPreview, platform, true)).join('') : '<p class="empty-state">No preview available.</p>';
+		});
 
-		hostLabel.textContent = `Download for ${platformLabels[selectedPlatform] ?? 'your platform'}`;
-		renderReleaseList();
-		updateRelease(selectedRelease);
+		panel.addEventListener('toggle', (event) => {
+			if (!event.target.open) return;
+			panel.querySelectorAll('details[open]').forEach((details) => { if (details !== event.target) details.removeAttribute('open'); });
+		}, true);
+		panel.querySelectorAll('.stable-menu.disabled').forEach((menu) => {
+			menu.addEventListener('click', (event) => event.preventDefault());
+		});
 	}
 </script>
 
 <style>
-	.download-panel {
-		--download-border: color-mix(in srgb, var(--landing-text) 14%, transparent);
-		--download-muted: color-mix(in srgb, var(--landing-text) 68%, transparent);
-		border: 1px solid var(--download-border);
-		border-radius: 1.5rem;
-		background: linear-gradient(135deg, color-mix(in srgb, var(--landing-surface) 92%, var(--landing-accent)), var(--landing-surface));
-		box-shadow: 0 1.5rem 4rem #001b3d1a;
-		overflow: visible;
-	}
-	.download-main { padding: clamp(1.5rem, 5vw, 3rem); }
-	.download-eyebrow, .picker-eyebrow { color: var(--landing-accent-strong); font-size: .8rem; font-weight: 700; letter-spacing: .05em; margin: 0 0 .75rem; text-transform: uppercase; }
-	.download-main h2 { color: var(--landing-heading); font-size: clamp(1.6rem, 4vw, 2.35rem); letter-spacing: -.035em; margin: 0; }
-	.download-description { color: var(--download-muted); margin: .75rem 0 0; min-height: 1.5rem; }
-	.download-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.75rem; }
-	.download-button, .other-button { align-items: center; border: 0; border-radius: .7rem; cursor: pointer; display: inline-flex; font: inherit; gap: .6rem; justify-content: center; padding: .78rem 1rem; transition: background .2s, transform .2s; }
-	.download-button { background: var(--landing-accent); color: white; font-weight: 750; text-decoration: none; }
-	.download-button:hover, .download-button:focus-visible { background: var(--landing-accent-strong); transform: translateY(-1px); }
-	.download-button[aria-disabled="true"] { background: var(--landing-muted); }
-	.button-icon { display: inline-flex; }
-	.button-icon svg { height: 1.15rem; width: 1.15rem; }
-	.other-button { background: color-mix(in srgb, var(--landing-text) 8%, transparent); color: var(--landing-heading); }
-	.other-button:hover, .other-button:focus-visible { background: color-mix(in srgb, var(--landing-accent) 14%, transparent); }
-	.download-meta { align-items: center; color: var(--download-muted); display: flex; flex-wrap: wrap; gap: .5rem; font-size: .82rem; margin: 1.35rem 0 0; }
-	.download-meta a { color: inherit; }
-	.download-picker { background: var(--landing-surface); border: 1px solid var(--download-border); border-radius: 1rem; box-shadow: 0 1.5rem 4rem #001b3d2e; color: var(--landing-text); margin: auto; padding: 1.25rem; width: min(30rem, calc(100vw - 2rem)); }
-	.download-picker::backdrop { background: #001b3d66; }
-	.picker-heading { align-items: flex-start; display: flex; justify-content: space-between; }
-	.picker-heading h2 { color: var(--landing-heading); font-size: 1.2rem; margin: 0; }
-	.picker-heading button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 .2rem; }
-	.picker-eyebrow { font-size: .7rem; margin-bottom: .3rem; }
-	.picker-description { color: var(--download-muted); font-size: .9rem; margin: .85rem 0 1rem; }
-	.platform-list, .release-list { display: grid; gap: .5rem; }
-	.platform-option, .release-option { align-items: center; border: 1px solid transparent; border-radius: .7rem; cursor: pointer; display: flex; font: inherit; gap: .75rem; text-align: left; transition: background .2s, border-color .2s; width: 100%; }
-	.platform-option { background: color-mix(in srgb, var(--landing-text) 5%, transparent); color: var(--landing-text); padding: .7rem; }
-	.platform-option:hover:not(:disabled), .platform-option:focus-visible, .platform-option[aria-pressed="true"] { background: color-mix(in srgb, var(--landing-accent) 11%, transparent); border-color: color-mix(in srgb, var(--landing-accent) 32%, transparent); }
-	.platform-option:disabled { cursor: not-allowed; opacity: .48; }
-	.platform-icon { align-items: center; background: color-mix(in srgb, var(--landing-text) 9%, transparent); border-radius: .55rem; display: inline-flex; height: 2.2rem; justify-content: center; width: 2.2rem; }
-	.platform-icon svg { fill: currentColor; height: 1.35rem; width: 1.35rem; }
-	.platform-icon--linux { color: #e6b23b; }
-	.platform-icon--windows { color: #3da9f5; }
-	.platform-icon--macos { color: var(--landing-text); }
-	.platform-copy { display: grid; gap: .12rem; min-width: 0; }
-	.platform-copy strong { color: var(--landing-heading); font-size: .9rem; }
-	.platform-copy small { color: var(--download-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.platform-arrow { color: var(--download-muted); font-size: 1.1rem; margin-left: auto; }
-	.release-picker { width: min(25rem, calc(100vw - 2rem)); }
-	.prerelease-toggle { align-items: center; color: var(--landing-heading); display: flex; font-size: .9rem; gap: .6rem; margin: 1rem 0; }
-	.prerelease-toggle input { accent-color: var(--landing-accent); height: 1rem; width: 1rem; }
-	.release-list { max-height: 15rem; overflow-y: auto; padding-right: .25rem; }
-	.release-option { background: transparent; color: var(--landing-heading); justify-content: space-between; padding: .7rem .75rem; }
-	.release-option:hover, .release-option:focus-visible, .release-option[aria-pressed="true"] { background: color-mix(in srgb, var(--landing-accent) 11%, transparent); }
-	.release-option small { color: var(--landing-accent-strong); font-size: .72rem; }
-	.empty-state { color: var(--download-muted); font-size: .9rem; }
-	@media (max-width: 34rem) {
-		.download-actions { display: grid; }
-		.download-button, .other-button { width: 100%; }
+	.download-prototype { --border: color-mix(in srgb, var(--landing-text) 15%, transparent); --muted: color-mix(in srgb, var(--landing-text) 64%, transparent); color: var(--landing-text); position: relative; }
+	.variant { border: 1px solid var(--border); border-radius: 1.4rem; box-shadow: 0 1.5rem 4rem #001b3d12; min-height: 22rem; padding: clamp(1.5rem, 5vw, 3rem); }
+	.variant h3 { color: var(--landing-heading); font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -.05em; margin: 0; }
+	.variant p { color: var(--muted); }
+	.control-stack { display: grid; gap: 1rem; max-width: 39rem; }
+	.primary-row, .secondary-row { align-items: flex-start; display: flex; flex-wrap: wrap; gap: .65rem; }
+	.primary-download { align-items: center; background: var(--landing-heading); border-radius: .8rem; color: #fff; display: flex; gap: .8rem; min-width: 18.5rem; padding: .8rem 1rem; text-decoration: none; transition: transform .2s, background .2s; }
+	.primary-download:hover, .primary-download:focus-visible { background: var(--landing-accent-strong); transform: translateY(-1px); }
+	.primary-download[aria-disabled="true"] { background: color-mix(in srgb, var(--landing-text) 28%, var(--landing-surface)); color: color-mix(in srgb, var(--landing-text) 48%, transparent); cursor: not-allowed; pointer-events: none; transform: none; }
+	.primary-download[aria-disabled="true"] small { color: inherit; }
+	.primary-download > span:nth-child(2) { display: grid; gap: .08rem; }
+	.primary-download strong { font-size: .9rem; }
+	.primary-download small { color: #ffffffb8; font-size: .72rem; }
+	.platform-logo { align-items: center; display: inline-flex; flex: 0 0 auto; height: 1.45rem; justify-content: center; width: 1.45rem; }
+	.platform-logo svg { fill: currentColor; height: 100%; width: 100%; }
+	.platform-logo img { filter: grayscale(1); height: 100%; width: 100%; }
+	.download-glyph { height: 1.15rem; margin-left: auto; width: 1.15rem; }
+	.download-menu { position: relative; }
+	.download-menu summary { align-items: center; background: color-mix(in srgb, var(--landing-text) 7%, transparent); border: 1px solid transparent; border-radius: .8rem; color: var(--landing-heading); cursor: pointer; display: flex; font-size: .84rem; font-weight: 700; gap: .5rem; list-style: none; min-height: 3.65rem; padding: .75rem 1rem; }
+	.download-menu summary::-webkit-details-marker { display: none; }
+	.download-menu summary:hover, .download-menu summary:focus-visible, .download-menu[open] summary { background: color-mix(in srgb, var(--landing-accent) 10%, transparent); border-color: color-mix(in srgb, var(--landing-accent) 28%, transparent); }
+	.download-menu.disabled summary { background: color-mix(in srgb, var(--landing-text) 5%, transparent); border-color: transparent; color: color-mix(in srgb, var(--landing-text) 38%, transparent); cursor: not-allowed; }
+	.menu-card { background: var(--landing-surface); border: 1px solid var(--border); border-radius: .85rem; box-shadow: 0 1.1rem 2.5rem #001b3d26; left: 0; min-width: 20rem; padding: .65rem; position: absolute; top: calc(100% + .45rem); z-index: 10; }
+	.menu-title { color: var(--landing-heading) !important; font-size: .7rem; font-weight: 800; letter-spacing: .08em; margin: .35rem .45rem .55rem; text-transform: uppercase; }
+	:global(.platform-option) { align-items: center; border-radius: .6rem; color: var(--landing-heading); display: flex; gap: .75rem; padding: .65rem; text-decoration: none; }
+	:global(.platform-option:hover), :global(.platform-option:focus-visible) { background: color-mix(in srgb, var(--landing-accent) 10%, transparent); }
+	:global(.platform-option[aria-disabled="true"]) { color: color-mix(in srgb, var(--landing-text) 38%, transparent); cursor: not-allowed; pointer-events: none; }
+	:global(.platform-option > span:nth-child(2)) { display: grid; gap: .1rem; }
+	:global(.platform-option strong) { font-size: .85rem; }
+	:global(.platform-option small), .preview-heading small { color: var(--muted); font-size: .7rem; }
+	:global(.platform-option > svg) { height: 1rem; margin-left: auto; width: 1rem; }
+	:global(.platform-option .platform-logo) { align-items: center; display: inline-flex; flex: 0 0 auto; height: 1.45rem; justify-content: center; width: 1.45rem; }
+	:global(.platform-option .platform-logo svg) { fill: currentColor; height: 100%; width: 100%; }
+	:global(.platform-option .platform-logo img) { filter: grayscale(1); height: 100%; width: 100%; }
+	.rc-badge, .stable-badge { background: #f2a4291a; border: 1px solid #e4982544; border-radius: 999px; color: #9b5b00; font-size: .62rem; font-weight: 800; padding: .16rem .38rem; }
+	.spark { color: #9b5b00; }
+	.preview-heading { align-items: flex-start; display: flex; justify-content: space-between; padding: .15rem .35rem .55rem; }
+	.preview-heading .menu-title { margin-left: .1rem; margin-bottom: .12rem; }
+	.release-links { align-items: center; display: flex; gap: 1rem; min-height: 3.65rem; }
+	.release-links a { color: var(--muted); font-size: .78rem; font-weight: 650; text-decoration: none; }
+	.release-links a:hover { color: var(--landing-heading); text-decoration: underline; }
+	.overline { color: var(--landing-accent-strong) !important; font-size: .72rem; font-weight: 800; letter-spacing: .1em; margin: 0 0 .8rem; text-transform: uppercase; }
+	.variant-c { background: var(--landing-surface); min-height: 0; }
+	.compact-heading { align-items: center; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; margin-bottom: 1.3rem; padding-bottom: 1.2rem; }
+	.compact-heading .overline { margin-bottom: .35rem; }
+	.compact-heading h3 { font-size: 1.5rem; }
+	.stable-badge { background: #20a76916; border-color: #20a76940; color: #147548; }
+	.stable-badge.unavailable { background: color-mix(in srgb, var(--landing-text) 7%, transparent); border-color: var(--border); color: var(--muted); }
+	.variant-c .control-stack { max-width: none; }
+	.variant-c .primary-row { flex-wrap: nowrap; }
+	.variant-c .primary-download { flex: 1; }
+	.variant-c .secondary-row { justify-content: space-between; }
+	@media (max-width: 36rem) {
+		.variant { padding: 1.25rem; }
+		.primary-row, .secondary-row, .variant-c .primary-row { display: grid; }
+		.primary-download, .download-menu, .download-menu summary { min-width: 0; width: 100%; }
+		.menu-card { min-width: min(20rem, calc(100vw - 4rem)); right: 0; }
+		.release-links { flex-wrap: wrap; }
 	}
 </style>
