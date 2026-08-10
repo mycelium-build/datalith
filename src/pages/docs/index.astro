@@ -1,0 +1,17 @@
+---
+const baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+const documentationUrl = `${baseUrl}docs/vault/welcome/`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="refresh" content={`0;url=${documentationUrl}`} />
+		<link rel="canonical" href={documentationUrl} />
+		<title>Datalith documentation</title>
+	</head>
+	<body>
+		<script is:inline define:vars={{ documentationUrl }}>window.location.replace(documentationUrl);</script>
+	</body>
+</html>

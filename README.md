@@ -30,7 +30,9 @@ The `datalith-bot` installation must include the `datalith` repository. Its
 token needs read-only Contents access to `datalith`; it does not need access to
 `datalith-site` because that repository is checked out with the workflow token.
 
-The build fetches published releases from the GitHub Releases API, filters out
-drafts, and exposes stable releases and release candidates in the download
-selector. Documentation is regenerated from `datalith/docs/vault` on every
-deployment.
+The root page is a standalone landing page; `/docs/` redirects to the imported
+documentation welcome page. The build fetches published releases from the
+GitHub Releases API, filters out drafts, and exposes the latest stable download
+for the visitor's platform. Older releases and pre-releases are available from
+the download panel. Documentation is regenerated from `datalith/docs/vault` on
+every deployment.

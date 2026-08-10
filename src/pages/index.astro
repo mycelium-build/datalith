@@ -1,0 +1,134 @@
+---
+import DownloadPanel from '../components/DownloadPanel.astro';
+
+const baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+const docsUrl = `${baseUrl}docs/vault/welcome/`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content="Datalith is a fast, local-first knowledge workspace." />
+		<link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
+		<title>Datalith · Your knowledge, connected.</title>
+	</head>
+	<body>
+		<div class="page-shell">
+			<header class="site-header">
+				<a class="brand" href={baseUrl} aria-label="Datalith home">
+					<img src={`${baseUrl}datalith.png`} alt="" width="34" height="34" />
+					<span>Datalith</span>
+				</a>
+				<nav aria-label="Main navigation">
+					<a href={docsUrl}>Documentation</a>
+					<a href="https://github.com/mycelium-build/datalith" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+				</nav>
+			</header>
+
+			<main>
+				<section class="hero">
+					<p class="eyebrow">A calmer way to work with knowledge</p>
+					<h1>Your knowledge,<br /><em>connected.</em></h1>
+					<p class="hero-copy">Datalith is a local-first workspace for finding, linking, editing, and visualizing the files that matter to you.</p>
+					<div class="hero-actions">
+						<a class="primary-link" href={docsUrl}>Explore the documentation <span aria-hidden="true">→</span></a>
+						<a class="secondary-link" href="https://github.com/mycelium-build/datalith" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
+					</div>
+				</section>
+
+				<section class="download-section" aria-labelledby="download-heading">
+					<div class="section-heading">
+						<p class="eyebrow">Available now</p>
+						<h2 id="download-heading">Take Datalith with you.</h2>
+						<p>Download the latest version for your computer. Your files stay on your machine.</p>
+					</div>
+					<DownloadPanel />
+				</section>
+
+				<section class="feature-grid" aria-label="Datalith highlights">
+					<article>
+						<span class="feature-number">01</span>
+						<h2>Local by design</h2>
+						<p>Your Vault is a folder you own. Datalith works with your files, not around them.</p>
+					</article>
+					<article>
+						<span class="feature-number">02</span>
+						<h2>Fast to explore</h2>
+						<p>Search, link, and move through connected ideas without losing your place.</p>
+					</article>
+					<article>
+						<span class="feature-number">03</span>
+						<h2>Plain files</h2>
+						<p>Keep the durable, portable formats you already trust at the heart of your workspace.</p>
+					</article>
+				</section>
+			</main>
+
+			<footer class="site-footer">
+				<span>© {new Date().getFullYear()} Datalith</span>
+				<span>Built for thoughtful work.</span>
+			</footer>
+		</div>
+	</body>
+</html>
+
+<style>
+	:global(:root) {
+		--landing-background: #f4f8fc;
+		--landing-surface: #ffffff;
+		--landing-text: #183044;
+		--landing-heading: #10283d;
+		--landing-muted: #587187;
+		--landing-accent: #1685e8;
+		--landing-accent-strong: #0568bf;
+		background: var(--landing-background);
+		color: var(--landing-text);
+		font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	}
+	:global(*) { box-sizing: border-box; }
+	:global(body) { margin: 0; }
+	:global(a) { color: inherit; }
+	.page-shell { margin: 0 auto; max-width: 76rem; padding: 0 clamp(1.25rem, 5vw, 4.5rem); }
+	.site-header { align-items: center; display: flex; justify-content: space-between; padding: 1.35rem 0; }
+	.brand { align-items: center; color: var(--landing-heading); display: inline-flex; font-size: 1.05rem; font-weight: 800; gap: .65rem; letter-spacing: -.02em; text-decoration: none; }
+	.brand img { image-rendering: pixelated; }
+	nav { align-items: center; display: flex; gap: 1.5rem; }
+	nav a { color: var(--landing-muted); font-size: .88rem; text-decoration: none; }
+	nav a:hover, nav a:focus-visible { color: var(--landing-heading); }
+	.hero { max-width: 46rem; padding: clamp(5rem, 12vw, 9rem) 0 clamp(5rem, 11vw, 8rem); }
+	.eyebrow { color: var(--landing-accent-strong); font-size: .76rem; font-weight: 800; letter-spacing: .12em; margin: 0 0 1rem; text-transform: uppercase; }
+	.hero h1 { color: var(--landing-heading); font-size: clamp(3.3rem, 9vw, 7rem); font-weight: 500; letter-spacing: -.085em; line-height: .93; margin: 0; }
+	.hero h1 em { color: var(--landing-accent); font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+	.hero-copy { color: var(--landing-muted); font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.65; margin: 1.75rem 0 0; max-width: 33rem; }
+	.hero-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 2rem; }
+	.primary-link, .secondary-link { border-radius: .65rem; font-size: .9rem; font-weight: 700; padding: .8rem 1rem; text-decoration: none; }
+	.primary-link { background: var(--landing-accent); color: #fff; }
+	.primary-link:hover, .primary-link:focus-visible { background: var(--landing-accent-strong); }
+	.primary-link span, .secondary-link span { margin-left: .4rem; }
+	.secondary-link { color: var(--landing-muted); padding-left: 0; }
+	.secondary-link:hover, .secondary-link:focus-visible { color: var(--landing-heading); }
+	.download-section { border-top: 1px solid #cbdbe9; padding: clamp(3.5rem, 8vw, 6rem) 0; }
+	.section-heading { display: grid; gap: .65rem; margin-bottom: 1.5rem; }
+	.section-heading .eyebrow { margin-bottom: 0; }
+	.section-heading h2 { color: var(--landing-heading); font-size: clamp(2rem, 4vw, 3.25rem); letter-spacing: -.06em; margin: 0; }
+	.section-heading p:last-child { color: var(--landing-muted); margin: 0; }
+	.feature-grid { border-top: 1px solid #cbdbe9; display: grid; gap: 1px; grid-template-columns: repeat(3, 1fr); padding: 0 0 clamp(4rem, 9vw, 7rem); }
+	.feature-grid article { border-right: 1px solid #cbdbe9; padding: 2rem 1.5rem 0 0; }
+	.feature-grid article + article { padding-left: 1.5rem; }
+	.feature-grid article:last-child { border-right: 0; }
+	.feature-number { color: var(--landing-accent); font-size: .75rem; font-weight: 800; letter-spacing: .08em; }
+	.feature-grid h2 { color: var(--landing-heading); font-size: 1.1rem; letter-spacing: -.02em; margin: 1.2rem 0 .6rem; }
+	.feature-grid p { color: var(--landing-muted); font-size: .9rem; line-height: 1.6; margin: 0; max-width: 16rem; }
+	.site-footer { border-top: 1px solid #cbdbe9; color: var(--landing-muted); display: flex; font-size: .8rem; justify-content: space-between; padding: 1.5rem 0 2rem; }
+	@media (max-width: 40rem) {
+		nav { gap: .8rem; }
+		nav a:first-child { display: none; }
+		.hero { padding-top: 4rem; }
+		.feature-grid { grid-template-columns: 1fr; }
+		.feature-grid article, .feature-grid article + article { border-bottom: 1px solid #cbdbe9; border-right: 0; padding: 1.5rem 0; }
+		.feature-grid article:last-child { border-bottom: 0; }
+		.site-footer { gap: .5rem; }
+	}
+</style>

@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://mycelium-build.github.io',
-	base: process.env.SITE_BASE ?? '/datalith-site',
+	base: process.env.SITE_BASE ?? '/',
 	integrations: [
 	starlight({
 			title: 'Datalith',

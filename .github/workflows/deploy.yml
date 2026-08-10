@@ -60,6 +60,7 @@ jobs:
           DATALITH_SOURCE_DIR: ${{ github.workspace }}/datalith-source
           RELEASE_REPOSITORY: mycelium-build/datalith
           DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
+          SITE_BASE: /datalith-site
         run: npm run build
 
       - name: Configure Pages
