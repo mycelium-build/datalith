@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "sync-docs": "node scripts/sync-docs.mjs",
-    "fetch-releases": "node scripts/fetch-releases.mjs",
+    "sync-docs": "node --env-file-if-exists=.env scripts/sync-docs.mjs",
+    "fetch-releases": "node --env-file-if-exists=.env scripts/fetch-releases.mjs",
     "prebuild": "npm run sync-docs && npm run fetch-releases",
     "build": "astro build",
     "preview": "astro preview",
