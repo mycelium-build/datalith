@@ -6,6 +6,14 @@ dist/
 # Imported from the Datalith repository during the build.
 src/content/docs/vault/
 src/data/releases.json
+src/data/stars.json
+src/data/graph.json
+src/data/search.json
+src/data/logo.txt
+src/data/themes/
+src/assets/icons/
+public/fonts/
+src/styles/themes.css
 
 # dependencies
 node_modules/
@@ -16,10 +24,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-
 # environment variables
 .env
 .env.production
 
-# macOS-specific files
-.DS_Store
+# temp
+temp/
