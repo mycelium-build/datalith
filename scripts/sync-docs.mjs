@@ -74,7 +74,7 @@ function relativeMarkdownLink(currentRoute, targetRoute) {
 	return `${relative || '.'}/`;
 }
 
-function rewriteWikiLinks(markdown, currentPath, index) {
+function rewriteWikiLinks(markdown, currentPath, index, edges) {
 	const currentRoute = routeFor(currentPath);
 	let inFence = false;
 	return markdown
@@ -95,12 +95,24 @@ function rewriteWikiLinks(markdown, currentPath, index) {
 						const text = label?.trim() || target.trim();
 						if (/^https?:\/\//i.test(link)) return `[${text}](${link})`;
 						const route = link.slice(1, -1);
+						if (route !== currentRoute) edges.add(`${currentRoute}|${route}`);
 						return `[${text}](${relativeMarkdownLink(currentRoute, route)})`;
 					});
 				})
 				.join('');
 		})
 		.join('\n');
+}
+
+function searchContent(markdown) {
+	return markdown
+		.replace(/^---[\s\S]*?---\r?\n?/, '')
+		.replace(/```[\s\S]*?```/g, ' ')
+		.replace(/`([^`]*)`/g, '$1')
+		.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+		.replace(/[#>*_~|-]/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
 }
 
 function addStarlightFrontmatter(markdown, relativePath) {
@@ -118,14 +130,49 @@ const index = buildDocumentIndex();
 await rm(destinationVault, { recursive: true, force: true });
 await mkdir(destinationVault, { recursive: true });
 
+const edges = new Set();
+const documents = [];
+
 for (const relativePath of markdownFiles) {
 	const sourcePath = path.join(sourceVault, relativePath);
 	const destinationPath = path.join(destinationVault, relativePath);
 	const original = await readFile(sourcePath, 'utf8');
-	const rewritten = rewriteWikiLinks(original, relativePath, index);
+	const rewritten = rewriteWikiLinks(original, relativePath, index, edges);
 	const document = addStarlightFrontmatter(rewritten, relativePath);
 	await mkdir(path.dirname(destinationPath), { recursive: true });
 	await writeFile(destinationPath, `${document}\n`);
+	documents.push({
+		route: `/${routeFor(relativePath)}/`,
+		name: path.posix.basename(relativePath, '.md'),
+		path: relativePath.split(path.sep).join('/').replace(/\.md$/i, ''),
+		title: titleFromMarkdown(rewritten, path.basename(relativePath, '.md')),
+		content: searchContent(rewritten),
+	});
 }
 
+const dataDirectory = path.join(siteRoot, 'src', 'data');
+await mkdir(dataDirectory, { recursive: true });
+
+const nodeRoutes = new Set(documents.map((document) => document.route.slice(1, -1)));
+const graphNodes = documents.map((document) => ({
+	id: document.route,
+	label: document.title,
+	route: document.route,
+}));
+const graphEdges = [...edges]
+	.filter((edge) => edge.split('|').every((route) => nodeRoutes.has(route)))
+	.map((edge) => {
+		const [source, target] = edge.split('|');
+		return { source: `/${source}/`, target: `/${target}/` };
+	});
+await writeFile(
+	path.join(dataDirectory, 'graph.json'),
+	`${JSON.stringify({ nodes: graphNodes, edges: graphEdges }, null, 2)}\n`,
+);
+await writeFile(
+	path.join(dataDirectory, 'search.json'),
+	`${JSON.stringify({ documents }, null, 2)}\n`,
+);
+
 console.log(`Imported ${markdownFiles.length} Markdown files from ${sourceVault}`);
+console.log(`Wrote docs graph (${graphNodes.length} nodes, ${graphEdges.length} edges) and search index (${documents.length} documents)`);
