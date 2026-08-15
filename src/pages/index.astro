@@ -1,134 +1,529 @@
 ---
-import DownloadPanel from '../components/DownloadPanel.astro';
+import "../styles/base.css";
+import "../styles/themes.css";
+import DownloadPanel from "../components/DownloadPanel.astro";
+import MonolithLogo from "../components/MonolithLogo.astro";
+import Icon from "../components/Icon.astro";
+import ThemePicker from "../components/ThemePicker.astro";
+import SearchWidget from "../components/SearchWidget.astro";
+import MarkdownWidget from "../components/MarkdownWidget.astro";
+import TodoWidget from "../components/TodoWidget.astro";
+import GraphWidget from "../components/GraphWidget.astro";
+import stars from "../data/stars.json";
 
-const baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
-const docsUrl = `${baseUrl}docs/vault/welcome/`;
+const baseUrl = import.meta.env.BASE_URL;
+const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`;
+const githubUrl = "https://github.com/mycelium-build/datalith";
+const starCount = Number(stars.stargazersCount ?? 0);
 ---
 
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="description" content="Datalith is a fast, local-first knowledge workspace." />
-		<link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
-		<title>Datalith · Your knowledge, connected.</title>
-	</head>
-	<body>
-		<div class="page-shell">
-			<header class="site-header">
-				<a class="brand" href={baseUrl} aria-label="Datalith home">
-					<img src={`${baseUrl}datalith.png`} alt="" width="34" height="34" />
-					<span>Datalith</span>
-				</a>
-				<nav aria-label="Main navigation">
-					<a href={docsUrl}>Documentation</a>
-					<a href="https://github.com/mycelium-build/datalith" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
-				</nav>
-			</header>
+<html lang="en" data-datalith-theme="datalith-light" data-mode="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta
+            name="description"
+            content="Datalith is a fast, local-first knowledge workspace."
+        />
+        <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
+        <title>Datalith · Your knowledge, connected.</title>
+        <script is:inline>
+            (function () {
+                var mode = "light";
+                var id = "datalith-light";
+                try {
+                    var raw = localStorage.getItem("datalith:theme");
+                    if (raw) {
+                        var parsed = JSON.parse(raw);
+                        if (parsed.mode === "dark") mode = "dark";
+                    } else if (
+                        window.matchMedia &&
+                        window.matchMedia("(prefers-color-scheme: dark)")
+                            .matches
+                    ) {
+                        mode = "dark";
+                    }
+                    raw = localStorage.getItem("datalith:theme");
+                    if (raw) {
+                        var parsed = JSON.parse(raw);
+                        id =
+                            (mode === "dark" ? parsed.dark : parsed.light) ||
+                            id;
+                    }
+                } catch (error) {
+                    /* ignore storage errors */
+                }
+                document.documentElement.dataset.datalithTheme = id;
+                document.documentElement.dataset.mode = mode;
+            })();
+        </script>
+    </head>
+    <body>
+        <div class="page-shell">
+            <header class="site-header">
+                <a class="brand" href={baseUrl}>Datalith</a>
+                <nav aria-label="Main navigation">
+                    <a href={docsUrl}>Documentation</a>
+                    <a
+                        class="github-link"
+                        href={githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        <Icon name="star" />
+                        <span>GitHub</span>
+                        {
+                            starCount > 0 && (
+                                <span
+                                    class="star-count"
+                                    aria-label={`${starCount} stars`}
+                                >
+                                    {starCount}
+                                </span>
+                            )
+                        }
+                    </a>
+                </nav>
+            </header>
 
-			<main>
-				<section class="hero">
-					<p class="eyebrow">A calmer way to work with knowledge</p>
-					<h1>Your knowledge,<br /><em>connected.</em></h1>
-					<p class="hero-copy">Datalith is a local-first workspace for finding, linking, editing, and visualizing the files that matter to you.</p>
-					<div class="hero-actions">
-						<a class="primary-link" href={docsUrl}>Explore the documentation <span aria-hidden="true">→</span></a>
-						<a class="secondary-link" href="https://github.com/mycelium-build/datalith" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
-					</div>
-				</section>
+            <main>
+                <section class="hero" aria-label="Datalith">
+                    <div class="hero-grid">
+                        <div class="hero-logo" aria-hidden="true">
+                            <MonolithLogo cell={9} />
+                        </div>
+                        <div class="hero-copy">
+                            <p class="eyebrow">
+                                A calmer way to work with knowledge
+                            </p>
+                            <h1 class="display">
+                                Your knowledge,<br /><em>connected.</em>
+                            </h1>
+                            <p class="hero-sub">
+                                Datalith is a local-first workspace for finding,
+                                linking, editing, and visualizing the files that
+                                matter to you.
+                            </p>
+                            <div class="hero-actions">
+                                <a class="pixel-button" href="#download"
+                                    ><Icon name="download" /><span
+                                        >Download Datalith</span
+                                    ></a
+                                >
+                                <a class="hero-link" href={docsUrl}
+                                    >Documentation</a
+                                >
+                                <a
+                                    class="hero-link external"
+                                    href={githubUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    >GitHub <Icon name="arrowUpRight" /></a
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-				<section class="download-section" aria-labelledby="download-heading">
-					<div class="section-heading">
-						<p class="eyebrow">Available now</p>
-						<h2 id="download-heading">Take Datalith with you.</h2>
-						<p>Download the latest version for your computer. Your files stay on your machine.</p>
-					</div>
-					<DownloadPanel />
-				</section>
+                <section
+                    class="download-section"
+                    id="download"
+                    aria-labelledby="download-heading"
+                >
+                    <div class="section-heading">
+                        <p class="eyebrow">Available now</p>
+                        <h2 class="display" id="download-heading">
+                            Take Datalith with you.
+                        </h2>
+                        <p>
+                            Download the latest version for your computer. Your
+                            files stay on your machine.
+                        </p>
+                    </div>
+                    <DownloadPanel />
+                </section>
 
-				<section class="feature-grid" aria-label="Datalith highlights">
-					<article>
-						<span class="feature-number">01</span>
-						<h2>Local by design</h2>
-						<p>Your Vault is a folder you own. Datalith works with your files, not around them.</p>
-					</article>
-					<article>
-						<span class="feature-number">02</span>
-						<h2>Fast to explore</h2>
-						<p>Search, link, and move through connected ideas without losing your place.</p>
-					</article>
-					<article>
-						<span class="feature-number">03</span>
-						<h2>Plain files</h2>
-						<p>Keep the durable, portable formats you already trust at the heart of your workspace.</p>
-					</article>
-				</section>
-			</main>
+                <section class="bento" aria-label="Datalith features">
+                    <div class="bento-col">
+                        <article class="bento-tile tile-md">
+                            <header class="tile-head">
+                                <Icon name="note" />
+                                <div>
+                                    <h2 class="display">Write in Markdown</h2>
+                                    <p>
+                                        Notes with live preview, wiki links, and
+                                        properties. Your files stay plain `.md`.
+                                    </p>
+                                </div>
+                            </header>
+                            <MarkdownWidget />
+                        </article>
 
-			<footer class="site-footer">
-				<span>© {new Date().getFullYear()} Datalith</span>
-				<span>Built for thoughtful work.</span>
-			</footer>
-		</div>
-	</body>
+                        <article class="bento-tile tile-graph">
+                            <header class="tile-head">
+                                <Icon name="graph" />
+                                <div>
+                                    <h2 class="display">Connected by design</h2>
+                                    <p>
+                                        Wiki links become a living graph. Click
+                                        a node to open its page.
+                                    </p>
+                                </div>
+                            </header>
+                            <GraphWidget />
+                        </article>
+
+                        <article class="bento-tile tile-fast">
+                            <div class="tile-head">
+                                <Icon name="bolt" class="tile-glyph" />
+                                <div>
+                                    <h2 class="display">Fast, really fast</h2>
+                                    <p>
+                                        Opens instantly, even on vaults of 10k+
+                                        notes. Rust + GPUI.
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="bento-tile tile-local">
+                            <div class="tile-head">
+                                <Icon name="folder" class="tile-glyph" />
+                                <div>
+                                    <h2 class="display">Local first</h2>
+                                    <p>
+                                        You are in control. Your vault is a
+                                        folder you own.
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="bento-col">
+                        <article class="bento-tile tile-search">
+                            <header class="tile-head">
+                                <Icon name="search" />
+                                <div>
+                                    <h2 class="display">
+                                        Find anything, instantly
+                                    </h2>
+                                    <p>
+                                        Search the docs by name and content, as
+                                        you type.
+                                    </p>
+                                </div>
+                            </header>
+                            <SearchWidget />
+                        </article>
+
+                        <article class="bento-tile tile-theme">
+                            <header class="tile-head">
+                                <Icon name="palette" />
+                                <div>
+                                    <h2 class="display">Make it yours</h2>
+                                    <p>
+                                        Ten themes, light and dark, from
+                                        Datalith's own set.
+                                    </p>
+                                </div>
+                            </header>
+                            <ThemePicker variant="full" />
+                        </article>
+
+                        <article class="bento-tile tile-todo">
+                            <header class="tile-head">
+                                <Icon name="todo" />
+                                <div>
+                                    <h2 class="display">
+                                        Tasks that stay files
+                                    </h2>
+                                    <p>
+                                        A real todo.txt editor: priorities,
+                                        projects, subtasks.
+                                    </p>
+                                </div>
+                            </header>
+                            <TodoWidget />
+                        </article>
+
+                        <article class="bento-tile tile-private">
+                            <div class="tile-head">
+                                <Icon name="lock" class="tile-glyph" />
+                                <div>
+                                    <h2 class="display">Private by default</h2>
+                                    <p>Your files never leave your machine.</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="open-source" aria-label="Open source">
+                    <div>
+                        <p class="eyebrow">Open source</p>
+                        <h2 class="display">
+                            MIT-licensed. Star it on GitHub.
+                        </h2>
+                    </div>
+                    <a
+                        class="pixel-button"
+                        href={githubUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        <Icon name="star" />
+                        <span>Star on GitHub</span>
+                        {
+                            starCount > 0 && (
+                                <span
+                                    class="star-count-inverse"
+                                    aria-label={`${starCount} stars`}
+                                >
+                                    {starCount}
+                                </span>
+                            )
+                        }
+                    </a>
+                </section>
+            </main>
+
+            <footer class="site-footer">
+                <span>© {new Date().getFullYear()} Datalith</span>
+                <span>Built for thoughtful work.</span>
+            </footer>
+        </div>
+    </body>
 </html>
 
 <style>
-	:global(:root) {
-		--landing-background: #f4f8fc;
-		--landing-surface: #ffffff;
-		--landing-text: #183044;
-		--landing-heading: #10283d;
-		--landing-muted: #587187;
-		--landing-accent: #1685e8;
-		--landing-accent-strong: #0568bf;
-		background: var(--landing-background);
-		color: var(--landing-text);
-		font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-	}
-	:global(*) { box-sizing: border-box; }
-	:global(body) { margin: 0; }
-	:global(a) { color: inherit; }
-	.page-shell { margin: 0 auto; max-width: 76rem; padding: 0 clamp(1.25rem, 5vw, 4.5rem); }
-	.site-header { align-items: center; display: flex; justify-content: space-between; padding: 1.35rem 0; }
-	.brand { align-items: center; color: var(--landing-heading); display: inline-flex; font-size: 1.05rem; font-weight: 800; gap: .65rem; letter-spacing: -.02em; text-decoration: none; }
-	.brand img { image-rendering: pixelated; }
-	nav { align-items: center; display: flex; gap: 1.5rem; }
-	nav a { color: var(--landing-muted); font-size: .88rem; text-decoration: none; }
-	nav a:hover, nav a:focus-visible { color: var(--landing-heading); }
-	.hero { max-width: 46rem; padding: clamp(5rem, 12vw, 9rem) 0 clamp(5rem, 11vw, 8rem); }
-	.eyebrow { color: var(--landing-accent-strong); font-size: .76rem; font-weight: 800; letter-spacing: .12em; margin: 0 0 1rem; text-transform: uppercase; }
-	.hero h1 { color: var(--landing-heading); font-size: clamp(3.3rem, 9vw, 7rem); font-weight: 500; letter-spacing: -.085em; line-height: .93; margin: 0; }
-	.hero h1 em { color: var(--landing-accent); font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
-	.hero-copy { color: var(--landing-muted); font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.65; margin: 1.75rem 0 0; max-width: 33rem; }
-	.hero-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 2rem; }
-	.primary-link, .secondary-link { border-radius: .65rem; font-size: .9rem; font-weight: 700; padding: .8rem 1rem; text-decoration: none; }
-	.primary-link { background: var(--landing-accent); color: #fff; }
-	.primary-link:hover, .primary-link:focus-visible { background: var(--landing-accent-strong); }
-	.primary-link span, .secondary-link span { margin-left: .4rem; }
-	.secondary-link { color: var(--landing-muted); padding-left: 0; }
-	.secondary-link:hover, .secondary-link:focus-visible { color: var(--landing-heading); }
-	.download-section { border-top: 1px solid #cbdbe9; padding: clamp(3.5rem, 8vw, 6rem) 0; }
-	.section-heading { display: grid; gap: .65rem; margin-bottom: 1.5rem; }
-	.section-heading .eyebrow { margin-bottom: 0; }
-	.section-heading h2 { color: var(--landing-heading); font-size: clamp(2rem, 4vw, 3.25rem); letter-spacing: -.06em; margin: 0; }
-	.section-heading p:last-child { color: var(--landing-muted); margin: 0; }
-	.feature-grid { border-top: 1px solid #cbdbe9; display: grid; gap: 1px; grid-template-columns: repeat(3, 1fr); padding: 0 0 clamp(4rem, 9vw, 7rem); }
-	.feature-grid article { border-right: 1px solid #cbdbe9; padding: 2rem 1.5rem 0 0; }
-	.feature-grid article + article { padding-left: 1.5rem; }
-	.feature-grid article:last-child { border-right: 0; }
-	.feature-number { color: var(--landing-accent); font-size: .75rem; font-weight: 800; letter-spacing: .08em; }
-	.feature-grid h2 { color: var(--landing-heading); font-size: 1.1rem; letter-spacing: -.02em; margin: 1.2rem 0 .6rem; }
-	.feature-grid p { color: var(--landing-muted); font-size: .9rem; line-height: 1.6; margin: 0; max-width: 16rem; }
-	.site-footer { border-top: 1px solid #cbdbe9; color: var(--landing-muted); display: flex; font-size: .8rem; justify-content: space-between; padding: 1.5rem 0 2rem; }
-	@media (max-width: 40rem) {
-		nav { gap: .8rem; }
-		nav a:first-child { display: none; }
-		.hero { padding-top: 4rem; }
-		.feature-grid { grid-template-columns: 1fr; }
-		.feature-grid article, .feature-grid article + article { border-bottom: 1px solid #cbdbe9; border-right: 0; padding: 1.5rem 0; }
-		.feature-grid article:last-child { border-bottom: 0; }
-		.site-footer { gap: .5rem; }
-	}
+    html {
+        scroll-behavior: smooth;
+    }
+
+    .hero {
+        padding: clamp(2rem, 6vw, 5rem) 0 clamp(4rem, 9vw, 7rem);
+    }
+    .hero-grid {
+        align-items: center;
+        display: grid;
+        gap: clamp(2rem, 5vw, 4rem);
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    }
+    .hero-logo {
+        justify-self: center;
+        width: min(34vw, 17rem);
+        animation: float 3.4s steps(6, jump-none) infinite;
+    }
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-0.9rem);
+        }
+    }
+    .hero-copy h1 {
+        font-size: clamp(2.7rem, 6.4vw, 5.2rem);
+        margin: 0;
+
+        em {
+            color: var(--dl-accent);
+            font-style: normal;
+        }
+    }
+    .hero-sub {
+        color: var(--dl-muted);
+        font-size: clamp(1rem, 2vw, 1.18rem);
+        line-height: 1.6;
+        margin: 1.4rem 0 0;
+        max-width: 30rem;
+    }
+    .hero-actions {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.6rem;
+        margin-top: 2rem;
+    }
+    .hero-link {
+        align-items: center;
+        color: var(--dl-muted);
+        display: inline-flex;
+        font-size: 0.92rem;
+        font-weight: 600;
+        gap: 0.3rem;
+
+        .pixel-icon {
+            font-size: 14px;
+        }
+
+        &:hover,
+        &:focus-visible {
+            color: var(--dl-fg);
+        }
+    }
+    .github-link {
+        align-items: center;
+        display: inline-flex;
+        gap: 0.4rem;
+
+        .pixel-icon {
+            color: var(--dl-yellow);
+            font-size: 14px;
+        }
+    }
+    .star-count {
+        background: var(--dl-surface-alt);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.12rem 0.4rem;
+    }
+
+    .download-section {
+        padding: clamp(3rem, 7vw, 5.5rem) 0;
+    }
+    .section-heading {
+        margin-bottom: var(--space-6);
+
+        h2 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            margin: 0 0 0.6rem;
+        }
+
+        p:last-child {
+            color: var(--dl-muted);
+            margin: 0;
+        }
+    }
+
+    .bento {
+        display: flex;
+        gap: var(--space-4);
+        padding-bottom: clamp(3rem, 7vw, 5.5rem);
+    }
+    .bento-col {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-4);
+        min-width: 0;
+    }
+    .bento-tile {
+        background: var(--dl-surface);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: var(--space-5);
+
+        h2.display {
+            font-size: 1.3rem;
+            margin: 0 0 0.45rem;
+        }
+
+        p {
+            color: var(--dl-muted);
+            font-size: 0.86rem;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        .pixel-icon {
+            flex: 0 0 auto;
+        }
+    }
+
+    .tile-md {
+        aspect-ratio: 1 / 1;
+    }
+    .tile-graph {
+        height: 22rem;
+    }
+    .tile-todo {
+        aspect-ratio: 1 / 1;
+    }
+
+    .tile-head {
+        align-items: flex-start;
+        display: flex;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+
+        .pixel-icon {
+            color: var(--dl-accent);
+            font-size: 21px;
+            flex: 0 0 auto;
+            margin-top: 0.15rem;
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            margin: 0 0 0.3rem;
+        }
+
+        p {
+            color: var(--dl-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .open-source {
+        align-items: center;
+        background: var(--dl-surface);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-5);
+        justify-content: space-between;
+        margin-bottom: clamp(3rem, 7vw, 5.5rem);
+        padding: var(--space-6) var(--space-5);
+
+        .eyebrow {
+            margin-bottom: 0.3rem;
+        }
+
+        h2 {
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            margin: 0;
+        }
+    }
+    .star-count-inverse {
+        background: color-mix(in srgb, #000 18%, transparent);
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 0.14rem 0.45rem;
+    }
+
+    @media (max-width: 52rem) {
+        .hero-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+        .hero-logo {
+            width: 11rem;
+        }
+        .hero-sub {
+            margin-inline: auto;
+        }
+        .hero-actions {
+            justify-content: center;
+        }
+        .bento {
+            flex-direction: column;
+        }
+        .bento-col {
+            flex: none;
+        }
+        .open-source {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
 </style>
