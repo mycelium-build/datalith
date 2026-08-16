@@ -24,10 +24,10 @@ const starCount = Number(stars.stargazersCount ?? 0);
         <meta name="viewport" content="width=device-width" />
         <meta
             name="description"
-            content="Datalith is a fast, local-first knowledge workspace."
+            content="Datalith is a fast, local-first knowledge Vault. Turn scattered notes into a personal encyclopedia."
         />
         <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
-        <title>Datalith · Your knowledge, connected.</title>
+        <title>Datalith · From pixels to knowledge</title>
         <script is:inline>
             (function () {
                 var mode = "light";
@@ -95,7 +95,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
                         </div>
                         <div class="hero-copy">
                             <p class="eyebrow">
-                                A calmer way to work with knowledge
+                                A personal encyclopedia
                             </p>
                             <h1 class="display">
                                 Your knowledge,<br /><em>connected.</em>
@@ -132,12 +132,14 @@ const starCount = Number(stars.stargazersCount ?? 0);
                     aria-labelledby="download-heading"
                 >
                     <div class="section-heading">
-                        <p class="eyebrow">Available now</p>
+                        <p class="eyebrow">Start today</p>
                         <h2 class="display" id="download-heading">
-                            Take Datalith with you.
+                            Begin your encyclopedia.
                         </h2>
                         <p>
-                            Download the latest version for your computer.
+                            Download Datalith and lay the first pixel of your
+                            own knowledge. Free, open source, for macOS,
+                            Windows, and Linux.
                         </p>
                     </div>
                     <DownloadPanel />
@@ -149,10 +151,12 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <div class="tile-head">
                                 <Icon name="bolt" class="tile-glyph" />
                                 <div>
-                                    <h2 class="display">Fast, really fast</h2>
+                                    <h2 class="display">
+                                        Instant, every time
+                                    </h2>
                                     <p>
-                                        Opens instantly, even on vaults of 10k+
-                                        notes. Rust + GPUI.
+                                        Opens in a blink, even on Vaults of 10k+ notes.
+                                        So reading and writing never wait on you.
                                     </p>
                                 </div>
                             </div>
@@ -194,8 +198,8 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 <div>
                                     <h2 class="display">Local first</h2>
                                     <p>
-                                        You are in control. Your vault is a folder you own.<br/>
-                                        Your data is saved in open formats, so you are never locked in.
+                                        Your Vault is a folder you own with open formats file that outlive apps.
+                                        Your encyclopedia can never be taken from you.
                                     </p>
                                 </div>
                             </div>
@@ -208,7 +212,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 <Icon name="search" />
                                 <div>
                                     <h2 class="display">
-                                        Find anything, instantly
+                                        Every thought, findable
                                     </h2>
                                     <p>
                                         Search the docs by name and content, as you type.<br/>
@@ -223,10 +227,12 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <header class="tile-head">
                                 <Icon name="graph" />
                                 <div>
-                                    <h2 class="display">Connected by design</h2>
+                                    <h2 class="display">
+                                        Ideas, connected by design
+                                    </h2>
                                     <p>
-                                        Wiki links become a living graph. Click
-                                        a node to open its page.
+                                        Wiki links become a living graph.
+                                        Follow a thread and rediscover what you forgot you knew.
                                     </p>
                                 </div>
                             </header>
@@ -240,6 +246,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                     <h2 class="display">Make it yours</h2>
                                     <p>
                                         Dozens of themes, light and dark.
+                                        Knowledge shaped into a familiar place is easier to come back to.
                                     </p>
                                 </div>
                             </header>
@@ -283,6 +290,25 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 </span>
                             )
                         }
+                    </a>
+                </section>
+
+                <section class="final-cta" aria-label="Download Datalith">
+                    <div class="final-cta-mark" aria-hidden="true">
+                        <MonolithLogo cell={6} />
+                    </div>
+                    <div class="final-cta-copy">
+                        <p class="eyebrow">Ready to begin?</p>
+                        <h2 class="display">
+                            Plant your monolith in a folder of your own.
+                        </h2>
+                        <p>
+                            One download, one empty folder and a lifetime of knowledge sharpens into focus.
+                        </p>
+                    </div>
+                    <a class="pixel-button" href="#download">
+                        <Icon name="download" />
+                        <span>Download Datalith</span>
                     </a>
                 </section>
             </main>
@@ -507,6 +533,32 @@ const starCount = Number(stars.stargazersCount ?? 0);
         padding: 0.14rem 0.45rem;
     }
 
+    .final-cta {
+        align-items: center;
+        background: var(--dl-surface);
+        border: 1px solid var(--dl-border);
+        display: grid;
+        gap: clamp(1.5rem, 4vw, 3rem);
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+        margin-bottom: clamp(3rem, 7vw, 5.5rem);
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+    }
+    .final-cta-mark {
+        animation: float 3.6s ease-in-out infinite;
+        width: clamp(4rem, 8vw, 6rem);
+    }
+    .final-cta-copy {
+        h2 {
+            font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+            margin: 0 0 0.45rem;
+        }
+
+        p:last-child {
+            color: var(--dl-muted);
+            margin: 0;
+        }
+    }
+
     @media (max-width: 52rem) {
         .hero-grid {
             grid-template-columns: 1fr;
@@ -530,6 +582,14 @@ const starCount = Number(stars.stargazersCount ?? 0);
         .open-source {
             align-items: flex-start;
             flex-direction: column;
+        }
+        .final-cta {
+            grid-template-columns: 1fr;
+            justify-items: center;
+            text-align: center;
+        }
+        .final-cta-mark {
+            width: 5rem;
         }
     }
 </style>
