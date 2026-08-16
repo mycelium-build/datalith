@@ -4,35 +4,26 @@ Static download and documentation website for [Datalith](https://github.com/myce
 
 ## Local development
 
-The build imports Markdown from `../datalith/docs/vault` by default. Override
-that location with `DATALITH_SOURCE_DIR` when needed. For a local build against
-a private Datalith repository, `DATALITH_READ_TOKEN` can be a temporary
-read-only token.
+The build imports from `../datalith` by default. Override that location with `DATALITH_SOURCE_DIR` when needed. For build against Datalith repository, `DATALITH_READ_TOKEN` can be use. The build scripts read environment variables from a `.env` file in the project root when present (see `.env.example`).
 
 ```sh
 npm install
-DATALITH_READ_TOKEN=... npm run build
+npm run build
 npm run dev
 ```
 
-The workflow uses the organization’s `datalith-bot` GitHub App to read the
-private Datalith repository. Add the existing app credentials as Actions
-secrets named `AUTOMATION_APP_ID` and `AUTOMATION_APP_PRIVATE_KEY`. The
-private key is used only during the build and is never included in the
-generated website.
+The `prebuild` step regenerates everything that comes from the Datalith repo:
 
-## GitHub Pages
+- `sync-docs` imports the documentation vault and derives the docs search index (`src/data/search.json`) and docs graph (`src/data/graph.json`).
+- `sync-assets` copies the app icon source (`datalith.txt`), pixel icons, theme JSON files, and Pixeloid fonts.
+- `build-icons` generates `src/components/Icon.astro` from the synced `src/assets/icons/*.svg` files.
+- `build-themes` translates the curated gpui-component theme JSONs into the CSS variables used by the whole site (`src/styles/themes.css` and `src/data/themes.json`).
+- `fetch-releases` pulls published releases and the GitHub star count.
 
-The deployment workflow is intentionally manual for now. Run **Actions →
-Deploy website → Run workflow** and choose the Datalith ref to import.
+The workflow uses the organization's `datalith-bot` GitHub App to read the Datalith repository. Add the existing app credentials as Actions secrets named `AUTOMATION_APP_ID` and `AUTOMATION_APP_PRIVATE_KEY`.
 
-The `datalith-bot` installation must include the `datalith` repository. Its
-token needs read-only Contents access to `datalith`; it does not need access to
-`datalith-site` because that repository is checked out with the workflow token.
+## Deployment
 
-The root page is a standalone landing page; `/docs/` redirects to the imported
-documentation welcome page. The build fetches published releases from the
-GitHub Releases API, filters out drafts, and exposes the latest stable download
-for the visitor's platform. Older releases and pre-releases are available from
-the download panel. Documentation is regenerated from `datalith/docs/vault` on
-every deployment.
+The deployment workflow is intentionally manual for now. Run **Actions → Deploy website → Run workflow** and choose the Datalith ref to import.
+
+The `datalith-bot` installation must include the `datalith` repository. Its token needs read-only Contents access to `datalith`.
