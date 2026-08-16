@@ -10,13 +10,13 @@ const CURATED = [
 	'Datalith Light',
 	'Ayu Light',
 	'Everforest Light',
-	'Flexoki Light',
+	'Gruvbox Light',
 	'Mellifluous Light',
 	'Datalith Dark',
 	'Matrix',
 	'Tokyo Night',
 	'Gruvbox Dark',
-	'Solarized Dark',
+	'Catppuccin Mocha',
 ];
 
 function rgbToHsl([r, g, b]) {
