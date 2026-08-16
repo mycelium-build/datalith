@@ -404,6 +404,7 @@ import Icon from "./Icon.astro";
     .todo-sort-group {
         align-items: center;
         display: flex;
+        gap: 0.4rem;
     }
     .todo-sort-wrap {
         align-items: center;
@@ -444,14 +445,16 @@ import Icon from "./Icon.astro";
         }
     }
     .todo-sort-dir {
+        align-items: center;
         background: var(--dl-surface-alt);
         color: var(--dl-muted);
-        font-family: var(--font-sans);
+        display: flex;
         font-size: 0.7rem;
         font-weight: 700;
         height: 1.9rem;
-        border-inline-start: 1px solid var(--dl-bg);
-        padding: 0 0.4rem;
+        justify-content: center;
+        padding: 0;
+        width: 1.9rem;
 
         .pixel-icon {
             font-size: 14px;
