@@ -124,6 +124,27 @@ const starCount = Number(stars.stargazersCount ?? 0);
                     </div>
                 </section>
 
+                <section class="intro" aria-label="About Datalith">
+                    <div class="intro-panel">
+                        <span class="corner corner-tl" aria-hidden="true"></span>
+                        <span class="corner corner-tr" aria-hidden="true"></span>
+                        <span class="corner corner-bl" aria-hidden="true"></span>
+                        <span class="corner corner-br" aria-hidden="true"></span>
+                        <div class="intro-copy">
+                            <p class="eyebrow">A little magic</p>
+                            <h2 class="display">
+                                The enchanted monolith<br/>that remembers.
+                            </h2>
+                            <p>
+                                Datalith's is a monolith, enchanted to find and visual every note you have ever written.
+                                A note is a pixel, a link between two notes another.
+                                Tend them, and the picture sharpens into focus:
+                                a private personal encyclopedia, one of a kind, built to outlast any app, service, or trend.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
                 <section
                     class="download-section"
                     id="download"
@@ -404,6 +425,83 @@ const starCount = Number(stars.stargazersCount ?? 0);
         font-size: 0.72rem;
         font-weight: 700;
         padding: 0.12rem 0.4rem;
+    }
+
+    .intro {
+        padding: 0 0 clamp(3rem, 7vw, 5.5rem);
+    }
+    .intro-panel {
+        background: var(--dl-surface);
+        border: 1px solid var(--dl-border);
+        padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1.25rem, 3vw, 2.5rem);
+        position: relative;
+        text-align: center;
+    }
+    .corner {
+        background: var(--dl-accent);
+        height: 4px;
+        position: absolute;
+        width: 4px;
+    }
+    .corner-tl {
+        box-shadow:
+            0 4px 0 0 var(--dl-accent),
+            0 8px 0 0 var(--dl-accent),
+            4px 0 0 0 var(--dl-accent),
+            8px 0 0 0 var(--dl-accent);
+        left: -4px;
+        top: -4px;
+    }
+    .corner-tr {
+        box-shadow:
+            0 4px 0 0 var(--dl-accent),
+            0 8px 0 0 var(--dl-accent),
+            -4px 0 0 0 var(--dl-accent),
+            -8px 0 0 0 var(--dl-accent);
+        right: -4px;
+        top: -4px;
+    }
+    .corner-bl {
+        bottom: -4px;
+        box-shadow:
+            0 -4px 0 0 var(--dl-accent),
+            0 -8px 0 0 var(--dl-accent),
+            4px 0 0 0 var(--dl-accent),
+            8px 0 0 0 var(--dl-accent);
+        left: -4px;
+    }
+    .corner-br {
+        bottom: -4px;
+        box-shadow:
+            0 -4px 0 0 var(--dl-accent),
+            0 -8px 0 0 var(--dl-accent),
+            -4px 0 0 0 var(--dl-accent),
+            -8px 0 0 0 var(--dl-accent);
+        right: -4px;
+    }
+    .intro-copy {
+        margin-inline: auto;
+        max-width: 44rem;
+
+        h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            margin: 0 0 1rem;
+        }
+
+        p {
+            color: var(--dl-muted);
+            line-height: 1.65;
+            margin-inline: auto;
+            max-width: 42rem;
+        }
+
+        p + p {
+            margin-top: 0.85rem;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
     }
 
     .download-section {
