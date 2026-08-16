@@ -21,6 +21,7 @@ import Icon from "./Icon.astro";
         forceManyBody,
         forceCenter,
         forceCollide,
+        type SimulationNodeDatum,
     } from "d3-force";
     import { select } from "d3-selection";
     import { zoom, zoomIdentity } from "d3-zoom";
@@ -43,8 +44,8 @@ import Icon from "./Icon.astro";
         target: string | NodeDatum;
     };
 
-    const svg = select(root).select("[data-graph-canvas]");
-    const g = svg.append("g");
+    const svg = select(root).select<SVGSVGElement>("[data-graph-canvas]");
+    const g = svg.append<SVGGElement>("g");
 
     const nodes: NodeDatum[] = graphData.nodes.map((n) => ({ ...n }));
     const links: EdgeDatum[] = graphData.edges.map((e) => ({ ...e }));
@@ -68,11 +69,11 @@ import Icon from "./Icon.astro";
     const node = g
         .append("g")
         .attr("class", "nodes")
-        .selectAll("g")
+        .selectAll<SVGGElement, NodeDatum>("g")
         .data(nodes)
         .join("g")
         .call(
-            drag()
+            drag<SVGGElement, NodeDatum>()
                 .on("start", (event, d) => {
                     touched = true;
                     dragged = false;
@@ -110,8 +111,8 @@ import Icon from "./Icon.astro";
     let hovered: NodeDatum | null = null;
 
     function positionLabel(d: NodeDatum) {
-        const text = label.select("text");
-        const rect = label.select("rect");
+        const text = label.select<SVGTextElement>("text");
+        const rect = label.select<SVGRectElement>("rect");
         text.text(d.label);
         const width = text.node()?.getComputedTextLength() ?? 0;
         rect.attr("width", width + 10).attr("x", -(width + 10) / 2);
@@ -128,16 +129,16 @@ import Icon from "./Icon.astro";
                 .distance(110)
                 .strength(0.45),
         )
-        .force("charge", forceManyBody().strength(-320))
-        .force("center", forceCenter(0, 0))
-        .force("collide", forceCollide(22))
+        .force("charge", forceManyBody<NodeDatum>().strength(-320))
+        .force("center", forceCenter<NodeDatum>(0, 0))
+        .force("collide", forceCollide<NodeDatum>(22))
         .alphaDecay(0.02)
         .on("tick", () => {
             link
-                .attr("x1", (d) => (d.source as NodeDatum).x)
-                .attr("y1", (d) => (d.source as NodeDatum).y)
-                .attr("x2", (d) => (d.target as NodeDatum).x)
-                .attr("y2", (d) => (d.target as NodeDatum).y);
+                .attr("x1", (d) => (d.source as NodeDatum).x ?? 0)
+                .attr("y1", (d) => (d.source as NodeDatum).y ?? 0)
+                .attr("x2", (d) => (d.target as NodeDatum).x ?? 0)
+                .attr("y2", (d) => (d.target as NodeDatum).y ?? 0);
             node.attr("transform", (d) => `translate(${d.x},${d.y})`);
             if (hovered) positionLabel(hovered);
         });
@@ -180,7 +181,7 @@ import Icon from "./Icon.astro";
             node.classed("active", false);
         });
 
-    const zoomBehavior = zoom()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
         .scaleExtent([0.4, 3])
         .filter(
             (event) =>
