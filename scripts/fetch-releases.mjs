@@ -65,3 +65,23 @@ const releases = (await response.json())
 await mkdir(path.dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify({ repository, generatedAt: new Date().toISOString(), releases }, null, 2)}\n`);
 console.log(`Fetched ${releases.length} published releases from ${repository}`);
+
+const starsResponse = await fetch(`https://api.github.com/repos/${repository}`, {
+	headers: {
+		accept: 'application/vnd.github+json',
+		'user-agent': 'datalith-site-build',
+		...(token ? { authorization: `Bearer ${token}` } : {}),
+	},
+});
+let stargazersCount = 0;
+if (starsResponse.ok) {
+	const repo = await starsResponse.json();
+	stargazersCount = Number(repo.stargazers_count ?? 0);
+} else {
+	console.warn(`GitHub repository request failed with ${starsResponse.status} ${starsResponse.statusText}; star count left at 0`);
+}
+await writeFile(
+	path.join(siteRoot, 'src', 'data', 'stars.json'),
+	`${JSON.stringify({ repository, stargazersCount, fetchedAt: new Date().toISOString() }, null, 2)}\n`,
+);
+console.log(`Fetched ${stargazersCount} stars from ${repository}`);
