@@ -7,7 +7,7 @@ import Icon from "./Icon.astro";
     data-graph-widget
     aria-label="Documentation graph"
 >
-    <canvas data-graph-canvas></canvas>
+    <svg data-graph-canvas role="img" aria-label="Documentation graph"></svg>
     <div class="graph-hint">
         <Icon name="graph" /><span
             >Drag to pan · scroll to zoom · click a node to open it</span>
@@ -21,348 +21,266 @@ import Icon from "./Icon.astro";
         forceManyBody,
         forceCenter,
         forceCollide,
-        type SimulationNodeDatum,
     } from "d3-force";
+    import { select } from "d3-selection";
+    import { zoom, zoomIdentity } from "d3-zoom";
+    import { drag } from "d3-drag";
     import graphData from "../data/graph.json";
     import { docUrl } from "../lib/route";
-    import { onThemeChange } from "../lib/theme";
 
     const root =
         document.currentScript?.closest("[data-graph-widget]") ??
         document.querySelector("[data-graph-widget]");
     if (!root) throw new Error("graph widget missing host");
-    const canvas = root.querySelector<HTMLCanvasElement>(
-        "[data-graph-canvas]",
-    )!;
-    const ctx = canvas.getContext("2d")!;
 
     interface NodeDatum extends SimulationNodeDatum {
         id: string;
         label: string;
         route: string;
     }
-    type EdgeDatum = { source: string | NodeDatum; target: string | NodeDatum };
+    type EdgeDatum = {
+        source: string | NodeDatum;
+        target: string | NodeDatum;
+    };
 
-    const nodes: NodeDatum[] = graphData.nodes.map((node) => ({
-        ...node,
-        x: 0,
-        y: 0,
-    }));
-    const edges: EdgeDatum[] = graphData.edges.map((edge) => ({ ...edge }));
+    const svg = select(root).select("[data-graph-canvas]");
+    const g = svg.append("g");
 
-    const transform = { x: 0, y: 0, k: 1 };
-    let width = 0;
-    let height = 0;
+    const nodes: NodeDatum[] = graphData.nodes.map((n) => ({ ...n }));
+    const links: EdgeDatum[] = graphData.edges.map((e) => ({ ...e }));
+
+    let w = root.clientWidth;
+    let h = root.clientHeight;
+    svg.attr("width", w).attr("height", h);
+
+    const degree = (id: string) =>
+        graphData.edges.filter((e) => e.source === id || e.target === id).length;
+
+    const link = g
+        .append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(links)
+        .join("line");
+
+    let dragged = false;
+
+    const node = g
+        .append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .call(
+            drag()
+                .on("start", (event, d) => {
+                    touched = true;
+                    dragged = false;
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                })
+                .on("drag", (event, d) => {
+                    dragged = true;
+                    d.fx = event.x;
+                    d.fy = event.y;
+                })
+                .on("end", (event, d) => {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                    setTimeout(() => (dragged = false), 0);
+                }),
+        )
+        .on("click", (event, d) => {
+            if (dragged) return;
+            window.location.href = docUrl(d.route);
+        });
+
+    node.append("circle").attr("r", (d) => 7 + Math.min(5, degree(d.id)) * 2);
+
+    const label = g.append("g").attr("class", "node-label");
+    label.append("rect").attr("height", 16).attr("rx", 3).attr("y", -12);
+    label
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("y", 0)
+        .attr("font-size", 11);
+
     let hovered: NodeDatum | null = null;
-    let dragging: NodeDatum | null = null;
-    let pointerDown: {
-        x: number;
-        y: number;
-        lastX: number;
-        lastY: number;
-        moved: boolean;
-    } | null = null;
-    let raf = 0;
 
-    function palette() {
-        const styles = getComputedStyle(document.documentElement);
-        return {
-            accent: styles.getPropertyValue("--dl-accent").trim() || "#1e8dff",
-            muted: styles.getPropertyValue("--dl-muted").trim() || "#707070",
-            border: styles.getPropertyValue("--dl-border").trim() || "#d2d2d2",
-            bg: styles.getPropertyValue("--dl-bg").trim() || "#f9f9f9",
-        };
+    function positionLabel(d: NodeDatum) {
+        const text = label.select("text");
+        const rect = label.select("rect");
+        text.text(d.label);
+        const width = text.node()?.getComputedTextLength() ?? 0;
+        rect.attr("width", width + 10).attr("x", -(width + 10) / 2);
+        label
+            .attr("transform", `translate(${d.x},${(d.y ?? 0) + 26})`)
+            .style("display", null);
     }
-
-    function sizeCanvas() {
-        const rect = root.getBoundingClientRect();
-        const ratio = window.devicePixelRatio || 1;
-        width = Math.max(1, rect.width);
-        height = Math.max(1, rect.height);
-        canvas.width = Math.round(width * ratio);
-        canvas.height = Math.round(height * ratio);
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    }
-
-    const linkForce = forceLink<NodeDatum, EdgeDatum>(edges)
-        .id((node) => node.id)
-        .distance(110)
-        .strength(0.45);
 
     const simulation = forceSimulation<NodeDatum>(nodes)
-        .force("link", linkForce)
+        .force(
+            "link",
+            forceLink<NodeDatum, EdgeDatum>(links)
+                .id((d) => d.id)
+                .distance(110)
+                .strength(0.45),
+        )
         .force("charge", forceManyBody().strength(-320))
         .force("center", forceCenter(0, 0))
         .force("collide", forceCollide(22))
         .alphaDecay(0.02)
-        .on("tick", scheduleDraw);
+        .on("tick", () => {
+            link
+                .attr("x1", (d) => (d.source as NodeDatum).x)
+                .attr("y1", (d) => (d.source as NodeDatum).y)
+                .attr("x2", (d) => (d.target as NodeDatum).x)
+                .attr("y2", (d) => (d.target as NodeDatum).y);
+            node.attr("transform", (d) => `translate(${d.x},${d.y})`);
+            if (hovered) positionLabel(hovered);
+        });
 
-    function neighborSet(node: NodeDatum): Set<string> {
-        const set = new Set<string>([node.id]);
-        for (const edge of linkForce.links()) {
-            const source = typeof edge.source === "object" ? edge.source : null;
-            const target = typeof edge.target === "object" ? edge.target : null;
-            if (source?.id === node.id) set.add(target?.id ?? "");
-            if (target?.id === node.id) set.add(source?.id ?? "");
+    function neighborSet(d: NodeDatum): Set<string> {
+        const set = new Set<string>([d.id]);
+        for (const l of link.data()) {
+            const source = l.source as NodeDatum;
+            const target = l.target as NodeDatum;
+            if (source.id === d.id) set.add(target.id);
+            if (target.id === d.id) set.add(source.id);
         }
         return set;
     }
 
-    function degree(node: NodeDatum): number {
-        return linkForce.links().filter((edge) => {
-            const source = typeof edge.source === "object" ? edge.source : null;
-            const target = typeof edge.target === "object" ? edge.target : null;
-            return source?.id === node.id || target?.id === node.id;
-        }).length;
-    }
-
-    function draw() {
-        const colors = palette();
-        ctx.clearRect(0, 0, width, height);
-        ctx.save();
-        ctx.translate(transform.x, transform.y);
-        ctx.scale(transform.k, transform.k);
-
-        const incident = hovered ? neighborSet(hovered) : null;
-
-        ctx.lineWidth = 1;
-        for (const edge of linkForce.links()) {
-            const source = typeof edge.source === "object" ? edge.source : null;
-            const target = typeof edge.target === "object" ? edge.target : null;
-            if (!source || !target) continue;
-            const active = Boolean(
-                incident?.has(source.id) && incident?.has(target.id),
-            );
-            ctx.strokeStyle = active ? colors.accent : colors.border;
-            ctx.globalAlpha = hovered && !active ? 0.16 : 0.65;
-            ctx.beginPath();
-            ctx.moveTo(source.x ?? 0, source.y ?? 0);
-            ctx.lineTo(target.x ?? 0, target.y ?? 0);
-            ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-
-        for (const node of nodes) {
-            const isHovered = hovered?.id === node.id;
-            const active = Boolean(incident?.has(node.id));
-            const radius =
-                (isHovered ? 1.3 : 1) * (7 + Math.min(5, degree(node)) * 2);
-            ctx.globalAlpha = hovered && !active ? 0.22 : 1;
-            ctx.fillStyle = colors.accent;
-            ctx.beginPath();
-            ctx.arc(node.x ?? 0, node.y ?? 0, radius, 0, Math.PI * 2);
-            ctx.fill();
-            if (isHovered) {
-                ctx.strokeStyle = colors.fg;
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-            ctx.globalAlpha = 1;
-        }
-
-        if (hovered) {
-            ctx.fillStyle = colors.muted;
-            ctx.font =
-                '11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            const label =
-                hovered.label.length > 24
-                    ? `${hovered.label.slice(0, 23)}…`
-                    : hovered.label;
-            const textWidth = ctx.measureText(label).width;
-            const x = (hovered.x ?? 0) - textWidth / 2;
-            const y = (hovered.y ?? 0) + 26;
-            ctx.fillRect(x - 3, y - 12, textWidth + 6, 16);
-            ctx.fillStyle = colors.bg;
-            ctx.fillText(label, x, y);
-        }
-
-        ctx.restore();
-    }
-
-    function scheduleDraw() {
-        if (raf) return;
-        raf = requestAnimationFrame(() => {
-            raf = 0;
-            draw();
+    node
+        .on("mouseenter", (event, d) => {
+            hovered = d;
+            const set = neighborSet(d);
+            link.classed("inactive", (l) => {
+                const s = l.source as NodeDatum;
+                const t = l.target as NodeDatum;
+                return !(set.has(s.id) && set.has(t.id));
+            });
+            link.classed("active", (l) => {
+                const s = l.source as NodeDatum;
+                const t = l.target as NodeDatum;
+                return set.has(s.id) && set.has(t.id);
+            });
+            node.classed("inactive", (n) => !set.has(n.id));
+            node.classed("active", (n) => n.id === d.id);
+            positionLabel(d);
+        })
+        .on("mouseleave", () => {
+            hovered = null;
+            label.style("display", "none");
+            link.classed("inactive", false);
+            link.classed("active", false);
+            node.classed("inactive", false);
+            node.classed("active", false);
         });
+
+    const zoomBehavior = zoom()
+        .scaleExtent([0.4, 3])
+        .filter(
+            (event) =>
+                event.type === "wheel" ||
+                (!event.button && !event.ctrlKey && !event.target.closest(".nodes")),
+        )
+        .on("start", (event) => {
+            if (event.sourceEvent) touched = true;
+        })
+        .on("zoom", (event) => g.attr("transform", event.transform));
+
+    svg.call(zoomBehavior);
+
+    let touched = false;
+
+    function fitView() {
+        if (!nodes.length) return;
+        const xs = nodes.map((n) => n.x ?? 0);
+        const ys = nodes.map((n) => n.y ?? 0);
+        const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+        const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+        const k = Math.min(1, Math.max(0.55, Math.min(w, h) / 340));
+        svg.call(
+            zoomBehavior.transform,
+            zoomIdentity.translate(w / 2 - cx * k, h / 2 - cy * k).scale(k),
+        );
     }
 
-    function toWorld(clientX: number, clientY: number) {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: (clientX - rect.left - transform.x) / transform.k,
-            y: (clientY - rect.top - transform.y) / transform.k,
+    simulation.on("end", () => {
+        if (!touched) fitView();
+    });
+
+    const resizeObserver = new ResizeObserver(() => {
+        const nextW = root.clientWidth;
+        const nextH = root.clientHeight;
+        if (nextW === w && nextH === h) return;
+        w = nextW;
+        h = nextH;
+        svg.attr("width", w).attr("height", h);
+        const t = (select(root).property("__zoom") ?? zoomIdentity) as {
+            k: number;
         };
-    }
-
-    function nodeAt(clientX: number, clientY: number): NodeDatum | null {
-        const point = toWorld(clientX, clientY);
-        for (const node of nodes) {
-            const radius = 7 + Math.min(5, degree(node)) * 2;
-            const dx = (point.x - (node.x ?? 0)) ** 2;
-            const dy = (point.y - (node.y ?? 0)) ** 2;
-            if (dx + dy <= radius * radius) return node;
-        }
-        return null;
-    }
-
-    function centerView() {
-        if (nodes.length === 0) return;
-        const degrees = new Map<string, number>();
-        for (const edge of linkForce.links()) {
-            const source = typeof edge.source === "object" ? edge.source : null;
-            const target = typeof edge.target === "object" ? edge.target : null;
-            degrees.set(
-                source?.id ?? "",
-                (degrees.get(source?.id ?? "") ?? 0) + 1,
-            );
-            degrees.set(
-                target?.id ?? "",
-                (degrees.get(target?.id ?? "") ?? 0) + 1,
-            );
-        }
-        let cx = 0;
-        let cy = 0;
-        let total = 0;
-        for (const node of nodes) {
-            const weight = 1 + (degrees.get(node.id) ?? 0);
-            cx += (node.x ?? 0) * weight;
-            cy += (node.y ?? 0) * weight;
-            total += weight;
-        }
-        cx /= total;
-        cy /= total;
-        const k = Math.min(1, Math.max(0.55, Math.min(width, height) / 340));
-        transform.k = k;
-        transform.x = width / 2 - cx * k;
-        transform.y = height / 2 - cy * k;
-        draw();
-    }
-
-    canvas.addEventListener("pointermove", (event) => {
-        if (dragging) {
-            const point = toWorld(event.clientX, event.clientY);
-            dragging.fx = point.x;
-            dragging.fy = point.y;
-            return;
-        }
-        if (pointerDown) return;
-        const node = nodeAt(event.clientX, event.clientY);
-        if (node !== hovered) {
-            hovered = node;
-            canvas.style.cursor = node ? "pointer" : "grab";
-            draw();
-        }
+        svg.call(zoomBehavior.transform, zoomIdentity.translate(w / 2, h / 2).scale(t.k));
     });
 
-    canvas.addEventListener("pointerleave", () => {
-        hovered = null;
-        draw();
-    });
-
-    canvas.addEventListener("pointerdown", (event) => {
-        canvas.setPointerCapture(event.pointerId);
-        const node = nodeAt(event.clientX, event.clientY);
-        pointerDown = {
-            x: event.clientX,
-            y: event.clientY,
-            lastX: event.clientX,
-            lastY: event.clientY,
-            moved: false,
-        };
-        if (node) {
-            dragging = node;
-            simulation.alphaTarget(0.3).restart();
-        } else {
-            canvas.style.cursor = "grabbing";
-        }
-    });
-
-    canvas.addEventListener("pointermove", (event) => {
-        if (!pointerDown || dragging) return;
-        if (
-            Math.abs(event.clientX - pointerDown.x) +
-                Math.abs(event.clientY - pointerDown.y) >
-            4
-        ) {
-            pointerDown.moved = true;
-        }
-        transform.x += event.clientX - pointerDown.lastX;
-        transform.y += event.clientY - pointerDown.lastY;
-        pointerDown.lastX = event.clientX;
-        pointerDown.lastY = event.clientY;
-        draw();
-    });
-
-    canvas.addEventListener("pointerup", (event) => {
-        simulation.alphaTarget(0);
-        if (dragging) {
-            dragging.fx = null;
-            dragging.fy = null;
-            dragging = null;
-            canvas.style.cursor = "grab";
-        } else if (pointerDown && !pointerDown.moved) {
-            const node = nodeAt(event.clientX, event.clientY);
-            if (node) window.location.href = docUrl(node.route);
-        } else {
-            canvas.style.cursor = "grab";
-        }
-        pointerDown = null;
-    });
-
-    canvas.addEventListener("pointercancel", () => {
-        dragging = null;
-        pointerDown = null;
-        simulation.alphaTarget(0);
-        canvas.style.cursor = "grab";
-    });
-
-    canvas.addEventListener(
-        "wheel",
-        (event) => {
-            event.preventDefault();
-            const point = toWorld(event.clientX, event.clientY);
-            const factor = Math.exp(-event.deltaY * 0.0015);
-            const next = Math.min(3, Math.max(0.4, transform.k * factor));
-            transform.x =
-                event.clientX -
-                (event.clientX - transform.x) * (next / transform.k);
-            transform.y =
-                event.clientY -
-                (event.clientY - transform.y) * (next / transform.k);
-            transform.k = next;
-            draw();
-        },
-        { passive: false },
-    );
-
-    window.addEventListener("resize", () => {
-        sizeCanvas();
-        centerView();
-    });
-
-    onThemeChange(() => draw());
-    sizeCanvas();
-    const observer = new ResizeObserver(() => sizeCanvas());
-    observer.observe(root);
-    centerView();
+    resizeObserver.observe(root);
+    fitView();
 </script>
 
 <style>
     .graph-widget {
         display: flex;
+        flex: 1;
         flex-direction: column;
         min-height: 0;
         position: relative;
 
-        canvas {
+        :global(svg) {
             display: block;
             flex: 1;
             min-height: 0;
+            width: 100%;
             cursor: grab;
             touch-action: none;
+        }
+
+        :global(.links line) {
+            stroke: var(--dl-border);
+            stroke-width: 1;
+            opacity: 0.65;
+            transition: opacity 0.15s;
+        }
+        :global(.links line.inactive) {
+            opacity: 0.16;
+        }
+        :global(.links line.active) {
+            stroke: var(--dl-accent);
+            opacity: 1;
+        }
+        :global(.nodes circle) {
+            fill: var(--dl-accent);
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        :global(.nodes g:hover circle),
+        :global(.nodes g.active circle) {
+            stroke: var(--dl-accent);
+            stroke-width: 1.5;
+        }
+        :global(.nodes circle.inactive) {
+            opacity: 0.22;
+        }
+        :global(.node-label rect) {
+            fill: var(--dl-surface-alt);
+            stroke: var(--dl-border);
+            stroke-width: 1;
+        }
+        :global(.node-label text) {
+            fill: var(--dl-fg);
+            font-family: var(--font-sans);
         }
     }
 
