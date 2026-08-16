@@ -146,34 +146,6 @@ const starCount = Number(stars.stargazersCount ?? 0);
 
                 <section class="bento" aria-label="Datalith features">
                     <div class="bento-col">
-                        <article class="bento-tile tile-md">
-                            <header class="tile-head">
-                                <Icon name="note" />
-                                <div>
-                                    <h2 class="display">Write in Markdown</h2>
-                                    <p>
-                                        Notes with live preview, wiki links, and
-                                        properties. Your files stay plain `.md`.
-                                    </p>
-                                </div>
-                            </header>
-                            <MarkdownWidget />
-                        </article>
-
-                        <article class="bento-tile tile-graph">
-                            <header class="tile-head">
-                                <Icon name="graph" />
-                                <div>
-                                    <h2 class="display">Connected by design</h2>
-                                    <p>
-                                        Wiki links become a living graph. Click
-                                        a node to open its page.
-                                    </p>
-                                </div>
-                            </header>
-                            <GraphWidget />
-                        </article>
-
                         <article class="bento-tile tile-fast">
                             <div class="tile-head">
                                 <Icon name="bolt" class="tile-glyph" />
@@ -185,6 +157,36 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                     </p>
                                 </div>
                             </div>
+                        </article>
+
+                        <article class="bento-tile tile-md">
+                            <header class="tile-head">
+                                <Icon name="note" />
+                                <div>
+                                    <h2 class="display">Write in Markdown</h2>
+                                    <p>
+                                        Notes with preview, wiki links, and
+                                        properties.
+                                    </p>
+                                </div>
+                            </header>
+                            <MarkdownWidget />
+                        </article>
+
+                        <article class="bento-tile tile-todo">
+                            <header class="tile-head">
+                                <Icon name="todo" />
+                                <div>
+                                    <h2 class="display">
+                                        Tasks that stay files
+                                    </h2>
+                                    <p>
+                                        A real todo.txt editor: priorities,
+                                        projects, subtasks.
+                                    </p>
+                                </div>
+                            </header>
+                            <TodoWidget />
                         </article>
 
                         <article class="bento-tile tile-local">
@@ -218,6 +220,20 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <SearchWidget />
                         </article>
 
+                        <article class="bento-tile tile-graph">
+                            <header class="tile-head">
+                                <Icon name="graph" />
+                                <div>
+                                    <h2 class="display">Connected by design</h2>
+                                    <p>
+                                        Wiki links become a living graph. Click
+                                        a node to open its page.
+                                    </p>
+                                </div>
+                            </header>
+                            <GraphWidget />
+                        </article>
+
                         <article class="bento-tile tile-theme">
                             <header class="tile-head">
                                 <Icon name="palette" />
@@ -230,22 +246,6 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 </div>
                             </header>
                             <ThemePicker variant="full" />
-                        </article>
-
-                        <article class="bento-tile tile-todo">
-                            <header class="tile-head">
-                                <Icon name="todo" />
-                                <div>
-                                    <h2 class="display">
-                                        Tasks that stay files
-                                    </h2>
-                                    <p>
-                                        A real todo.txt editor: priorities,
-                                        projects, subtasks.
-                                    </p>
-                                </div>
-                            </header>
-                            <TodoWidget />
                         </article>
 
                         <article class="bento-tile tile-private">
