@@ -1,0 +1,381 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<section
+    class="graph-widget"
+    data-graph-widget
+    aria-label="Documentation graph"
+>
+    <canvas data-graph-canvas></canvas>
+    <div class="graph-hint">
+        <Icon name="graph" /><span
+            >Drag to pan · scroll to zoom · click a node to open it</span>
+    </div>
+</section>
+
+<script>
+    import {
+        forceSimulation,
+        forceLink,
+        forceManyBody,
+        forceCenter,
+        forceCollide,
+        type SimulationNodeDatum,
+    } from "d3-force";
+    import graphData from "../data/graph.json";
+    import { docUrl } from "../lib/route";
+    import { onThemeChange } from "../lib/theme";
+
+    const root =
+        document.currentScript?.closest("[data-graph-widget]") ??
+        document.querySelector("[data-graph-widget]");
+    if (!root) throw new Error("graph widget missing host");
+    const canvas = root.querySelector<HTMLCanvasElement>(
+        "[data-graph-canvas]",
+    )!;
+    const ctx = canvas.getContext("2d")!;
+
+    interface NodeDatum extends SimulationNodeDatum {
+        id: string;
+        label: string;
+        route: string;
+    }
+    type EdgeDatum = { source: string | NodeDatum; target: string | NodeDatum };
+
+    const nodes: NodeDatum[] = graphData.nodes.map((node) => ({
+        ...node,
+        x: 0,
+        y: 0,
+    }));
+    const edges: EdgeDatum[] = graphData.edges.map((edge) => ({ ...edge }));
+
+    const transform = { x: 0, y: 0, k: 1 };
+    let width = 0;
+    let height = 0;
+    let hovered: NodeDatum | null = null;
+    let dragging: NodeDatum | null = null;
+    let pointerDown: {
+        x: number;
+        y: number;
+        lastX: number;
+        lastY: number;
+        moved: boolean;
+    } | null = null;
+    let raf = 0;
+
+    function palette() {
+        const styles = getComputedStyle(document.documentElement);
+        return {
+            accent: styles.getPropertyValue("--dl-accent").trim() || "#1e8dff",
+            muted: styles.getPropertyValue("--dl-muted").trim() || "#707070",
+            border: styles.getPropertyValue("--dl-border").trim() || "#d2d2d2",
+            bg: styles.getPropertyValue("--dl-bg").trim() || "#f9f9f9",
+        };
+    }
+
+    function sizeCanvas() {
+        const rect = root.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        width = Math.max(1, rect.width);
+        height = Math.max(1, rect.height);
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    const linkForce = forceLink<NodeDatum, EdgeDatum>(edges)
+        .id((node) => node.id)
+        .distance(110)
+        .strength(0.45);
+
+    const simulation = forceSimulation<NodeDatum>(nodes)
+        .force("link", linkForce)
+        .force("charge", forceManyBody().strength(-320))
+        .force("center", forceCenter(0, 0))
+        .force("collide", forceCollide(22))
+        .alphaDecay(0.02)
+        .on("tick", scheduleDraw);
+
+    function neighborSet(node: NodeDatum): Set<string> {
+        const set = new Set<string>([node.id]);
+        for (const edge of linkForce.links()) {
+            const source = typeof edge.source === "object" ? edge.source : null;
+            const target = typeof edge.target === "object" ? edge.target : null;
+            if (source?.id === node.id) set.add(target?.id ?? "");
+            if (target?.id === node.id) set.add(source?.id ?? "");
+        }
+        return set;
+    }
+
+    function degree(node: NodeDatum): number {
+        return linkForce.links().filter((edge) => {
+            const source = typeof edge.source === "object" ? edge.source : null;
+            const target = typeof edge.target === "object" ? edge.target : null;
+            return source?.id === node.id || target?.id === node.id;
+        }).length;
+    }
+
+    function draw() {
+        const colors = palette();
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.translate(transform.x, transform.y);
+        ctx.scale(transform.k, transform.k);
+
+        const incident = hovered ? neighborSet(hovered) : null;
+
+        ctx.lineWidth = 1;
+        for (const edge of linkForce.links()) {
+            const source = typeof edge.source === "object" ? edge.source : null;
+            const target = typeof edge.target === "object" ? edge.target : null;
+            if (!source || !target) continue;
+            const active = Boolean(
+                incident?.has(source.id) && incident?.has(target.id),
+            );
+            ctx.strokeStyle = active ? colors.accent : colors.border;
+            ctx.globalAlpha = hovered && !active ? 0.16 : 0.65;
+            ctx.beginPath();
+            ctx.moveTo(source.x ?? 0, source.y ?? 0);
+            ctx.lineTo(target.x ?? 0, target.y ?? 0);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        for (const node of nodes) {
+            const isHovered = hovered?.id === node.id;
+            const active = Boolean(incident?.has(node.id));
+            const radius =
+                (isHovered ? 1.3 : 1) * (7 + Math.min(5, degree(node)) * 2);
+            ctx.globalAlpha = hovered && !active ? 0.22 : 1;
+            ctx.fillStyle = colors.accent;
+            ctx.beginPath();
+            ctx.arc(node.x ?? 0, node.y ?? 0, radius, 0, Math.PI * 2);
+            ctx.fill();
+            if (isHovered) {
+                ctx.strokeStyle = colors.fg;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        if (hovered) {
+            ctx.fillStyle = colors.muted;
+            ctx.font =
+                '11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            const label =
+                hovered.label.length > 24
+                    ? `${hovered.label.slice(0, 23)}…`
+                    : hovered.label;
+            const textWidth = ctx.measureText(label).width;
+            const x = (hovered.x ?? 0) - textWidth / 2;
+            const y = (hovered.y ?? 0) + 26;
+            ctx.fillRect(x - 3, y - 12, textWidth + 6, 16);
+            ctx.fillStyle = colors.bg;
+            ctx.fillText(label, x, y);
+        }
+
+        ctx.restore();
+    }
+
+    function scheduleDraw() {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+            raf = 0;
+            draw();
+        });
+    }
+
+    function toWorld(clientX: number, clientY: number) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (clientX - rect.left - transform.x) / transform.k,
+            y: (clientY - rect.top - transform.y) / transform.k,
+        };
+    }
+
+    function nodeAt(clientX: number, clientY: number): NodeDatum | null {
+        const point = toWorld(clientX, clientY);
+        for (const node of nodes) {
+            const radius = 7 + Math.min(5, degree(node)) * 2;
+            const dx = (point.x - (node.x ?? 0)) ** 2;
+            const dy = (point.y - (node.y ?? 0)) ** 2;
+            if (dx + dy <= radius * radius) return node;
+        }
+        return null;
+    }
+
+    function centerView() {
+        if (nodes.length === 0) return;
+        const degrees = new Map<string, number>();
+        for (const edge of linkForce.links()) {
+            const source = typeof edge.source === "object" ? edge.source : null;
+            const target = typeof edge.target === "object" ? edge.target : null;
+            degrees.set(
+                source?.id ?? "",
+                (degrees.get(source?.id ?? "") ?? 0) + 1,
+            );
+            degrees.set(
+                target?.id ?? "",
+                (degrees.get(target?.id ?? "") ?? 0) + 1,
+            );
+        }
+        let cx = 0;
+        let cy = 0;
+        let total = 0;
+        for (const node of nodes) {
+            const weight = 1 + (degrees.get(node.id) ?? 0);
+            cx += (node.x ?? 0) * weight;
+            cy += (node.y ?? 0) * weight;
+            total += weight;
+        }
+        cx /= total;
+        cy /= total;
+        const k = Math.min(1, Math.max(0.55, Math.min(width, height) / 340));
+        transform.k = k;
+        transform.x = width / 2 - cx * k;
+        transform.y = height / 2 - cy * k;
+        draw();
+    }
+
+    canvas.addEventListener("pointermove", (event) => {
+        if (dragging) {
+            const point = toWorld(event.clientX, event.clientY);
+            dragging.fx = point.x;
+            dragging.fy = point.y;
+            return;
+        }
+        if (pointerDown) return;
+        const node = nodeAt(event.clientX, event.clientY);
+        if (node !== hovered) {
+            hovered = node;
+            canvas.style.cursor = node ? "pointer" : "grab";
+            draw();
+        }
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+        hovered = null;
+        draw();
+    });
+
+    canvas.addEventListener("pointerdown", (event) => {
+        canvas.setPointerCapture(event.pointerId);
+        const node = nodeAt(event.clientX, event.clientY);
+        pointerDown = {
+            x: event.clientX,
+            y: event.clientY,
+            lastX: event.clientX,
+            lastY: event.clientY,
+            moved: false,
+        };
+        if (node) {
+            dragging = node;
+            simulation.alphaTarget(0.3).restart();
+        } else {
+            canvas.style.cursor = "grabbing";
+        }
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+        if (!pointerDown || dragging) return;
+        if (
+            Math.abs(event.clientX - pointerDown.x) +
+                Math.abs(event.clientY - pointerDown.y) >
+            4
+        ) {
+            pointerDown.moved = true;
+        }
+        transform.x += event.clientX - pointerDown.lastX;
+        transform.y += event.clientY - pointerDown.lastY;
+        pointerDown.lastX = event.clientX;
+        pointerDown.lastY = event.clientY;
+        draw();
+    });
+
+    canvas.addEventListener("pointerup", (event) => {
+        simulation.alphaTarget(0);
+        if (dragging) {
+            dragging.fx = null;
+            dragging.fy = null;
+            dragging = null;
+            canvas.style.cursor = "grab";
+        } else if (pointerDown && !pointerDown.moved) {
+            const node = nodeAt(event.clientX, event.clientY);
+            if (node) window.location.href = docUrl(node.route);
+        } else {
+            canvas.style.cursor = "grab";
+        }
+        pointerDown = null;
+    });
+
+    canvas.addEventListener("pointercancel", () => {
+        dragging = null;
+        pointerDown = null;
+        simulation.alphaTarget(0);
+        canvas.style.cursor = "grab";
+    });
+
+    canvas.addEventListener(
+        "wheel",
+        (event) => {
+            event.preventDefault();
+            const point = toWorld(event.clientX, event.clientY);
+            const factor = Math.exp(-event.deltaY * 0.0015);
+            const next = Math.min(3, Math.max(0.4, transform.k * factor));
+            transform.x =
+                event.clientX -
+                (event.clientX - transform.x) * (next / transform.k);
+            transform.y =
+                event.clientY -
+                (event.clientY - transform.y) * (next / transform.k);
+            transform.k = next;
+            draw();
+        },
+        { passive: false },
+    );
+
+    window.addEventListener("resize", () => {
+        sizeCanvas();
+        centerView();
+    });
+
+    onThemeChange(() => draw());
+    sizeCanvas();
+    const observer = new ResizeObserver(() => sizeCanvas());
+    observer.observe(root);
+    centerView();
+</script>
+
+<style>
+    .graph-widget {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        position: relative;
+
+        canvas {
+            display: block;
+            flex: 1;
+            min-height: 0;
+            cursor: grab;
+            touch-action: none;
+        }
+    }
+
+    .graph-hint {
+        align-items: center;
+        color: var(--dl-muted);
+        display: flex;
+        font-size: 0.72rem;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+
+        .pixel-icon {
+            font-size: 14px;
+        }
+    }
+</style>
