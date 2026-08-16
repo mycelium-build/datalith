@@ -1,0 +1,295 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<section class="search-widget" data-search-widget>
+    <label class="search-field">
+        <Icon name="search" />
+        <input
+            type="search"
+            placeholder="Search the docs…"
+            data-search-input
+            autocomplete="off"
+            spellcheck="false"
+        />
+    </label>
+    <div class="search-body" data-search-body>
+        <p class="search-hint" data-search-hint>
+            Search Datalith's documentation by file name or content.
+        </p>
+    </div>
+    <ul class="search-results" data-search-results hidden></ul>
+</section>
+
+<script>
+    import searchData from "../data/search.json";
+    import fileIcon from "../assets/icons/file.svg?raw";
+    import { docUrl } from "../lib/route";
+
+    const root =
+        document.currentScript?.closest("[data-search-widget]") ??
+        document.querySelector("[data-search-widget]");
+    if (!root) throw new Error("search widget missing host");
+    const input = root.querySelector<HTMLInputElement>("[data-search-input]")!;
+    const body = root.querySelector<HTMLElement>("[data-search-body]")!;
+    const hint = root.querySelector<HTMLElement>("[data-search-hint]")!;
+    const list = root.querySelector<HTMLUListElement>("[data-search-results]")!;
+
+    const MAX_RESULTS = 6;
+
+    function score(
+        doc: { name: string; title: string; content: string },
+        query: string,
+    ): number {
+        const name = doc.name.toLowerCase();
+        const title = doc.title.toLowerCase();
+        const content = doc.content.toLowerCase();
+        if (name === query) return 300;
+        if (name.startsWith(query)) return 240;
+        if (name.includes(query)) return 160;
+        if (title === query) return 120;
+        if (title.startsWith(query)) return 90;
+        if (title.includes(query)) return 60;
+        if (content.includes(query)) return 30;
+        return 0;
+    }
+
+    function snippet(content: string, query: string): string {
+        const haystack = content.toLowerCase();
+        const index = haystack.indexOf(query);
+        if (index < 0) return content.slice(0, 110);
+        const start = Math.max(0, index - 45);
+        const slice = content.slice(start, start + 140);
+        const lead = start > 0 ? "…" : "";
+        return lead + slice;
+    }
+
+    function escapeHtml(text: string): string {
+        return text.replace(
+            /[&<>"']/g,
+            (ch) =>
+                ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;",
+                })[ch]!,
+        );
+    }
+
+    function highlight(text: string, query: string): string {
+        const pattern = new RegExp(
+            `(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+            "gi",
+        );
+        return text
+            .split(pattern)
+            .map((part, index) => {
+                const safe = escapeHtml(part);
+                return index % 2 === 1 ? `<mark>${safe}</mark>` : safe;
+            })
+            .join("");
+    }
+
+    function breadcrumb(path: string): string {
+        return path.replace(/\//g, " · ");
+    }
+
+    function render(query: string) {
+        if (!root) throw new Error("search widget missing host");
+
+        const q = query.trim().toLowerCase();
+        if (q.length < 2) {
+            hint.hidden = false;
+            body.hidden = false;
+            list.hidden = true;
+            list.innerHTML = "";
+            root.classList.remove("has-results");
+            return;
+        }
+        const results = searchData.documents
+            .map((doc) => ({ doc, score: score(doc, q) }))
+            .filter((result) => result.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, MAX_RESULTS);
+        hint.hidden = true;
+        body.hidden = true;
+        list.hidden = false;
+        root.classList.add("has-results");
+        if (results.length === 0) {
+            list.innerHTML =
+                '<li class="search-empty">No matches — try another term.</li>';
+            return;
+        }
+        list.innerHTML = results
+            .map(
+                ({ doc }) => `
+				<li>
+					<a href="${docUrl(doc.route)}">
+						<span class="result-line">
+							<span class="result-icon">${fileIcon}</span>
+							<span class="result-name">${highlight(doc.name, q)}</span>
+							<span class="result-meta">${breadcrumb(doc.path)}</span>
+						</span>
+						<span class="result-snippet">${highlight(snippet(doc.content, q), q)}</span>
+					</a>
+				</li>`,
+            )
+            .join("");
+    }
+
+    input.addEventListener("input", () => render(input.value));
+    input.addEventListener("blur", () => {
+        setTimeout(() => {
+            if (!root.contains(document.activeElement))
+                root.classList.remove("has-results");
+        }, 120);
+    });
+    input.addEventListener("focus", () => {
+        if (input.value.trim().length >= 2) root.classList.add("has-results");
+    });
+    render("");
+</script>
+
+<style is:global>
+    .search-widget {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        position: relative;
+    }
+
+    .search-field {
+        align-items: center;
+        background: var(--dl-surface-alt);
+        display: flex;
+        gap: 0.6rem;
+        padding: 0.65rem 0.8rem;
+
+        .pixel-icon {
+            color: var(--dl-muted);
+            font-size: 14px;
+        }
+
+        input {
+            background: transparent;
+            border: 0;
+            color: var(--dl-fg);
+            flex: 1;
+            font-size: 0.95rem;
+            min-width: 0;
+            outline: 0;
+            &::placeholder {
+                color: var(--dl-muted);
+            }
+        }
+    }
+
+    .search-body {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .search-hint {
+        color: var(--dl-muted);
+        font-size: 0.82rem;
+        margin: auto;
+        padding: 0 0.5rem;
+        text-align: center;
+    }
+
+    .search-results {
+        background: var(--dl-surface);
+        border: 1px solid var(--dl-border);
+        box-shadow: 0 10px 30px color-mix(in srgb, #000 14%, transparent);
+        display: grid;
+        gap: 0;
+        left: 0;
+        list-style: none;
+        margin: 0;
+        max-height: min(22rem, 70vh);
+        overflow-y: auto;
+        padding: 0.25rem;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.4rem);
+        z-index: 40;
+        &[hidden] {
+            display: none;
+        }
+
+        a {
+            display: grid;
+            gap: 0.25rem;
+            padding: 0.55rem 0.6rem;
+
+            &:hover,
+            &:focus-visible {
+                background: var(--dl-surface-alt);
+            }
+        }
+
+        li + li a {
+            border-top: 1px solid
+                color-mix(in srgb, var(--dl-border) 55%, transparent);
+        }
+    }
+
+    .result-line {
+        align-items: center;
+        display: flex;
+        gap: 0.45rem;
+        min-width: 0;
+    }
+    .result-icon {
+        align-items: center;
+        color: var(--dl-accent);
+        display: inline-flex;
+        flex: 0 0 auto;
+        font-size: 14px;
+
+        svg {
+            height: 1em;
+            width: 1em;
+        }
+    }
+    .result-name {
+        font-size: 0.92rem;
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .result-meta {
+        color: var(--dl-muted);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        margin-left: auto;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .result-snippet {
+        color: var(--dl-muted);
+        font-size: 0.78rem;
+        line-height: 1.45;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .search-empty {
+        color: var(--dl-muted);
+        font-size: 0.85rem;
+        padding: 0.8rem 0.6rem;
+    }
+
+    mark {
+        background: color-mix(in srgb, var(--dl-accent) 30%, transparent);
+        color: var(--dl-fg);
+        padding: 0;
+    }
+</style>
