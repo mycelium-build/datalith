@@ -142,12 +142,17 @@ import Icon from "./Icon.astro";
     input.addEventListener("input", () => render(input.value));
     input.addEventListener("blur", () => {
         setTimeout(() => {
-            if (!root.contains(document.activeElement))
+            if (!root.contains(document.activeElement)) {
                 root.classList.remove("has-results");
+                list.hidden = true;
+            }
         }, 120);
     });
     input.addEventListener("focus", () => {
-        if (input.value.trim().length >= 2) root.classList.add("has-results");
+        if (input.value.trim().length >= 2) {
+            root.classList.add("has-results");
+            list.hidden = false;
+        }
     });
     render("");
 </script>
