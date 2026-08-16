@@ -8,10 +8,10 @@ const stylesDirectory = path.join(siteRoot, 'src', 'styles');
 
 const CURATED = [
 	'Datalith Light',
-	'Solarized Light',
-	'Catppuccin Latte',
-	'Gruvbox Light',
-	'Hybrid Light',
+	'Ayu Light',
+	'Everforest Light',
+	'Flexoki Light',
+	'Mellifluous Light',
 	'Datalith Dark',
 	'Matrix',
 	'Tokyo Night',
@@ -85,7 +85,7 @@ function translateTheme(entry) {
 	const mode = entry.mode === 'dark' ? 'dark' : 'light';
 	const colors = entry.colors ?? {};
 	const highlight = entry.highlight ?? {};
-	const accent = first(colors, ['accent.background', 'primary.background', 'ring'], defaultAccent(mode));
+	const accent = first(colors, ['primary.background', 'accent.background', 'ring'], defaultAccent(mode));
 	const fg = first(colors, ['foreground'], mode === 'dark' ? '#dedede' : '#000000');
 	const bg = first(colors, ['background'], mode === 'dark' ? '#131313' : '#f9f9f9');
 	return {
@@ -104,7 +104,7 @@ function translateTheme(entry) {
 		'--dl-muted': first(colors, ['muted.foreground', 'tab.foreground', 'popover.foreground'], fg),
 		'--dl-border': first(colors, ['border', 'title_bar.border'], '#888888'),
 		'--dl-accent': accent,
-		'--dl-accent-fg': first(colors, ['accent.foreground', 'primary.foreground'], '#ffffff'),
+		'--dl-accent-fg': first(colors, ['primary.foreground', 'accent.foreground'], '#ffffff'),
 		'--dl-ring': first(colors, ['ring'], accent),
 		'--dl-code-bg': first(highlight, ['editor.background'], bg),
 		'--dl-yellow': first(colors, ['base.yellow'], '#b59a00'),
