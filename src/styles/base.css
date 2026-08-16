@@ -1,0 +1,205 @@
+@font-face {
+	font-family: 'Pixeloid Sans';
+	src: url('/fonts/PixeloidSans.ttf') format('truetype');
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Pixeloid Sans';
+	src: url('/fonts/PixeloidSans-Bold.ttf') format('truetype');
+	font-weight: 700;
+	font-display: swap;
+}
+
+:root {
+	--font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+	--font-pixel: 'Pixeloid Sans', var(--font-sans);
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 3rem;
+	--space-8: 4rem;
+	--pixel-size: 4px;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--dl-bg);
+	color: var(--dl-fg);
+	font-family: var(--font-sans);
+	font-size: 16px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+body {
+	margin: 0;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+img,
+svg {
+	vertical-align: middle;
+}
+
+svg {
+	shape-rendering: crispEdges;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+	color: inherit;
+}
+
+button {
+	background: none;
+	border: 0;
+	cursor: pointer;
+	padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+pre,
+blockquote,
+ul,
+ol {
+	margin-top: 0;
+}
+
+::selection {
+	background: color-mix(in srgb, var(--dl-accent) 30%, transparent);
+}
+
+:focus-visible {
+	outline: 2px solid var(--dl-accent);
+	outline-offset: 2px;
+}
+
+.page-shell {
+	margin: 0 auto;
+	max-width: 74rem;
+	padding: 0 clamp(1.25rem, 5vw, 3rem);
+}
+
+.display {
+	font-family: var(--font-pixel);
+	font-weight: 700;
+	line-height: 1.1;
+	letter-spacing: 0.01em;
+}
+
+.eyebrow {
+	color: var(--dl-accent);
+	font-size: 0.78rem;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	margin: 0 0 var(--space-3);
+}
+
+.site-header {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	padding: var(--space-5) 0;
+
+	.brand {
+		align-items: center;
+		display: inline-flex;
+		gap: var(--space-3);
+		font-family: var(--font-pixel);
+		font-size: 1.15rem;
+		font-weight: 700;
+	}
+
+	nav {
+		align-items: center;
+		display: flex;
+		gap: var(--space-5);
+
+		a {
+			color: var(--dl-muted);
+			font-size: 0.9rem;
+			font-weight: 600;
+			&:hover, &:focus-visible {
+				color: var(--dl-fg);
+			}
+		}
+	}
+}
+
+.pixel-button {
+	align-items: center;
+	background: var(--dl-accent);
+	color: var(--dl-accent-fg);
+	display: inline-flex;
+	font-family: var(--font-pixel);
+	font-size: 1rem;
+	font-weight: 700;
+	gap: var(--space-2);
+	justify-content: center;
+	line-height: 1;
+	padding: 0.8rem 1.1rem;
+	transition: transform 0.06s steps(2, jump-none), background 0.12s;
+	image-rendering: pixelated;
+
+	.pixel-icon {
+		font-size: 21px;
+	}
+
+	&:hover, &:focus-visible {
+		background: color-mix(in srgb, var(--dl-accent) 82%, #000 18%);
+	}
+	&:active {
+		transform: translate(2px, 2px);
+	}
+	&[aria-disabled='true'] {
+		background: var(--dl-surface-alt);
+		color: var(--dl-muted);
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+}
+
+.site-footer {
+	color: var(--dl-muted);
+	display: flex;
+	flex-wrap: wrap;
+	font-size: 0.8rem;
+	gap: var(--space-3);
+	justify-content: space-between;
+	padding: var(--space-6) 0 var(--space-7);
+}
+
+@media (max-width: 40rem) {
+	.site-header nav {
+		gap: var(--space-3);
+
+		a:first-child {
+			display: none;
+		}
+	}
+}
