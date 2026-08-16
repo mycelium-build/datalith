@@ -1,0 +1,330 @@
+---
+import themes from "../data/themes.json";
+import Icon from "./Icon.astro";
+
+interface Props {
+    variant?: "full" | "compact";
+}
+
+const { variant = "full" } = Astro.props;
+const lights = themes.filter((theme) => theme.mode === "light");
+const darks = themes.filter((theme) => theme.mode === "dark");
+---
+
+<section
+    class:list={["theme-picker", variant === "compact" && "is-compact"]}
+    data-theme-picker
+>
+    {
+        variant === "compact" && (
+            <button
+                class="theme-trigger"
+                type="button"
+                data-theme-trigger
+                aria-haspopup="true"
+                aria-expanded="false"
+            >
+                <Icon name="palette" />
+                <span>Theme</span>
+            </button>
+        )
+    }
+    <div
+        class="theme-panel"
+        data-theme-panel
+        hidden={variant === "compact" || undefined}
+    >
+        <div class="mode-toggle" role="group" aria-label="Color mode">
+            <button type="button" data-mode-btn="light"
+                ><Icon name="sun" />Light</button
+            >
+            <button type="button" data-mode-btn="dark"
+                ><Icon name="moon" />Dark</button
+            >
+        </div>
+        <div class="theme-groups">
+            <div class="theme-group" data-mode-group="light">
+                <p class="group-label">Light</p>
+                <div class="theme-options">
+                    {
+                        lights.map((theme) => (
+                            <button
+                                class="theme-option"
+                                type="button"
+                                data-theme-option={theme.id}
+                                data-option-mode="light"
+                            >
+                                <span class="swatch" aria-hidden="true">
+                                    <i style={`background:${theme.accent}`} />
+                                </span>
+                                <span class="option-name">{theme.name}</span>
+                            </button>
+                        ))
+                    }
+                </div>
+            </div>
+            <div class="theme-group" data-mode-group="dark">
+                <p class="group-label">Dark</p>
+                <div class="theme-options">
+                    {
+                        darks.map((theme) => (
+                            <button
+                                class="theme-option"
+                                type="button"
+                                data-theme-option={theme.id}
+                                data-option-mode="dark"
+                            >
+                                <span class="swatch" aria-hidden="true">
+                                    <i style={`background:${theme.accent}`} />
+                                </span>
+                                <span class="option-name">{theme.name}</span>
+                            </button>
+                        ))
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    import {
+        applyTheme,
+        loadTheme,
+        saveTheme,
+        activeThemeId,
+        onThemeChange,
+    } from "../lib/theme";
+
+    function init(root: HTMLElement) {
+        const trigger = root.querySelector<HTMLButtonElement>(
+            "[data-theme-trigger]",
+        );
+        const panel = root.querySelector<HTMLElement>("[data-theme-panel]");
+        const modeButtons = [
+            ...root.querySelectorAll<HTMLButtonElement>("[data-mode-btn]"),
+        ];
+        const options = [
+            ...root.querySelectorAll<HTMLButtonElement>("[data-theme-option]"),
+        ];
+
+        const isCompact = () => Boolean(trigger);
+
+        function sync(state: {
+            mode: "light" | "dark";
+            light: string;
+            dark: string;
+        }) {
+            for (const button of modeButtons) {
+                const active = button.dataset.modeBtn === state.mode;
+                button.classList.toggle("is-active", active);
+                button.setAttribute("aria-pressed", String(active));
+            }
+            for (const option of options) {
+                const isForCurrentMode =
+                    option.dataset.optionMode === state.mode;
+                const active =
+                    isForCurrentMode &&
+                    option.dataset.themeOption === activeThemeId(state);
+                option.classList.toggle("is-active", Boolean(active));
+                option.setAttribute("aria-pressed", String(active));
+            }
+        }
+
+        function open() {
+            if (!panel || !trigger) return;
+            panel.hidden = false;
+            trigger.setAttribute("aria-expanded", "true");
+        }
+
+        function close() {
+            if (!panel || !trigger) return;
+            panel.hidden = true;
+            trigger.setAttribute("aria-expanded", "false");
+        }
+
+        if (trigger && panel) {
+            trigger.addEventListener("click", () =>
+                panel.hidden ? open() : close(),
+            );
+            document.addEventListener("click", (event) => {
+                if (!root.contains(event.target as Node)) close();
+            });
+        }
+
+        for (const option of options) {
+            option.addEventListener("click", () => {
+                const id = option.dataset.themeOption!;
+                const mode =
+                    (option.dataset.optionMode as "light" | "dark") ?? "light";
+                const state = loadTheme();
+                const next = { ...state, mode, [mode]: id } as typeof state;
+                applyTheme(id, mode);
+                saveTheme(next);
+                sync(next);
+                if (isCompact()) close();
+            });
+        }
+
+        for (const button of modeButtons) {
+            button.addEventListener("click", () => {
+                const mode =
+                    (button.dataset.modeBtn as "light" | "dark") ?? "light";
+                const state = loadTheme();
+                const next = { ...state, mode };
+                applyTheme(activeThemeId(next), mode);
+                saveTheme(next);
+                sync(next);
+            });
+        }
+
+        onThemeChange(() => sync(loadTheme()));
+        sync(loadTheme());
+    }
+
+    for (const root of document.querySelectorAll<HTMLElement>(
+        "[data-theme-picker]",
+    )) {
+        init(root);
+    }
+</script>
+
+<style>
+    .theme-picker {
+        position: relative;
+        &:not(.is-compact) {
+            position: static;
+
+            .theme-panel {
+                position: static;
+                inset: auto;
+                min-width: 0;
+                padding: 0;
+            }
+
+            .theme-groups {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.25rem;
+            }
+        }
+    }
+
+    .theme-trigger {
+        align-items: center;
+        color: var(--dl-muted);
+        display: inline-flex;
+        font-size: 0.85rem;
+        font-weight: 700;
+        gap: 0.35rem;
+        height: 2.25rem;
+        padding: 0 0.7rem;
+        &:hover {
+            color: var(--dl-fg);
+            background: var(--dl-surface);
+        }
+
+        .pixel-icon {
+            color: var(--dl-fg);
+            font-size: 14px;
+        }
+    }
+
+    .theme-panel {
+        background: var(--dl-surface);
+        inset-inline-end: 0;
+        padding: 1rem;
+        position: absolute;
+        top: calc(100% + 0.35rem);
+        z-index: 30;
+        min-width: 16.5rem;
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    .mode-toggle {
+        background: var(--dl-surface-alt);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.15rem;
+        padding: 0.15rem;
+        margin-bottom: 0.85rem;
+
+        button {
+            align-items: center;
+            color: var(--dl-muted);
+            display: flex;
+            font-family: var(--font-pixel);
+            font-size: 0.8rem;
+            font-weight: 700;
+            gap: 0.35rem;
+            justify-content: center;
+            padding: 0.45rem 0;
+            &.is-active {
+                background: var(--dl-accent);
+                color: var(--dl-accent-fg);
+            }
+
+            .pixel-icon {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .theme-groups {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .group-label {
+        color: var(--dl-muted);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        margin: 0 0 0.35rem;
+        text-transform: uppercase;
+    }
+
+    .theme-options {
+        display: grid;
+        gap: 0.15rem;
+    }
+    .theme-option {
+        align-items: center;
+        color: var(--dl-fg);
+        display: flex;
+        font-size: 0.86rem;
+        gap: 0.55rem;
+        padding: 0.35rem 0.45rem;
+        text-align: start;
+        &:hover {
+            background: var(--dl-surface-alt);
+        }
+        &.is-active {
+            background: color-mix(in srgb, var(--dl-accent) 14%, transparent);
+        }
+    }
+    .option-name {
+        flex: 1;
+    }
+
+    .swatch {
+        background: var(--dl-bg);
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 0.95rem;
+        width: 0.95rem;
+        padding: 0.16rem;
+
+        i {
+            display: block;
+            height: 100%;
+            width: 100%;
+        }
+    }
+
+    .is-compact .theme-panel {
+        right: 0;
+        top: calc(100% + 0.4rem);
+    }
+</style>
