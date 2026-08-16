@@ -156,7 +156,6 @@ ol {
 	background: var(--dl-accent);
 	color: var(--dl-accent-fg);
 	display: inline-flex;
-	font-family: var(--font-pixel);
 	font-size: 1rem;
 	font-weight: 700;
 	gap: var(--space-2);
