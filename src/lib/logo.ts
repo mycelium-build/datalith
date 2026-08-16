@@ -2,9 +2,10 @@ import logoSource from '../data/logo.txt?raw';
 import { whiten } from './whiten';
 
 const TIER_COLORS: Record<string, string> = {
-	M: 'accent',
-	'1': 'logo-1',
-	'2': 'logo-2',
+	M: 'light',
+	'0': 'top',
+	'1': 'right',
+	'2': 'left',
 	I: 'inscription',
 };
 
@@ -41,9 +42,10 @@ function parseLogo(source: string): LogoGrid {
 export function renderLogo(accent: string, cell = 1): string {
 	const grid = parseLogo(logoSource);
 	const colors = {
-		accent,
-		'logo-1': whiten(accent, 0.35),
-		'logo-2': whiten(accent, 0.7),
+		light: accent,
+		top: '#ffffff',
+		right: whiten(accent, 0.35),
+		left: whiten(accent, 0.7),
 		inscription: '#ffffff',
 	};
 	const rects = grid.cells
