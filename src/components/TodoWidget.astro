@@ -1,0 +1,623 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<section class="todo-widget" data-todo-widget>
+    <header class="todo-toolbar">
+        <div class="todo-toolbar-row">
+            <button
+                class="todo-add-btn"
+                type="button"
+                data-todo-focus-add
+                aria-label="Add a task"
+            >
+                <Icon name="plus" />
+            </button>
+            <label class="todo-search">
+                <input
+                    type="search"
+                    data-todo-search
+                    placeholder="Search tasks…"
+                    autocomplete="off"
+                    spellcheck="false"
+                />
+            </label>
+        </div>
+        <div class="todo-toolbar-row">
+            <div class="todo-filter-group">
+                <Icon name="funnel" class="funnel-icon" />
+                <label class="todo-filter-wrap">
+                    <select data-todo-filter aria-label="Filter by">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="done">Done</option>
+                    </select>
+                    <Icon name="chevronDown" class="filter-chevron" />
+                </label>
+            </div>
+            <div class="todo-sort-group">
+                <label class="todo-sort-wrap">
+                    <select data-todo-sort aria-label="Sort by">
+                        <option value="priority">Priority</option>
+                        <option value="description">Description</option>
+                        <option value="date" selected>Date</option>
+                    </select>
+                    <Icon name="chevronDown" class="sort-chevron" />
+                </label>
+                <button
+                    class="todo-sort-dir"
+                    type="button"
+                    data-todo-sort-dir
+                    aria-label="Toggle sort direction"
+                    ><Icon name="arrowDownAZ" /></button
+                >
+            </div>
+        </div>
+    </header>
+    <div class="todo-progress" aria-hidden="true">
+        <div class="todo-progress-fill" data-todo-progress></div>
+    </div>
+    <ul class="todo-list" data-todo-list></ul>
+    <form class="todo-add" data-todo-add>
+        <input
+            type="text"
+            data-todo-input
+            placeholder="Add a task…  (A) priority works"
+            autocomplete="off"
+            spellcheck="false"
+        />
+        <button type="submit" aria-label="Add task"><Icon name="plus" /></button
+        >
+    </form>
+</section>
+
+<script>
+    import arrowDownAZIcon from "../assets/icons/arrow-down-a-z.svg?raw";
+    import arrowUpAZIcon from "../assets/icons/arrow-up-a-z.svg?raw";
+    import checkIcon from "../assets/icons/check.svg?raw";
+
+    const root =
+        document.currentScript?.closest("[data-todo-widget]") ??
+        document.querySelector("[data-todo-widget]");
+    if (!root) throw new Error("todo widget missing host");
+    const list = root.querySelector<HTMLUListElement>("[data-todo-list]")!;
+    const form = root.querySelector<HTMLFormElement>("[data-todo-add]")!;
+    const input = root.querySelector<HTMLInputElement>("[data-todo-input]")!;
+    const searchInput =
+        root.querySelector<HTMLInputElement>("[data-todo-search]")!;
+    const progress = root.querySelector<HTMLElement>("[data-todo-progress]")!;
+    const sortSelect =
+        root.querySelector<HTMLSelectElement>("[data-todo-sort]")!;
+    const sortDirButton = root.querySelector<HTMLButtonElement>(
+        "[data-todo-sort-dir]",
+    )!;
+    const sortDirIcon =
+        sortDirButton.querySelector<HTMLElement>(".pixel-icon")!;
+    const filterSelect =
+        root.querySelector<HTMLSelectElement>("[data-todo-filter]")!;
+    const addFocusButton = root.querySelector<HTMLButtonElement>(
+        "[data-todo-focus-add]",
+    )!;
+
+    let tasks = [
+        "(A) Launch the docs +release due:2026-09-01",
+        "  (B) Record a demo @video",
+        "  Screenshot the graph view @design",
+        "x Write the welcome page @docs",
+        "x Link the tour checklist @docs",
+        "(C) Star the repo on GitHub @github",
+    ];
+    let filter: "all" | "active" | "done" = "all";
+    let search = "";
+    type SortKey = "priority" | "description" | "date";
+    let sort: SortKey = "date";
+    let descending = false;
+
+    const PRIORITY_COLORS: Record<string, string> = {
+        A: "#ef4444",
+        B: "#f97316",
+        C: "#eab308",
+        D: "#22c55e",
+        E: "#3b82f6",
+    };
+
+    function parseLine(line: string) {
+        const done = /^\s*x\s+/.test(line);
+        let rest = (done ? line.replace(/^\s*x\s+/, "") : line).trim();
+        const priorityMatch = rest.match(/^\(([A-Z])\)\s*/);
+        const priority = priorityMatch ? priorityMatch[1] : null;
+        if (priority && priorityMatch)
+            rest = rest.slice(priorityMatch[0].length);
+        const dateMatch = rest.match(/^(\d{4}-\d{2}-\d{2})\s*/);
+        const date = dateMatch ? dateMatch[1] : null;
+        if (date && dateMatch) rest = rest.slice(dateMatch[0].length);
+        const projects = [...rest.matchAll(/\+([\w-]+)/g)].map(
+            (match) => match[1],
+        );
+        const contexts = [...rest.matchAll(/@([\w-]+)/g)].map(
+            (match) => match[1],
+        );
+        const indent = line.match(/^\s*/)![0].length;
+        rest = rest
+            .replace(/\+[\w-]+|@[\w-]+/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+        return {
+            line,
+            done,
+            priority,
+            date,
+            description: rest,
+            projects,
+            contexts,
+            indent,
+        };
+    }
+
+    function pill(label: string, color: string): string {
+        return `<span class="todo-pill" style="color:${color}">${label}</span>`;
+    }
+
+    function renderLine(
+        parsed: ReturnType<typeof parseLine>,
+        index: number,
+    ): string {
+        const {
+            done,
+            priority,
+            date,
+            description,
+            projects,
+            contexts,
+            indent,
+        } = parsed;
+        const classes = ["todo-row", done && "is-done", indent > 0 && "is-sub"]
+            .filter(Boolean)
+            .join(" ");
+        const priorityBadge = priority
+            ? `<span class="todo-priority" style="color:${PRIORITY_COLORS[priority] ?? "var(--dl-muted)"}" aria-label="Priority ${priority}">${priority}</span>`
+            : "";
+        const projectPills = projects
+            .map((p) => pill(`+${p}`, "var(--dl-blue)"))
+            .join("");
+        const contextPills = contexts
+            .map((c) => pill(`@${c}`, "var(--dl-green)"))
+            .join("");
+        return `
+			<li class="${classes}" data-todo-index="${index}">
+				<span class="todo-check" aria-hidden="true">${done ? checkIcon : ""}</span>
+				${priorityBadge}
+				${date ? `<time class="todo-date">${date}</time>` : ""}
+				<span class="todo-text">${description}</span>
+				${projectPills}${contextPills}
+			</li>`;
+    }
+
+    function visibleTasks() {
+        const parsed = tasks.map(parseLine);
+        let shown = parsed.filter(
+            (task) => filter === "all" || (filter === "done") === task.done,
+        );
+        if (search.trim()) {
+            const q = search.trim().toLowerCase();
+            shown = shown.filter(
+                (task) =>
+                    task.description.toLowerCase().includes(q) ||
+                    task.projects.some((p) => p.toLowerCase().includes(q)) ||
+                    task.contexts.some((c) => c.toLowerCase().includes(q)),
+            );
+        }
+        const priorityRank = (p: string | null) =>
+            p ? p.charCodeAt(0) - 64 : 99;
+        const dir = descending ? -1 : 1;
+        shown.sort((a, b) => {
+            if (sort === "priority")
+                return (
+                    (priorityRank(a.priority) - priorityRank(b.priority)) * dir
+                );
+            if (sort === "date") {
+                const da = a.date ?? "9999-99-99";
+                const db = b.date ?? "9999-99-99";
+                return da.localeCompare(db) * dir;
+            }
+            return a.description.localeCompare(b.description) * dir;
+        });
+        return shown;
+    }
+
+    function render() {
+        const shown = visibleTasks();
+        const total = tasks.length;
+        const done = tasks.filter((t) => /^\s*x\s+/.test(t)).length;
+        progress.style.width =
+            total > 0 ? `${Math.round((done / total) * 100)}%` : "0%";
+        list.innerHTML = shown.length
+            ? shown
+                  .map((task, index) =>
+                      renderLine(task, tasks.indexOf(task.line)),
+                  )
+                  .join("")
+            : '<li class="todo-empty">No tasks to display</li>';
+        sortDirButton.setAttribute("aria-pressed", String(descending));
+    }
+
+    list.addEventListener("click", (event) => {
+        const row = (event.target as HTMLElement).closest<HTMLLIElement>(
+            "[data-todo-index]",
+        );
+        if (!row) return;
+        const index = Number(row.dataset.todoIndex);
+        const line = tasks[index];
+        tasks[index] = /^\s*x\s+/.test(line)
+            ? line.replace(/^\s*x\s+/, "")
+            : `x ${line}`;
+        render();
+    });
+
+    filterSelect.addEventListener("change", () => {
+        filter = (filterSelect.value as "all" | "active" | "done") ?? "all";
+        render();
+    });
+
+    searchInput.addEventListener("input", () => {
+        search = searchInput.value;
+        render();
+    });
+
+    sortSelect.addEventListener("change", () => {
+        sort = sortSelect.value as SortKey;
+        render();
+    });
+
+    sortDirButton.addEventListener("click", () => {
+        descending = !descending;
+        sortDirIcon.innerHTML = descending ? arrowUpAZIcon : arrowDownAZIcon;
+        render();
+    });
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = input.value.trim();
+        if (!value) return;
+        tasks.push(value);
+        input.value = "";
+        render();
+    });
+
+    addFocusButton.addEventListener("click", () => input.focus());
+    render();
+</script>
+
+<style is:global>
+    .todo-widget {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .todo-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .todo-toolbar-row {
+        align-items: center;
+        display: flex;
+        gap: 0.4rem;
+        &:last-child {
+            justify-content: flex-end;
+        }
+    }
+
+    .todo-add-btn {
+        align-items: center;
+        background: var(--dl-surface-alt);
+        color: var(--dl-accent);
+        display: flex;
+        flex: 0 0 auto;
+        height: 1.9rem;
+        justify-content: center;
+        width: 1.9rem;
+        &:hover {
+            background: var(--dl-accent);
+            color: var(--dl-accent-fg);
+        }
+
+        .pixel-icon {
+            font-size: 14px;
+        }
+    }
+
+    .todo-search {
+        align-items: center;
+        display: flex;
+        flex: 1;
+        height: 1.9rem;
+        background: var(--dl-surface-alt);
+        min-width: 0;
+        padding: 0 0.6rem;
+
+        input {
+            background: transparent;
+            border: 0;
+            color: var(--dl-fg);
+            flex: 1;
+            font-size: 0.8rem;
+            min-width: 0;
+            outline: 0;
+            &::placeholder {
+                color: var(--dl-muted);
+            }
+        }
+    }
+
+    .todo-filter-group {
+        align-items: center;
+        display: flex;
+        gap: 0.4rem;
+    }
+    .funnel-icon {
+        color: var(--dl-muted);
+        font-size: 14px;
+    }
+    .todo-filter-wrap {
+        align-items: center;
+        background: var(--dl-surface-alt);
+        display: inline-flex;
+        position: relative;
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            border: 0;
+            color: var(--dl-fg);
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            font-weight: 700;
+            height: 1.9rem;
+            outline: 0;
+            padding: 0 1.6rem 0 0.55rem;
+        }
+
+        .filter-chevron {
+            color: var(--dl-muted);
+            font-size: 14px;
+            pointer-events: none;
+            position: absolute;
+            right: 0.35rem;
+        }
+
+        &:hover,
+        &:focus-within {
+            background: color-mix(
+                in srgb,
+                var(--dl-accent) 14%,
+                var(--dl-surface-alt)
+            );
+        }
+    }
+
+    .todo-sort-group {
+        align-items: center;
+        display: flex;
+    }
+    .todo-sort-wrap {
+        align-items: center;
+        background: var(--dl-surface-alt);
+        display: inline-flex;
+        position: relative;
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            border: 0;
+            color: var(--dl-fg);
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            font-weight: 700;
+            height: 1.9rem;
+            outline: 0;
+            padding: 0 1.6rem 0 0.55rem;
+        }
+
+        .sort-chevron {
+            color: var(--dl-muted);
+            font-size: 14px;
+            pointer-events: none;
+            position: absolute;
+            right: 0.35rem;
+        }
+
+        &:hover,
+        &:focus-within {
+            background: color-mix(
+                in srgb,
+                var(--dl-accent) 14%,
+                var(--dl-surface-alt)
+            );
+        }
+    }
+    .todo-sort-dir {
+        background: var(--dl-surface-alt);
+        color: var(--dl-muted);
+        font-family: var(--font-sans);
+        font-size: 0.7rem;
+        font-weight: 700;
+        height: 1.9rem;
+        border-inline-start: 1px solid var(--dl-bg);
+        padding: 0 0.4rem;
+
+        .pixel-icon {
+            font-size: 14px;
+        }
+
+        &:hover,
+        &[aria-pressed="true"] {
+            background: var(--dl-accent);
+            color: var(--dl-accent-fg);
+        }
+    }
+
+    .todo-progress {
+        background: var(--dl-border);
+        height: 4px;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    .todo-progress-fill {
+        background: var(--dl-green);
+        height: 100%;
+        transition: width 0.2s;
+    }
+
+    .todo-list {
+        flex: 1;
+        list-style: none;
+        margin: 0 0 0.5rem;
+        overflow-y: auto;
+        padding: 0;
+    }
+
+    .todo-row {
+        align-items: center;
+        display: flex;
+        gap: 0.45rem;
+        font-size: 0.86rem;
+        padding: 0.32rem 0.4rem;
+        border-bottom: 1px solid
+            color-mix(in srgb, var(--dl-border) 45%, transparent);
+        cursor: pointer;
+        min-height: 2rem;
+        &:hover {
+            background: color-mix(in srgb, var(--dl-accent) 10%, transparent);
+        }
+        &.is-done {
+            .todo-check {
+                border-color: var(--dl-green);
+            }
+
+            .todo-text {
+                color: var(--dl-muted);
+            }
+        }
+        &.is-sub .todo-text {
+            color: var(--dl-muted);
+        }
+    }
+
+    .todo-check {
+        align-items: center;
+        border: 1px solid var(--dl-muted);
+        border-radius: 3px;
+        color: var(--dl-green);
+        display: flex;
+        flex: 0 0 auto;
+        height: 14px;
+        justify-content: center;
+        width: 14px;
+
+        svg {
+            height: 14px;
+            width: 14px;
+        }
+    }
+
+    .todo-pill {
+        background: color-mix(in srgb, currentColor 12%, transparent);
+        border-radius: 3px;
+        flex: 0 0 auto;
+        font-family: var(--font-sans);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.1rem 0.35rem;
+    }
+
+    .todo-priority {
+        align-items: center;
+        background: color-mix(in srgb, currentColor 14%, transparent);
+        border: 1px solid currentColor;
+        border-radius: 3px;
+        display: flex;
+        flex: 0 0 auto;
+        font-family: var(--font-sans);
+        font-size: 0.7rem;
+        font-weight: 700;
+        height: 1.05rem;
+        justify-content: center;
+        line-height: 1;
+        width: 1.05rem;
+    }
+
+    .todo-text {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .todo-date {
+        color: var(--dl-muted);
+        font-size: 0.7rem;
+        flex: 0 0 auto;
+    }
+
+    .todo-empty {
+        color: var(--dl-muted);
+        font-size: 0.85rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
+    }
+
+    .todo-add {
+        align-items: center;
+        background: var(--dl-surface-alt);
+        border-top: 1px solid var(--dl-border);
+        display: flex;
+        gap: 0.4rem;
+        padding: 0.4rem 0.5rem 0.4rem 0.8rem;
+
+        input {
+            background: transparent;
+            border: 0;
+            color: var(--dl-fg);
+            flex: 1;
+            font-size: 0.84rem;
+            min-width: 0;
+            outline: 0;
+            &::placeholder {
+                color: var(--dl-muted);
+            }
+        }
+
+        button {
+            align-items: center;
+            background: var(--dl-surface-alt);
+            color: var(--dl-accent);
+            display: flex;
+            flex: 0 0 auto;
+            height: 1.9rem;
+            justify-content: center;
+            width: 1.9rem;
+            &:hover {
+                background: var(--dl-bg);
+            }
+
+            .pixel-icon {
+                font-size: 14px;
+            }
+        }
+    }
+
+    @media (max-width: 26rem) {
+        .todo-toolbar-row:last-child {
+            display: none;
+        }
+    }
+</style>
