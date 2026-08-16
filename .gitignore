@@ -10,6 +10,7 @@ src/data/stars.json
 src/data/graph.json
 src/data/search.json
 src/data/logo.txt
+src/data/themes.json
 src/data/themes/
 src/data/themes.json
 src/components/Icon.astro

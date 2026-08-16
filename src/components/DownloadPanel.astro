@@ -20,6 +20,11 @@ const platforms = [
     { id: "windows", label: "Windows", detail: "64-bit", extension: ".exe" },
     { id: "linux", label: "Linux", detail: "x86_64", extension: ".AppImage" },
 ];
+const nativeLinuxPackages = [
+    { id: "linux-deb", label: "Debian / Ubuntu", detail: "x86_64", extension: ".deb" },
+    { id: "linux-rpm", label: "Fedora / RHEL", detail: "x86_64", extension: ".rpm" },
+    { id: "linux-arch", label: "Arch Linux", detail: "x86_64", extension: ".pkg.tar.zst" },
+];
 const version = (tagName: string) => tagName?.replace(/^v/, "") ?? "";
 const asset = (release, platform) =>
     release?.assets.find((item) => item.platform === platform);
@@ -77,11 +82,11 @@ const asset = (release, platform) =>
                     <summary
                         aria-disabled={String(!hasStableRelease)}
                         tabindex={hasStableRelease ? undefined : "-1"}
-                        >Other platforms <Icon name="chevronDown" /></summary
+                        ><span class="package-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg></span>Other packages <Icon name="chevronDown" /></summary
                     >
                     <div class="menu-card">
                         <p class="menu-title">
-                            Other platforms{
+                            Other packages{
                                 hasStableRelease
                                     ? ` · ${version(stable?.tagName)}`
                                     : ""
@@ -137,6 +142,7 @@ const asset = (release, platform) =>
             hasStableRelease,
             latestPreview,
             platforms,
+            nativeLinuxPackages,
         })}
     />
 </section>
@@ -148,6 +154,9 @@ const asset = (release, platform) =>
         windows:
             '<svg viewBox="0 0 24 24"><path d="M2.5 4.6 10.7 3.5v7.7H2.5V4.6Zm9.5-1.3L21.5 2v9.2H12V3.3ZM2.5 12.5h8.2v7.8l-8.2-1.1v-6.7Zm9.5 0h9.5V22L12 20.7v-8.2Z"/></svg>',
         linux: '<img src="https://cdn.simpleicons.org/linux/000000" alt="" width="24" height="24" />',
+        "linux-deb": '<img src="https://cdn.simpleicons.org/debian/000000" alt="" width="24" height="24" />',
+        "linux-rpm": '<img src="https://cdn.simpleicons.org/fedora/000000" alt="" width="24" height="24" />',
+        "linux-arch": '<img src="https://cdn.simpleicons.org/archlinux/000000" alt="" width="24" height="24" />',
     };
     const panel = document.querySelector("[data-download-panel]");
     if (panel) {
@@ -178,6 +187,18 @@ const asset = (release, platform) =>
                 ? `href="${item.browserDownloadUrl}"`
                 : 'aria-disabled="true" tabindex="-1"';
             return `<a class="platform-option" ${state}><span class="platform-logo">${logos[platform.id]}</span><span><strong>${platform.label}</strong><small>${isPreview ? cleanVersion(release.tagName) + " · " : ""}${platform.detail} · ${platform.extension}</small></span>${downloadIcon}</a>`;
+        };
+        const nativePackageGroup = (release, isPreview = false) => {
+            const availablePackages = data.nativeLinuxPackages.filter((item) =>
+                releaseAsset(release, item.id),
+            );
+            if (!availablePackages.length) return "";
+            const versionMeta = isPreview
+                ? `${cleanVersion(release.tagName)} · `
+                : "";
+            const formatLabel =
+                availablePackages.length === 1 ? "format" : "formats";
+            return `<details class="native-package-menu"><summary class="platform-option"><span class="platform-logo">${logos.linux}</span><span><strong>Linux native packages</strong><small>${versionMeta}x86_64 · ${availablePackages.length} ${formatLabel}</small></span><svg class="submenu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 10 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="native-package-options">${availablePackages.map((item) => platformLink(release, item, isPreview)).join("")}</div></details>`;
         };
 
         const template = panel.querySelector("[data-controls-template]");
@@ -219,17 +240,18 @@ const asset = (release, platform) =>
                         : "Check back soon"),
             );
         panel.querySelectorAll("[data-other-platforms]").forEach((list) => {
-            list.innerHTML = data.platforms
-                .filter((platform) => platform.id !== current)
-                .map((platform) =>
-                    platformLink(
-                        data.stable,
-                        platform,
-                        false,
-                        data.hasStableRelease,
-                    ),
-                )
-                .join("");
+            list.innerHTML =
+                data.platforms
+                    .filter((platform) => platform.id !== current)
+                    .map((platform) =>
+                        platformLink(
+                            data.stable,
+                            platform,
+                            false,
+                            data.hasStableRelease,
+                        ),
+                    )
+                    .join("") + nativePackageGroup(data.stable);
         });
         panel.querySelectorAll("[data-preview-platforms]").forEach((list) => {
             list.innerHTML = data.latestPreview
@@ -237,18 +259,21 @@ const asset = (release, platform) =>
                       .map((platform) =>
                           platformLink(data.latestPreview, platform, true),
                       )
-                      .join("")
+                      .join("") + nativePackageGroup(data.latestPreview, true)
                 : '<p class="empty-state">No preview available.</p>';
         });
 
         panel.addEventListener(
             "toggle",
             (event) => {
-                if (!event.target.open) return;
-                panel.querySelectorAll("details[open]").forEach((details) => {
-                    if (details !== event.target)
-                        details.removeAttribute("open");
-                });
+                if (!event.target.matches(".download-menu") || !event.target.open)
+                    return;
+                panel
+                    .querySelectorAll(".download-menu[open]")
+                    .forEach((details) => {
+                        if (details !== event.target)
+                            details.removeAttribute("open");
+                    });
             },
             true,
         );
@@ -384,7 +409,7 @@ const asset = (release, platform) =>
     .download-menu {
         position: relative;
 
-        summary {
+        > summary {
             align-items: center;
             background: var(--dl-surface-alt);
             color: var(--dl-fg);
@@ -405,9 +430,9 @@ const asset = (release, platform) =>
                 display: none;
             }
         }
-        summary:hover,
-        summary:focus-visible,
-        &[open] summary {
+        > summary:hover,
+        > summary:focus-visible,
+        &[open] > summary {
             background: color-mix(
                 in srgb,
                 var(--dl-accent) 16%,
@@ -415,10 +440,21 @@ const asset = (release, platform) =>
             );
         }
 
-        &.disabled summary {
+        &.disabled > summary {
             background: var(--dl-surface-alt);
             color: color-mix(in srgb, var(--dl-fg) 55%, var(--dl-muted));
             cursor: not-allowed;
+        }
+    }
+
+    .package-icon {
+        display: inline-flex;
+        height: 1.2rem;
+        width: 1.2rem;
+
+        svg {
+            height: 100%;
+            width: 100%;
         }
     }
 
@@ -492,6 +528,36 @@ const asset = (release, platform) =>
         filter: grayscale(1);
         height: 100%;
         width: 100%;
+    }
+    :global(.native-package-menu) {
+        border-top: 1px solid var(--dl-border);
+        margin-top: 0.25rem;
+        padding-top: 0.25rem;
+
+        > summary {
+            cursor: pointer;
+            list-style: none;
+
+            &::-webkit-details-marker {
+                display: none;
+            }
+        }
+        > summary:hover,
+        > summary:focus-visible,
+        &[open] > summary {
+            background: color-mix(in srgb, var(--dl-accent) 12%, transparent);
+        }
+        .submenu-chevron {
+            transition: transform 0.18s ease;
+        }
+        &[open] .submenu-chevron {
+            transform: rotate(180deg);
+        }
+    }
+    :global(.native-package-options) {
+        border-left: 1px solid var(--dl-border);
+        margin: 0.2rem 0 0.2rem 1.35rem;
+        padding-left: 0.45rem;
     }
 
     .rc-badge,
@@ -607,7 +673,7 @@ const asset = (release, platform) =>
         }
         .primary-download,
         .download-menu,
-        .download-menu summary {
+        .download-menu > summary {
             min-width: 0;
             width: 100%;
         }
