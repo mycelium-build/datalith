@@ -437,18 +437,15 @@ const starCount = Number(stars.stargazersCount ?? 0);
         }
     }
 
-    .tile-md {
-        aspect-ratio: 1 / 1;
-        min-height: 0;
-    }
-    .tile-graph {
-        aspect-ratio: 1 / 1;
-        min-height: 0;
-    }
+    .tile-md,
+    .tile-graph,
     .tile-todo {
         aspect-ratio: 1 / 1;
+        max-height: 400px;
         min-height: 0;
-
+        width: 100%;
+    }
+    .tile-todo {
         .todo-widget {
             flex-grow: 1;
         }
