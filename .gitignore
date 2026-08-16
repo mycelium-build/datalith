@@ -11,6 +11,7 @@ src/data/graph.json
 src/data/search.json
 src/data/logo.txt
 src/data/themes/
+src/data/themes.json
 src/assets/icons/
 public/fonts/
 src/styles/themes.css
