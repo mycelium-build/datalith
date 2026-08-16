@@ -312,9 +312,11 @@ const starCount = Number(stars.stargazersCount ?? 0);
         grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
     }
     .hero-logo {
+        display: flex;
+        justify-content: center;
         justify-self: center;
-        width: min(34vw, 17rem);
-        animation: float 3.4s steps(6, jump-none) infinite;
+        width: min(64vw, 32rem);
+        animation: float 3.6s ease-in-out infinite;
     }
     @keyframes float {
         0%,
@@ -322,11 +324,11 @@ const starCount = Number(stars.stargazersCount ?? 0);
             transform: translateY(0);
         }
         50% {
-            transform: translateY(-0.9rem);
+            transform: translateY(-1.1rem);
         }
     }
     .hero-copy h1 {
-        font-size: clamp(2.7rem, 6.4vw, 5.2rem);
+        font-size: clamp(2.2rem, 5vw, 4.2rem);
         margin: 0;
 
         em {
@@ -440,10 +442,16 @@ const starCount = Number(stars.stargazersCount ?? 0);
         min-height: 0;
     }
     .tile-graph {
-        height: 22rem;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
     }
     .tile-todo {
         aspect-ratio: 1 / 1;
+        min-height: 0;
+
+        .todo-widget {
+            flex-grow: 1;
+        }
     }
 
     .tile-head {
