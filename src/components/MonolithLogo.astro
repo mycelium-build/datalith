@@ -1,0 +1,39 @@
+---
+import { renderLogo } from "../lib/logo";
+
+interface Props {
+    cell?: number;
+}
+
+const { cell = 1 } = Astro.props;
+const defaultAccent = "#1e8dff";
+---
+
+<span
+    class="monolith"
+    data-monolith
+    data-monolith-cell={cell}
+    set:html={renderLogo(defaultAccent, cell)}
+    aria-hidden="true"
+/>
+
+<script>
+    import { refreshLogo } from "../lib/logo";
+    import { onThemeChange } from "../lib/theme";
+
+    refreshLogo();
+    onThemeChange(refreshLogo);
+</script>
+
+<style>
+    .monolith {
+        display: inline-block;
+        line-height: 0;
+
+        svg {
+            display: block;
+            height: auto;
+            width: 100%;
+        }
+    }
+</style>
