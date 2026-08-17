@@ -4,7 +4,7 @@ Static download and documentation website for [Datalith](https://github.com/myce
 
 ## Local development
 
-The build imports from `../datalith` by default. Override that location with `DATALITH_SOURCE_DIR` when needed. For build against Datalith repository, `DATALITH_READ_TOKEN` can be use. The build scripts read environment variables from a `.env` file in the project root when present (see `.env.example`).
+The build imports from `../datalith` by default. Override that location with `DATALITH_SOURCE_DIR` (local builds only). When `DATALITH_SOURCE_DIR` is unset, `sync-docs` and `sync-assets` clone the Datalith repository at `DATALITH_SOURCE_REF` (default `main`) using `DATALITH_READ_TOKEN`. In CI the token is required and `DATALITH_SOURCE_DIR` must not be set. The build scripts read environment variables from a `.env` file in the project root when present (see `.env.example`).
 
 ```sh
 npm install
