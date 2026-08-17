@@ -8,13 +8,10 @@ export const themeInitScript = `(function () {
     if (raw) {
       var parsed = JSON.parse(raw);
       if (parsed.mode === 'dark') mode = 'dark';
+      id = (mode === 'dark' ? parsed.dark : parsed.light) || id;
     } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       mode = 'dark';
-    }
-    raw = localStorage.getItem('datalith:theme');
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      id = (mode === 'dark' ? parsed.dark : parsed.light) || id;
+      id = 'datalith-dark';
     }
   } catch (error) {
     /* ignore storage errors */
