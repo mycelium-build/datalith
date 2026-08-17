@@ -1,16 +1,11 @@
 ---
-import Icon from "./Icon.astro";
+import Icon from "./Icon.astro"
 ---
 
 <section class="todo-widget" data-todo-widget>
     <header class="todo-toolbar">
         <div class="todo-toolbar-row">
-            <button
-                class="todo-add-btn"
-                type="button"
-                data-todo-focus-add
-                aria-label="Add a task"
-            >
+            <button class="todo-add-btn" type="button" data-todo-focus-add aria-label="Add a task">
                 <Icon name="plus" />
             </button>
             <label class="todo-search">
@@ -48,8 +43,7 @@ import Icon from "./Icon.astro";
                     class="todo-sort-dir"
                     type="button"
                     data-todo-sort-dir
-                    aria-label="Toggle sort direction"
-                    ><Icon name="arrowDownAZ" /></button
+                    aria-label="Toggle sort direction"><Icon name="arrowDownAZ" /></button
                 >
             </div>
         </div>
@@ -66,53 +60,44 @@ import Icon from "./Icon.astro";
             autocomplete="off"
             spellcheck="false"
         />
-        <button type="submit" aria-label="Add task"><Icon name="plus" /></button
-        >
+        <button type="submit" aria-label="Add task"><Icon name="plus" /></button>
     </form>
 </section>
 
 <script>
-    import arrowDownAZIcon from "../assets/icons/arrow-down-a-z.svg?raw";
-    import arrowUpAZIcon from "../assets/icons/arrow-up-a-z.svg?raw";
-    import checkIcon from "../assets/icons/check.svg?raw";
-    import { escapeHtml, sanitizeHtml } from "../lib/html";
+    import arrowDownAZIcon from "../assets/icons/arrow-down-a-z.svg?raw"
+    import arrowUpAZIcon from "../assets/icons/arrow-up-a-z.svg?raw"
+    import checkIcon from "../assets/icons/check.svg?raw"
+    import { escapeHtml, sanitizeHtml } from "../lib/html"
 
     const root =
         document.currentScript?.closest("[data-todo-widget]") ??
-        document.querySelector("[data-todo-widget]");
-    if (!root) throw new Error("todo widget missing host");
-    const list = root.querySelector<HTMLUListElement>("[data-todo-list]")!;
-    const form = root.querySelector<HTMLFormElement>("[data-todo-add]")!;
-    const input = root.querySelector<HTMLInputElement>("[data-todo-input]")!;
-    const searchInput =
-        root.querySelector<HTMLInputElement>("[data-todo-search]")!;
-    const progress = root.querySelector<HTMLElement>("[data-todo-progress]")!;
-    const sortSelect =
-        root.querySelector<HTMLSelectElement>("[data-todo-sort]")!;
-    const sortDirButton = root.querySelector<HTMLButtonElement>(
-        "[data-todo-sort-dir]",
-    )!;
-    const sortDirIcon =
-        sortDirButton.querySelector<HTMLElement>(".pixel-icon")!;
-    const filterSelect =
-        root.querySelector<HTMLSelectElement>("[data-todo-filter]")!;
-    const addFocusButton = root.querySelector<HTMLButtonElement>(
-        "[data-todo-focus-add]",
-    )!;
+        document.querySelector("[data-todo-widget]")
+    if (!root) throw new Error("todo widget missing host")
+    const list = root.querySelector<HTMLUListElement>("[data-todo-list]")!
+    const form = root.querySelector<HTMLFormElement>("[data-todo-add]")!
+    const input = root.querySelector<HTMLInputElement>("[data-todo-input]")!
+    const searchInput = root.querySelector<HTMLInputElement>("[data-todo-search]")!
+    const progress = root.querySelector<HTMLElement>("[data-todo-progress]")!
+    const sortSelect = root.querySelector<HTMLSelectElement>("[data-todo-sort]")!
+    const sortDirButton = root.querySelector<HTMLButtonElement>("[data-todo-sort-dir]")!
+    const sortDirIcon = sortDirButton.querySelector<HTMLElement>(".pixel-icon")!
+    const filterSelect = root.querySelector<HTMLSelectElement>("[data-todo-filter]")!
+    const addFocusButton = root.querySelector<HTMLButtonElement>("[data-todo-focus-add]")!
 
-    let tasks = [
+    const tasks = [
         "(A) Launch the docs +release due:2026-09-01",
         "  (B) Record a demo @video",
         "  Screenshot the graph view @design",
         "x Write the welcome page @docs",
         "x Link the tour checklist @docs",
         "(C) Star the repo on GitHub @github",
-    ];
-    let filter: "all" | "active" | "done" = "all";
-    let search = "";
-    type SortKey = "priority" | "description" | "date";
-    let sort: SortKey = "date";
-    let descending = false;
+    ]
+    let filter: "all" | "active" | "done" = "all"
+    let search = ""
+    type SortKey = "priority" | "description" | "date"
+    let sort: SortKey = "date"
+    let descending = false
 
     const PRIORITY_COLORS: Record<string, string> = {
         A: "#ef4444",
@@ -120,29 +105,24 @@ import Icon from "./Icon.astro";
         C: "#eab308",
         D: "#22c55e",
         E: "#3b82f6",
-    };
+    }
 
     function parseLine(line: string) {
-        const done = /^\s*x\s+/.test(line);
-        let rest = (done ? line.replace(/^\s*x\s+/, "") : line).trim();
-        const priorityMatch = rest.match(/^\(([A-Z])\)\s*/);
-        const priority = priorityMatch ? priorityMatch[1] : null;
-        if (priority && priorityMatch)
-            rest = rest.slice(priorityMatch[0].length);
-        const dateMatch = rest.match(/^(\d{4}-\d{2}-\d{2})\s*/);
-        const date = dateMatch ? dateMatch[1] : null;
-        if (date && dateMatch) rest = rest.slice(dateMatch[0].length);
-        const projects = [...rest.matchAll(/\+([\w-]+)/g)].map(
-            (match) => match[1],
-        );
-        const contexts = [...rest.matchAll(/@([\w-]+)/g)].map(
-            (match) => match[1],
-        );
-        const indent = line.match(/^\s*/)![0].length;
+        const done = /^\s*x\s+/.test(line)
+        let rest = (done ? line.replace(/^\s*x\s+/, "") : line).trim()
+        const priorityMatch = rest.match(/^\(([A-Z])\)\s*/)
+        const priority = priorityMatch ? priorityMatch[1] : null
+        if (priority && priorityMatch) rest = rest.slice(priorityMatch[0].length)
+        const dateMatch = rest.match(/^(\d{4}-\d{2}-\d{2})\s*/)
+        const date = dateMatch ? dateMatch[1] : null
+        if (date && dateMatch) rest = rest.slice(dateMatch[0].length)
+        const projects = [...rest.matchAll(/\+([\w-]+)/g)].map((match) => match[1])
+        const contexts = [...rest.matchAll(/@([\w-]+)/g)].map((match) => match[1])
+        const indent = line.match(/^\s*/)![0].length
         rest = rest
             .replace(/\+[\w-]+|@[\w-]+/g, "")
             .replace(/\s+/g, " ")
-            .trim();
+            .trim()
         return {
             line,
             done,
@@ -152,38 +132,23 @@ import Icon from "./Icon.astro";
             projects,
             contexts,
             indent,
-        };
+        }
     }
 
     function pill(label: string, color: string): string {
-        return `<span class="todo-pill" style="color:${color}">${label}</span>`;
+        return `<span class="todo-pill" style="color:${color}">${label}</span>`
     }
 
-    function renderLine(
-        parsed: ReturnType<typeof parseLine>,
-        index: number,
-    ): string {
-        const {
-            done,
-            priority,
-            date,
-            description,
-            projects,
-            contexts,
-            indent,
-        } = parsed;
+    function renderLine(parsed: ReturnType<typeof parseLine>, index: number): string {
+        const { done, priority, date, description, projects, contexts, indent } = parsed
         const classes = ["todo-row", done && "is-done", indent > 0 && "is-sub"]
             .filter(Boolean)
-            .join(" ");
+            .join(" ")
         const priorityBadge = priority
             ? `<span class="todo-priority" style="color:${PRIORITY_COLORS[priority] ?? "var(--dl-muted)"}" aria-label="Priority ${priority}">${priority}</span>`
-            : "";
-        const projectPills = projects
-            .map((p) => pill(`+${p}`, "var(--dl-blue)"))
-            .join("");
-        const contextPills = contexts
-            .map((c) => pill(`@${c}`, "var(--dl-green)"))
-            .join("");
+            : ""
+        const projectPills = projects.map((p) => pill(`+${p}`, "var(--dl-blue)")).join("")
+        const contextPills = contexts.map((c) => pill(`@${c}`, "var(--dl-green)")).join("")
         return `
 			<li class="${classes}" data-todo-index="${index}" tabindex="0" role="button" aria-label="Toggle task: ${escapeHtml(description)}">
 				<span class="todo-check" aria-hidden="true">${done ? checkIcon : ""}</span>
@@ -191,122 +156,105 @@ import Icon from "./Icon.astro";
 				${date ? `<time class="todo-date">${date}</time>` : ""}
 				<span class="todo-text">${escapeHtml(description)}</span>
 				${projectPills}${contextPills}
-			</li>`;
+			</li>`
     }
 
     function visibleTasks() {
         const parsed = tasks.map((line, index) => ({
             task: parseLine(line),
             index,
-        }));
+        }))
         let shown = parsed.filter(
-            ({ task }) =>
-                filter === "all" || (filter === "done") === task.done,
-        );
+            ({ task }) => filter === "all" || (filter === "done") === task.done,
+        )
         if (search.trim()) {
-            const q = search.trim().toLowerCase();
+            const q = search.trim().toLowerCase()
             shown = shown.filter(
                 ({ task }) =>
                     task.description.toLowerCase().includes(q) ||
                     task.projects.some((p) => p.toLowerCase().includes(q)) ||
                     task.contexts.some((c) => c.toLowerCase().includes(q)),
-            );
+            )
         }
-        const priorityRank = (p: string | null) =>
-            p ? p.charCodeAt(0) - 64 : 99;
-        const dir = descending ? -1 : 1;
+        const priorityRank = (p: string | null) => (p ? p.charCodeAt(0) - 64 : 99)
+        const dir = descending ? -1 : 1
         shown.sort((a, b) => {
             if (sort === "priority")
-                return (
-                    (priorityRank(a.task.priority) -
-                        priorityRank(b.task.priority)) *
-                    dir
-                );
+                return (priorityRank(a.task.priority) - priorityRank(b.task.priority)) * dir
             if (sort === "date") {
-                const da = a.task.date ?? "9999-99-99";
-                const db = b.task.date ?? "9999-99-99";
-                return da.localeCompare(db) * dir;
+                const da = a.task.date ?? "9999-99-99"
+                const db = b.task.date ?? "9999-99-99"
+                return da.localeCompare(db) * dir
             }
-            return a.task.description.localeCompare(b.task.description) * dir;
-        });
-        return shown;
+            return a.task.description.localeCompare(b.task.description) * dir
+        })
+        return shown
     }
 
     function render() {
-        const shown = visibleTasks();
-        const total = tasks.length;
-        const done = tasks.filter((t) => /^\s*x\s+/.test(t)).length;
-        progress.style.width =
-            total > 0 ? `${Math.round((done / total) * 100)}%` : "0%";
+        const shown = visibleTasks()
+        const total = tasks.length
+        const done = tasks.filter((t) => /^\s*x\s+/.test(t)).length
+        progress.style.width = total > 0 ? `${Math.round((done / total) * 100)}%` : "0%"
         list.innerHTML = shown.length
-            ? sanitizeHtml(
-                  shown
-                      .map(({ task, index }) => renderLine(task, index))
-                      .join(""),
-              )
-            : '<li class="todo-empty">No tasks to display</li>';
-        sortDirButton.setAttribute("aria-pressed", String(descending));
+            ? sanitizeHtml(shown.map(({ task, index }) => renderLine(task, index)).join(""))
+            : '<li class="todo-empty">No tasks to display</li>'
+        sortDirButton.setAttribute("aria-pressed", String(descending))
     }
 
     function toggleTask(index: number) {
-        const line = tasks[index];
-        if (line === undefined) return;
-        tasks[index] = /^\s*x\s+/.test(line)
-            ? line.replace(/^\s*x\s+/, "")
-            : `x ${line}`;
-        render();
+        const line = tasks[index]
+        if (line === undefined) return
+        tasks[index] = /^\s*x\s+/.test(line) ? line.replace(/^\s*x\s+/, "") : `x ${line}`
+        render()
     }
 
     list.addEventListener("click", (event) => {
-        const row = (event.target as HTMLElement).closest<HTMLLIElement>(
-            "[data-todo-index]",
-        );
-        if (!row) return;
-        toggleTask(Number(row.dataset.todoIndex));
-    });
+        const row = (event.target as HTMLElement).closest<HTMLLIElement>("[data-todo-index]")
+        if (!row) return
+        toggleTask(Number(row.dataset.todoIndex))
+    })
 
     list.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        const row = (event.target as HTMLElement).closest<HTMLLIElement>(
-            "[data-todo-index]",
-        );
-        if (!row) return;
-        event.preventDefault();
-        toggleTask(Number(row.dataset.todoIndex));
-    });
+        if (event.key !== "Enter" && event.key !== " ") return
+        const row = (event.target as HTMLElement).closest<HTMLLIElement>("[data-todo-index]")
+        if (!row) return
+        event.preventDefault()
+        toggleTask(Number(row.dataset.todoIndex))
+    })
 
     filterSelect.addEventListener("change", () => {
-        filter = (filterSelect.value as "all" | "active" | "done") ?? "all";
-        render();
-    });
+        filter = (filterSelect.value as "all" | "active" | "done") ?? "all"
+        render()
+    })
 
     searchInput.addEventListener("input", () => {
-        search = searchInput.value;
-        render();
-    });
+        search = searchInput.value
+        render()
+    })
 
     sortSelect.addEventListener("change", () => {
-        sort = sortSelect.value as SortKey;
-        render();
-    });
+        sort = sortSelect.value as SortKey
+        render()
+    })
 
     sortDirButton.addEventListener("click", () => {
-        descending = !descending;
-        sortDirIcon.innerHTML = descending ? arrowUpAZIcon : arrowDownAZIcon;
-        render();
-    });
+        descending = !descending
+        sortDirIcon.innerHTML = descending ? arrowUpAZIcon : arrowDownAZIcon
+        render()
+    })
 
     form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const value = input.value.trim();
-        if (!value) return;
-        tasks.push(value);
-        input.value = "";
-        render();
-    });
+        event.preventDefault()
+        const value = input.value.trim()
+        if (!value) return
+        tasks.push(value)
+        input.value = ""
+        render()
+    })
 
-    addFocusButton.addEventListener("click", () => input.focus());
-    render();
+    addFocusButton.addEventListener("click", () => input.focus())
+    render()
 </script>
 
 <style is:global>
@@ -414,11 +362,7 @@ import Icon from "./Icon.astro";
 
         &:hover,
         &:focus-within {
-            background: color-mix(
-                in srgb,
-                var(--dl-accent) 14%,
-                var(--dl-surface-alt)
-            );
+            background: color-mix(in srgb, var(--dl-accent) 14%, var(--dl-surface-alt));
         }
     }
 
@@ -458,11 +402,7 @@ import Icon from "./Icon.astro";
 
         &:hover,
         &:focus-within {
-            background: color-mix(
-                in srgb,
-                var(--dl-accent) 14%,
-                var(--dl-surface-alt)
-            );
+            background: color-mix(in srgb, var(--dl-accent) 14%, var(--dl-surface-alt));
         }
     }
     .todo-sort-dir {
@@ -514,8 +454,7 @@ import Icon from "./Icon.astro";
         gap: 0.45rem;
         font-size: 0.86rem;
         padding: 0.32rem 0.4rem;
-        border-bottom: 1px solid
-            color-mix(in srgb, var(--dl-border) 45%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--dl-border) 45%, transparent);
         cursor: pointer;
         min-height: 2rem;
         &:hover {

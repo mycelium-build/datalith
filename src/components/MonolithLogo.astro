@@ -1,12 +1,12 @@
 ---
-import { renderLogo } from "../lib/logo";
+import { renderLogo } from "../lib/logo"
 
 interface Props {
-    cell?: number;
+    cell?: number
 }
 
-const { cell = 1 } = Astro.props;
-const defaultAccent = "#1e8dff";
+const { cell = 1 } = Astro.props
+const defaultAccent = "#1e8dff"
 ---
 
 <span
@@ -18,11 +18,11 @@ const defaultAccent = "#1e8dff";
 />
 
 <script>
-    import { refreshLogo } from "../lib/logo";
-    import { onThemeChange } from "../lib/theme";
+    import { onThemeChange } from "../lib/theme"
+    import { refreshLogo } from "../lib/logo"
 
-    refreshLogo();
-    onThemeChange(refreshLogo);
+    refreshLogo()
+    onThemeChange(refreshLogo)
 </script>
 
 <style>

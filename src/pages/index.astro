@@ -1,21 +1,23 @@
 ---
-import "../styles/base.css";
-import "../styles/themes.css";
-import DownloadPanel from "../components/DownloadPanel.astro";
-import MonolithLogo from "../components/MonolithLogo.astro";
-import Icon from "../components/Icon.astro";
-import ThemePicker from "../components/ThemePicker.astro";
-import SearchWidget from "../components/SearchWidget.astro";
-import MarkdownWidget from "../components/MarkdownWidget.astro";
-import TodoWidget from "../components/TodoWidget.astro";
-import GraphWidget from "../components/GraphWidget.astro";
-import stars from "../data/stars.json";
-import { themeInitScript } from "../../scripts/theme-init.ts";
+import "../styles/base.css"
+import "../styles/themes.css"
 
-const baseUrl = import.meta.env.BASE_URL;
-const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`;
-const githubUrl = "https://github.com/mycelium-build/datalith";
-const starCount = Number(stars.stargazersCount ?? 0);
+import DownloadPanel from "../components/DownloadPanel.astro"
+import GraphWidget from "../components/GraphWidget.astro"
+import Icon from "../components/Icon.astro"
+import MarkdownWidget from "../components/MarkdownWidget.astro"
+import MonolithLogo from "../components/MonolithLogo.astro"
+import SearchWidget from "../components/SearchWidget.astro"
+import ThemePicker from "../components/ThemePicker.astro"
+import TodoWidget from "../components/TodoWidget.astro"
+
+import stars from "../data/stars.json"
+import { themeInitScript } from "../../scripts/theme-init.ts"
+
+const baseUrl = import.meta.env.BASE_URL
+const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`
+const githubUrl = "https://github.com/mycelium-build/datalith"
+const starCount = Number(stars.stargazersCount ?? 0)
 ---
 
 <!doctype html>
@@ -37,20 +39,12 @@ const starCount = Number(stars.stargazersCount ?? 0);
                 <a class="brand" href={baseUrl}>Datalith</a>
                 <nav aria-label="Main navigation">
                     <a href={docsUrl}>Documentation</a>
-                    <a
-                        class="github-link"
-                        href={githubUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                    >
+                    <a class="github-link" href={githubUrl} target="_blank" rel="noreferrer">
                         <Icon name="star" />
                         <span>GitHub</span>
                         {
                             starCount > 0 && (
-                                <span
-                                    class="star-count"
-                                    aria-label={`${starCount} stars`}
-                                >
+                                <span class="star-count" aria-label={`${starCount} stars`}>
                                     {starCount}
                                 </span>
                             )
@@ -66,30 +60,24 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <MonolithLogo cell={9} />
                         </div>
                         <div class="hero-copy">
-                            <p class="eyebrow">
-                                A personal encyclopedia
-                            </p>
+                            <p class="eyebrow">A personal encyclopedia</p>
                             <h1 class="display">
                                 From pixel to<br /><em>knowledge.</em>
                             </h1>
                             <p class="hero-sub">
-                                A local-first Vault where notes, links, and tasks sharpen into a monolith that lasts.
+                                A local-first Vault where notes, links, and tasks sharpen into a
+                                monolith that lasts.
                             </p>
                             <div class="hero-actions">
                                 <a class="pixel-button" href="#download"
-                                    ><Icon name="download" /><span
-                                        >Download Datalith</span
-                                    ></a
+                                    ><Icon name="download" /><span>Download Datalith</span></a
                                 >
-                                <a class="hero-link" href={docsUrl}
-                                    >Documentation</a
-                                >
+                                <a class="hero-link" href={docsUrl}>Documentation</a>
                                 <a
                                     class="hero-link external"
                                     href={githubUrl}
                                     target="_blank"
-                                    rel="noreferrer"
-                                    >GitHub <Icon name="arrowUpRight" /></a
+                                    rel="noreferrer">GitHub <Icon name="arrowUpRight" /></a
                                 >
                             </div>
                         </div>
@@ -105,32 +93,26 @@ const starCount = Number(stars.stargazersCount ?? 0);
                         <div class="intro-copy">
                             <p class="eyebrow">A little magic</p>
                             <h2 class="display">
-                                The enchanted monolith<br/>that remembers.
+                                The enchanted monolith<br />that remembers.
                             </h2>
                             <p>
-                                Datalith is a monolith, enchanted to find and visualize every note you have ever written.
-                                A note is a pixel, a link between two notes another.
-                                Tend them, and the picture sharpens into focus:
-                                a private personal encyclopedia, one of a kind, built to outlast any app, service, or trend.
+                                Datalith is a monolith, enchanted to find and visualize every note
+                                you have ever written. A note is a pixel, a link between two notes
+                                another. Tend them, and the picture sharpens into focus: a private
+                                personal encyclopedia, one of a kind, built to outlast any app,
+                                service, or trend.
                             </p>
                         </div>
                     </div>
                 </section>
 
-                <section
-                    class="download-section"
-                    id="download"
-                    aria-labelledby="download-heading"
-                >
+                <section class="download-section" id="download" aria-labelledby="download-heading">
                     <div class="section-heading">
                         <p class="eyebrow">Start today</p>
-                        <h2 class="display" id="download-heading">
-                            Begin your encyclopedia.
-                        </h2>
+                        <h2 class="display" id="download-heading">Begin your encyclopedia.</h2>
                         <p>
-                            Download Datalith and lay the first pixel of your
-                            own knowledge. Free, open source, for macOS,
-                            Windows, and Linux.
+                            Download Datalith and lay the first pixel of your own knowledge. Free,
+                            open source, for macOS, Windows, and Linux.
                         </p>
                     </div>
                     <DownloadPanel />
@@ -142,11 +124,9 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <div class="tile-head">
                                 <Icon name="bolt" class="tile-glyph" />
                                 <div>
-                                    <h2 class="display">
-                                        Instant, every time
-                                    </h2>
+                                    <h2 class="display">Instant, every time</h2>
                                     <p>
-                                        Opens in a blink, even on Vaults of 10k+ notes.<br/>
+                                        Opens in a blink, even on Vaults of 10k+ notes.<br />
                                         So reading and writing never wait on you.
                                     </p>
                                 </div>
@@ -158,10 +138,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 <Icon name="note" />
                                 <div>
                                     <h2 class="display">Write in Markdown</h2>
-                                    <p>
-                                        Notes with preview, wiki links, and
-                                        properties.
-                                    </p>
+                                    <p>Notes with preview, wiki links, and properties.</p>
                                 </div>
                             </header>
                             <MarkdownWidget />
@@ -171,13 +148,8 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <header class="tile-head">
                                 <Icon name="todo" />
                                 <div>
-                                    <h2 class="display">
-                                        Tasks that stay files
-                                    </h2>
-                                    <p>
-                                        A real todo.txt editor: priorities,
-                                        projects, subtasks.
-                                    </p>
+                                    <h2 class="display">Tasks that stay files</h2>
+                                    <p>A real todo.txt editor: priorities, projects, subtasks.</p>
                                 </div>
                             </header>
                             <TodoWidget />
@@ -189,7 +161,8 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 <div>
                                     <h2 class="display">Local first</h2>
                                     <p>
-                                        Your Vault is a folder you own, with open format files that outlive apps.<br/>
+                                        Your Vault is a folder you own, with open format files that
+                                        outlive apps.<br />
                                         Your encyclopedia can never be taken from you.
                                     </p>
                                 </div>
@@ -202,11 +175,10 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <header class="tile-head">
                                 <Icon name="search" />
                                 <div>
-                                    <h2 class="display">
-                                        Every thought, findable
-                                    </h2>
+                                    <h2 class="display">Every thought, findable</h2>
                                     <p>
-                                        Relevance-ranked search across names and content, as you type.<br/>
+                                        Relevance-ranked search across names and content, as you
+                                        type.<br />
                                         The right note surfaces even when you only half-remember it.
                                     </p>
                                 </div>
@@ -218,11 +190,9 @@ const starCount = Number(stars.stargazersCount ?? 0);
                             <header class="tile-head">
                                 <Icon name="graph" />
                                 <div>
-                                    <h2 class="display">
-                                        Ideas, connected by design
-                                    </h2>
+                                    <h2 class="display">Ideas, connected by design</h2>
                                     <p>
-                                        Wiki links become a living graph.<br/>
+                                        Wiki links become a living graph.<br />
                                         Follow a thread and rediscover what you forgot you knew.
                                     </p>
                                 </div>
@@ -236,8 +206,9 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 <div>
                                     <h2 class="display">Make it yours</h2>
                                     <p>
-                                        Dozens of themes, light and dark.<br/>
-                                        Knowledge shaped into a familiar place is easier to come back to.
+                                        Dozens of themes, light and dark.<br />
+                                        Knowledge shaped into a familiar place is easier to come back
+                                        to.
                                     </p>
                                 </div>
                             </header>
@@ -259,24 +230,14 @@ const starCount = Number(stars.stargazersCount ?? 0);
                 <section class="open-source" aria-label="Open source">
                     <div>
                         <p class="eyebrow">Open source</p>
-                        <h2 class="display">
-                            MIT-licensed. Star it on GitHub.
-                        </h2>
+                        <h2 class="display">MIT-licensed. Star it on GitHub.</h2>
                     </div>
-                    <a
-                        class="pixel-button"
-                        href={githubUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                    >
+                    <a class="pixel-button" href={githubUrl} target="_blank" rel="noreferrer">
                         <Icon name="star" />
                         <span>Star on GitHub</span>
                         {
                             starCount > 0 && (
-                                <span
-                                    class="star-count-inverse"
-                                    aria-label={`${starCount} stars`}
-                                >
+                                <span class="star-count-inverse" aria-label={`${starCount} stars`}>
                                     {starCount}
                                 </span>
                             )
@@ -290,11 +251,10 @@ const starCount = Number(stars.stargazersCount ?? 0);
                     </div>
                     <div class="final-cta-copy">
                         <p class="eyebrow">Ready to begin?</p>
-                        <h2 class="display">
-                            Plant your monolith in a folder of your own.
-                        </h2>
+                        <h2 class="display">Plant your monolith in a folder of your own.</h2>
                         <p>
-                            One download, one empty folder and a lifetime of knowledge sharpens into focus.
+                            One download, one empty folder and a lifetime of knowledge sharpens into
+                            focus.
                         </p>
                     </div>
                     <a class="pixel-button" href="#download">

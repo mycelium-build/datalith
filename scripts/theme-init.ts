@@ -21,4 +21,4 @@ export const themeInitScript = `(function () {
   }
   document.documentElement.dataset.datalithTheme = id;
   document.documentElement.dataset.mode = mode;
-})();`;
+})();`

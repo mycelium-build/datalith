@@ -1,20 +1,17 @@
 ---
-import themes from "../data/themes.json";
-import Icon from "./Icon.astro";
+import Icon from "./Icon.astro"
+import themes from "../data/themes.json"
 
 interface Props {
-    variant?: "full" | "compact";
+    variant?: "full" | "compact"
 }
 
-const { variant = "full" } = Astro.props;
-const lights = themes.filter((theme) => theme.mode === "light");
-const darks = themes.filter((theme) => theme.mode === "dark");
+const { variant = "full" } = Astro.props
+const lights = themes.filter((theme) => theme.mode === "light")
+const darks = themes.filter((theme) => theme.mode === "dark")
 ---
 
-<section
-    class:list={["theme-picker", variant === "compact" && "is-compact"]}
-    data-theme-picker
->
+<section class:list={["theme-picker", variant === "compact" && "is-compact"]} data-theme-picker>
     {
         variant === "compact" && (
             <button
@@ -29,18 +26,10 @@ const darks = themes.filter((theme) => theme.mode === "dark");
             </button>
         )
     }
-    <div
-        class="theme-panel"
-        data-theme-panel
-        hidden={variant === "compact" || undefined}
-    >
+    <div class="theme-panel" data-theme-panel hidden={variant === "compact" || undefined}>
         <div class="mode-toggle" role="group" aria-label="Color mode">
-            <button type="button" data-mode-btn="light"
-                ><Icon name="sun" />Light</button
-            >
-            <button type="button" data-mode-btn="dark"
-                ><Icon name="moon" />Dark</button
-            >
+            <button type="button" data-mode-btn="light"><Icon name="sun" />Light</button>
+            <button type="button" data-mode-btn="dark"><Icon name="moon" />Dark</button>
         </div>
         <div class="theme-groups">
             <div class="theme-group" data-mode-group="light">
@@ -88,104 +77,80 @@ const darks = themes.filter((theme) => theme.mode === "dark");
 </section>
 
 <script>
-    import {
-        applyTheme,
-        loadTheme,
-        saveTheme,
-        activeThemeId,
-        onThemeChange,
-    } from "../lib/theme";
+    import { activeThemeId, applyTheme, loadTheme, onThemeChange, saveTheme } from "../lib/theme"
 
     function init(root: HTMLElement) {
-        const trigger = root.querySelector<HTMLButtonElement>(
-            "[data-theme-trigger]",
-        );
-        const panel = root.querySelector<HTMLElement>("[data-theme-panel]");
-        const modeButtons = [
-            ...root.querySelectorAll<HTMLButtonElement>("[data-mode-btn]"),
-        ];
-        const options = [
-            ...root.querySelectorAll<HTMLButtonElement>("[data-theme-option]"),
-        ];
+        const trigger = root.querySelector<HTMLButtonElement>("[data-theme-trigger]")
+        const panel = root.querySelector<HTMLElement>("[data-theme-panel]")
+        const modeButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-mode-btn]")]
+        const options = [...root.querySelectorAll<HTMLButtonElement>("[data-theme-option]")]
 
-        const isCompact = () => Boolean(trigger);
+        const isCompact = () => Boolean(trigger)
 
-        function sync(state: {
-            mode: "light" | "dark";
-            light: string;
-            dark: string;
-        }) {
+        function sync(state: { mode: "light" | "dark"; light: string; dark: string }) {
             for (const button of modeButtons) {
-                const active = button.dataset.modeBtn === state.mode;
-                button.classList.toggle("is-active", active);
-                button.setAttribute("aria-pressed", String(active));
+                const active = button.dataset.modeBtn === state.mode
+                button.classList.toggle("is-active", active)
+                button.setAttribute("aria-pressed", String(active))
             }
             for (const option of options) {
-                const isForCurrentMode =
-                    option.dataset.optionMode === state.mode;
+                const isForCurrentMode = option.dataset.optionMode === state.mode
                 const active =
-                    isForCurrentMode &&
-                    option.dataset.themeOption === activeThemeId(state);
-                option.classList.toggle("is-active", Boolean(active));
-                option.setAttribute("aria-pressed", String(active));
+                    isForCurrentMode && option.dataset.themeOption === activeThemeId(state)
+                option.classList.toggle("is-active", Boolean(active))
+                option.setAttribute("aria-pressed", String(active))
             }
         }
 
         function open() {
-            if (!panel || !trigger) return;
-            panel.hidden = false;
-            trigger.setAttribute("aria-expanded", "true");
+            if (!panel || !trigger) return
+            panel.hidden = false
+            trigger.setAttribute("aria-expanded", "true")
         }
 
         function close() {
-            if (!panel || !trigger) return;
-            panel.hidden = true;
-            trigger.setAttribute("aria-expanded", "false");
+            if (!panel || !trigger) return
+            panel.hidden = true
+            trigger.setAttribute("aria-expanded", "false")
         }
 
         if (trigger && panel) {
-            trigger.addEventListener("click", () =>
-                panel.hidden ? open() : close(),
-            );
+            trigger.addEventListener("click", () => (panel.hidden ? open() : close()))
             document.addEventListener("click", (event) => {
-                if (!root.contains(event.target as Node)) close();
-            });
+                if (!root.contains(event.target as Node)) close()
+            })
         }
 
         for (const option of options) {
             option.addEventListener("click", () => {
-                const id = option.dataset.themeOption!;
-                const mode =
-                    (option.dataset.optionMode as "light" | "dark") ?? "light";
-                const state = loadTheme();
-                const next = { ...state, mode, [mode]: id } as typeof state;
-                applyTheme(id, mode);
-                saveTheme(next);
-                sync(next);
-                if (isCompact()) close();
-            });
+                const id = option.dataset.themeOption!
+                const mode = (option.dataset.optionMode as "light" | "dark") ?? "light"
+                const state = loadTheme()
+                const next = { ...state, mode, [mode]: id } as typeof state
+                applyTheme(id, mode)
+                saveTheme(next)
+                sync(next)
+                if (isCompact()) close()
+            })
         }
 
         for (const button of modeButtons) {
             button.addEventListener("click", () => {
-                const mode =
-                    (button.dataset.modeBtn as "light" | "dark") ?? "light";
-                const state = loadTheme();
-                const next = { ...state, mode };
-                applyTheme(activeThemeId(next), mode);
-                saveTheme(next);
-                sync(next);
-            });
+                const mode = (button.dataset.modeBtn as "light" | "dark") ?? "light"
+                const state = loadTheme()
+                const next = { ...state, mode }
+                applyTheme(activeThemeId(next), mode)
+                saveTheme(next)
+                sync(next)
+            })
         }
 
-        onThemeChange(() => sync(loadTheme()));
-        sync(loadTheme());
+        onThemeChange(() => sync(loadTheme()))
+        sync(loadTheme())
     }
 
-    for (const root of document.querySelectorAll<HTMLElement>(
-        "[data-theme-picker]",
-    )) {
-        init(root);
+    for (const root of document.querySelectorAll<HTMLElement>("[data-theme-picker]")) {
+        init(root)
     }
 </script>
 

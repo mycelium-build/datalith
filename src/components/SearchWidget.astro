@@ -1,5 +1,5 @@
 ---
-import Icon from "./Icon.astro";
+import Icon from "./Icon.astro"
 ---
 
 <section class="search-widget" data-search-widget>
@@ -22,92 +22,85 @@ import Icon from "./Icon.astro";
 </section>
 
 <script>
-    import searchData from "../data/search.json";
-    import fileIcon from "../assets/icons/file.svg?raw";
-    import { docUrl } from "../lib/route";
-    import { escapeHtml, sanitizeHtml } from "../lib/html";
+    import { docUrl } from "../lib/route"
+    import fileIcon from "../assets/icons/file.svg?raw"
+    import searchData from "../data/search.json"
+    import { escapeHtml, sanitizeHtml } from "../lib/html"
 
     const root =
         document.currentScript?.closest("[data-search-widget]") ??
-        document.querySelector("[data-search-widget]");
-    if (!root) throw new Error("search widget missing host");
-    const input = root.querySelector<HTMLInputElement>("[data-search-input]")!;
-    const body = root.querySelector<HTMLElement>("[data-search-body]")!;
-    const hint = root.querySelector<HTMLElement>("[data-search-hint]")!;
-    const list = root.querySelector<HTMLUListElement>("[data-search-results]")!;
+        document.querySelector("[data-search-widget]")
+    if (!root) throw new Error("search widget missing host")
+    const input = root.querySelector<HTMLInputElement>("[data-search-input]")!
+    const body = root.querySelector<HTMLElement>("[data-search-body]")!
+    const hint = root.querySelector<HTMLElement>("[data-search-hint]")!
+    const list = root.querySelector<HTMLUListElement>("[data-search-results]")!
 
-    const MAX_RESULTS = 6;
+    const MAX_RESULTS = 6
 
-    function score(
-        doc: { name: string; title: string; content: string },
-        query: string,
-    ): number {
-        const name = doc.name.toLowerCase();
-        const title = doc.title.toLowerCase();
-        const content = doc.content.toLowerCase();
-        if (name === query) return 300;
-        if (name.startsWith(query)) return 240;
-        if (name.includes(query)) return 160;
-        if (title === query) return 120;
-        if (title.startsWith(query)) return 90;
-        if (title.includes(query)) return 60;
-        if (content.includes(query)) return 30;
-        return 0;
+    function score(doc: { name: string; title: string; content: string }, query: string): number {
+        const name = doc.name.toLowerCase()
+        const title = doc.title.toLowerCase()
+        const content = doc.content.toLowerCase()
+        if (name === query) return 300
+        if (name.startsWith(query)) return 240
+        if (name.includes(query)) return 160
+        if (title === query) return 120
+        if (title.startsWith(query)) return 90
+        if (title.includes(query)) return 60
+        if (content.includes(query)) return 30
+        return 0
     }
 
     function snippet(content: string, query: string): string {
-        const haystack = content.toLowerCase();
-        const index = haystack.indexOf(query);
-        if (index < 0) return content.slice(0, 110);
-        const start = Math.max(0, index - 45);
-        const slice = content.slice(start, start + 140);
-        const lead = start > 0 ? "…" : "";
-        return lead + slice;
+        const haystack = content.toLowerCase()
+        const index = haystack.indexOf(query)
+        if (index < 0) return content.slice(0, 110)
+        const start = Math.max(0, index - 45)
+        const slice = content.slice(start, start + 140)
+        const lead = start > 0 ? "…" : ""
+        return lead + slice
     }
 
     function highlight(text: string, query: string): string {
-        const pattern = new RegExp(
-            `(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-            "gi",
-        );
+        const pattern = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
         return text
             .split(pattern)
             .map((part, index) => {
-                const safe = escapeHtml(part);
-                return index % 2 === 1 ? `<mark>${safe}</mark>` : safe;
+                const safe = escapeHtml(part)
+                return index % 2 === 1 ? `<mark>${safe}</mark>` : safe
             })
-            .join("");
+            .join("")
     }
 
     function breadcrumb(path: string): string {
-        return path.replace(/\//g, " · ");
+        return path.replace(/\//g, " · ")
     }
 
     function render(query: string) {
-        if (!root) throw new Error("search widget missing host");
+        if (!root) throw new Error("search widget missing host")
 
-        const q = query.trim().toLowerCase();
+        const q = query.trim().toLowerCase()
         if (q.length < 2) {
-            hint.hidden = false;
-            body.hidden = false;
-            list.hidden = true;
-            list.innerHTML = "";
-            root.classList.remove("has-results");
-            return;
+            hint.hidden = false
+            body.hidden = false
+            list.hidden = true
+            list.innerHTML = ""
+            root.classList.remove("has-results")
+            return
         }
         const results = searchData.documents
             .map((doc) => ({ doc, score: score(doc, q) }))
             .filter((result) => result.score > 0)
             .sort((a, b) => b.score - a.score)
-            .slice(0, MAX_RESULTS);
-        hint.hidden = true;
-        body.hidden = true;
-        list.hidden = false;
-        root.classList.add("has-results");
+            .slice(0, MAX_RESULTS)
+        hint.hidden = true
+        body.hidden = true
+        list.hidden = false
+        root.classList.add("has-results")
         if (results.length === 0) {
-            list.innerHTML =
-                '<li class="search-empty">No matches — try another term.</li>';
-            return;
+            list.innerHTML = '<li class="search-empty">No matches — try another term.</li>'
+            return
         }
         list.innerHTML = sanitizeHtml(
             results
@@ -125,29 +118,29 @@ import Icon from "./Icon.astro";
 				</li>`,
                 )
                 .join(""),
-        );
+        )
     }
 
-    let inputTimer: number | undefined;
+    let inputTimer: number | undefined
     input.addEventListener("input", () => {
-        window.clearTimeout(inputTimer);
-        inputTimer = window.setTimeout(() => render(input.value), 120);
-    });
+        window.clearTimeout(inputTimer)
+        inputTimer = window.setTimeout(() => render(input.value), 120)
+    })
     input.addEventListener("blur", () => {
         setTimeout(() => {
             if (!root.contains(document.activeElement)) {
-                root.classList.remove("has-results");
-                list.hidden = true;
+                root.classList.remove("has-results")
+                list.hidden = true
             }
-        }, 120);
-    });
+        }, 120)
+    })
     input.addEventListener("focus", () => {
         if (input.value.trim().length >= 2) {
-            root.classList.add("has-results");
-            list.hidden = false;
+            root.classList.add("has-results")
+            list.hidden = false
         }
-    });
-    render("");
+    })
+    render("")
 </script>
 
 <style is:global>
@@ -230,8 +223,7 @@ import Icon from "./Icon.astro";
         }
 
         li + li a {
-            border-top: 1px solid
-                color-mix(in srgb, var(--dl-border) 55%, transparent);
+            border-top: 1px solid color-mix(in srgb, var(--dl-border) 55%, transparent);
         }
     }
 

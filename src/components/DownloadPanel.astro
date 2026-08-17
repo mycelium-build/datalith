@@ -1,33 +1,28 @@
 ---
-import releaseData from "../data/releases.json";
-import Icon from "./Icon.astro";
+import Icon from "./Icon.astro"
+import releaseData from "../data/releases.json"
 
-const repositoryUrl = `https://github.com/${releaseData.repository}`;
-const sourceReleases = releaseData.releases ?? [];
+const repositoryUrl = `https://github.com/${releaseData.repository}`
+const sourceReleases = releaseData.releases ?? []
 // Keep the two channels deliberately disjoint: stable downloads must never fall back to a RC.
-const stableReleases = sourceReleases.filter(
-    (release) => release.prerelease === false,
-);
-const previewReleases = sourceReleases.filter(
-    (release) => release.prerelease === true,
-);
-const realStable = stableReleases[0];
-const latestPreview = previewReleases[0];
-const hasStableRelease = Boolean(realStable);
-const stable = realStable;
+const stableReleases = sourceReleases.filter((release) => release.prerelease === false)
+const previewReleases = sourceReleases.filter((release) => release.prerelease === true)
+const realStable = stableReleases[0]
+const latestPreview = previewReleases[0]
+const hasStableRelease = Boolean(realStable)
+const stable = realStable
 const platforms = [
     { id: "macos", label: "macOS", detail: "Apple silicon", extension: ".dmg" },
     { id: "windows", label: "Windows", detail: "64-bit", extension: ".exe" },
     { id: "linux", label: "Linux", detail: "x86_64", extension: ".AppImage" },
-];
+]
 const nativeLinuxPackages = [
     { id: "linux-deb", label: "Debian / Ubuntu", detail: "x86_64", extension: ".deb" },
     { id: "linux-rpm", label: "Fedora / RHEL", detail: "x86_64", extension: ".rpm" },
     { id: "linux-arch", label: "Arch Linux", detail: "x86_64", extension: ".pkg.tar.zst" },
-];
-const version = (tagName: string) => tagName?.replace(/^v/, "") ?? "";
-const asset = (release, platform) =>
-    release?.assets.find((item) => item.platform === platform);
+]
+const version = (tagName: string) => tagName?.replace(/^v/, "") ?? ""
+const asset = (release, platform) => release?.assets.find((item) => item.platform === platform)
 ---
 
 <section class="download-prototype" data-download-panel>
@@ -35,18 +30,11 @@ const asset = (release, platform) =>
         <div class="compact-heading">
             <div>
                 <p class="overline">Desktop app</p><h3>
-                    {
-                        hasStableRelease
-                            ? `Datalith ${version(stable?.tagName)}`
-                            : "Datalith"
-                    }
+                    {hasStableRelease ? `Datalith ${version(stable?.tagName)}` : "Datalith"}
                 </h3>
             </div>
-            <span
-                class:list={[
-                    "stable-badge",
-                    { unavailable: !hasStableRelease },
-                ]}>{hasStableRelease ? "Stable" : "Coming soon"}</span
+            <span class:list={["stable-badge", { unavailable: !hasStableRelease }]}
+                >{hasStableRelease ? "Stable" : "Coming soon"}</span
             >
         </div>
         <div class="download-controls"><Fragment set:html={""} /></div>
@@ -60,37 +48,34 @@ const asset = (release, platform) =>
                     data-stable-download
                     href={asset(stable, "macos")?.browserDownloadUrl}
                 >
+                    <span class="platform-logo" data-current-logo aria-hidden="true"></span>
                     <span
-                        class="platform-logo"
-                        data-current-logo
-                        aria-hidden="true"></span>
-                    <span
-                        ><strong data-stable-label>Download for macOS</strong
-                        ><small data-stable-meta
+                        ><strong data-stable-label>Download for macOS</strong><small
+                            data-stable-meta
                             >{version(stable?.tagName)} · Apple silicon · .dmg</small
                         ></span
                     >
                     <Icon name="download" class="download-glyph" />
                 </a>
                 <details
-                    class:list={[
-                        "download-menu",
-                        "stable-menu",
-                        { disabled: !hasStableRelease },
-                    ]}
+                    class:list={["download-menu", "stable-menu", { disabled: !hasStableRelease }]}
                 >
                     <summary
                         aria-disabled={String(!hasStableRelease)}
                         tabindex={hasStableRelease ? undefined : "-1"}
-                        ><span class="package-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" /></svg></span>Other packages <Icon name="chevronDown" /></summary
+                        ><span class="package-icon" aria-hidden="true"
+                            ><svg viewBox="0 0 24 24" fill="none"
+                                ><path
+                                    d="m4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                    stroke-linejoin="round"></path></svg
+                            ></span
+                        >Other packages <Icon name="chevronDown" /></summary
                     >
                     <div class="menu-card">
                         <p class="menu-title">
-                            Other packages{
-                                hasStableRelease
-                                    ? ` · ${version(stable?.tagName)}`
-                                    : ""
-                            }
+                            Other packages{hasStableRelease ? ` · ${version(stable?.tagName)}` : ""}
                         </p><div data-other-platforms></div>
                     </div>
                 </details>
@@ -98,19 +83,16 @@ const asset = (release, platform) =>
             <div class="secondary-row">
                 <details class="download-menu preview-menu">
                     <summary
-                        ><span class="spark" aria-hidden="true">✦</span> Download
-                        preview <span class="rc-badge">RC</span><Icon
-                            name="chevronDown"
-                        /></summary
+                        ><span class="spark" aria-hidden="true">✦</span> Download preview <span
+                            class="rc-badge">RC</span
+                        ><Icon name="chevronDown" /></summary
                     >
                     <div class="menu-card">
                         <div class="preview-heading">
                             <div>
                                 <p class="menu-title">
                                     Preview {version(latestPreview?.tagName)}
-                                </p><small
-                                    >Try upcoming features before release.</small
-                                >
+                                </p><small>Try upcoming features before release.</small>
                             </div><span class="rc-badge">RC</span>
                         </div>
                         <div data-preview-platforms></div>
@@ -120,13 +102,9 @@ const asset = (release, platform) =>
                     <a
                         href={`${repositoryUrl}/blob/main/CHANGELOG.md`}
                         target="_blank"
-                        rel="noreferrer"
-                        >Changelog <Icon name="arrowUpRight" /></a
+                        rel="noreferrer">Changelog <Icon name="arrowUpRight" /></a
                     >
-                    <a
-                        href={`${repositoryUrl}/releases`}
-                        target="_blank"
-                        rel="noreferrer"
+                    <a href={`${repositoryUrl}/releases`} target="_blank" rel="noreferrer"
                         >All releases <Icon name="arrowUpRight" /></a
                     >
                 </nav>
@@ -148,81 +126,71 @@ const asset = (release, platform) =>
 </section>
 
 <script>
-    import downloadIcon from "../assets/icons/download.svg?raw";
+    import downloadIcon from "../assets/icons/download.svg?raw"
     const logos = {
         macos: '<svg viewBox="0 0 24 24"><path d="M16.8 12.8c0-2 1.6-3 1.7-3.1a3.8 3.8 0 0 0-3-1.6c-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.8-2.8-.8a4.2 4.2 0 0 0-3.5 2.2c-1.5 2.6-.4 6.5 1 8.7.7 1.1 1.5 2.3 2.6 2.3 1 0 1.4-.7 2.7-.7s1.7.7 2.8.7 1.8-1.1 2.5-2.2c.8-1.2 1.1-2.4 1.1-2.5-.1 0-2-.8-2-3.8Zm-2-6c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.5-.9 2.4.9.1 1.8-.4 2.4-1.1Z"/></svg>',
         windows:
             '<svg viewBox="0 0 24 24"><path d="M2.5 4.6 10.7 3.5v7.7H2.5V4.6Zm9.5-1.3L21.5 2v9.2H12V3.3ZM2.5 12.5h8.2v7.8l-8.2-1.1v-6.7Zm9.5 0h9.5V22L12 20.7v-8.2Z"/></svg>',
         linux: '<img src="https://cdn.simpleicons.org/linux/000000" alt="" width="24" height="24" />',
-        "linux-deb": '<img src="https://cdn.simpleicons.org/debian/000000" alt="" width="24" height="24" />',
-        "linux-rpm": '<img src="https://cdn.simpleicons.org/fedora/000000" alt="" width="24" height="24" />',
-        "linux-arch": '<img src="https://cdn.simpleicons.org/archlinux/000000" alt="" width="24" height="24" />',
-    };
-    const panel = document.querySelector("[data-download-panel]");
+        "linux-deb":
+            '<img src="https://cdn.simpleicons.org/debian/000000" alt="" width="24" height="24" />',
+        "linux-rpm":
+            '<img src="https://cdn.simpleicons.org/fedora/000000" alt="" width="24" height="24" />',
+        "linux-arch":
+            '<img src="https://cdn.simpleicons.org/archlinux/000000" alt="" width="24" height="24" />',
+    }
+    const panel = document.querySelector("[data-download-panel]")
     if (panel) {
-        const data = JSON.parse(
-            panel.querySelector("[data-download-data]")?.textContent ?? "{}",
-        );
+        const data = JSON.parse(panel.querySelector("[data-download-data]")?.textContent ?? "{}")
         const detectPlatform = () => {
             const agent =
-                `${navigator.userAgentData?.platform ?? ""} ${navigator.platform ?? ""} ${navigator.userAgent}`.toLowerCase();
-            if (agent.includes("win")) return "windows";
-            if (agent.includes("linux")) return "linux";
-            return "macos";
-        };
-        const current = detectPlatform();
-        const info = (id) => data.platforms.find((item) => item.id === id);
-        const releaseAsset = (release, id) =>
-            release?.assets.find((item) => item.platform === id);
-        const cleanVersion = (tag) => tag?.replace(/^v/, "") ?? "";
-        const platformLink = (
-            release,
-            platform,
-            isPreview = false,
-            enabled = true,
-        ) => {
-            const item = releaseAsset(release, platform.id);
-            if (!item) return "";
+                `${navigator.userAgentData?.platform ?? ""} ${navigator.platform ?? ""} ${navigator.userAgent}`.toLowerCase()
+            if (agent.includes("win")) return "windows"
+            if (agent.includes("linux")) return "linux"
+            return "macos"
+        }
+        const current = detectPlatform()
+        const info = (id) => data.platforms.find((item) => item.id === id)
+        const releaseAsset = (release, id) => release?.assets.find((item) => item.platform === id)
+        const cleanVersion = (tag) => tag?.replace(/^v/, "") ?? ""
+        const platformLink = (release, platform, isPreview = false, enabled = true) => {
+            const item = releaseAsset(release, platform.id)
+            if (!item) return ""
             const state = enabled
                 ? `href="${item.browserDownloadUrl}"`
-                : 'aria-disabled="true" tabindex="-1"';
-            return `<a class="platform-option" ${state}><span class="platform-logo">${logos[platform.id]}</span><span><strong>${platform.label}</strong><small>${isPreview ? cleanVersion(release.tagName) + " · " : ""}${platform.detail} · ${platform.extension}</small></span>${downloadIcon}</a>`;
-        };
+                : 'aria-disabled="true" tabindex="-1"'
+            return `<a class="platform-option" ${state}><span class="platform-logo">${logos[platform.id]}</span><span><strong>${platform.label}</strong><small>${isPreview ? `${cleanVersion(release.tagName)} · ` : ""}${platform.detail} · ${platform.extension}</small></span>${downloadIcon}</a>`
+        }
         const nativePackageGroup = (release, isPreview = false) => {
             const availablePackages = data.nativeLinuxPackages.filter((item) =>
                 releaseAsset(release, item.id),
-            );
-            if (!availablePackages.length) return "";
-            const versionMeta = isPreview
-                ? `${cleanVersion(release.tagName)} · `
-                : "";
-            const formatLabel =
-                availablePackages.length === 1 ? "format" : "formats";
-            return `<details class="native-package-menu"><summary class="platform-option"><span class="platform-logo">${logos.linux}</span><span><strong>Linux native packages</strong><small>${versionMeta}x86_64 · ${availablePackages.length} ${formatLabel}</small></span><svg class="submenu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 10 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="native-package-options">${availablePackages.map((item) => platformLink(release, item, isPreview)).join("")}</div></details>`;
-        };
+            )
+            if (!availablePackages.length) return ""
+            const versionMeta = isPreview ? `${cleanVersion(release.tagName)} · ` : ""
+            const formatLabel = availablePackages.length === 1 ? "format" : "formats"
+            return `<details class="native-package-menu"><summary class="platform-option"><span class="platform-logo">${logos.linux}</span><span><strong>Linux native packages</strong><small>${versionMeta}x86_64 · ${availablePackages.length} ${formatLabel}</small></span><svg class="submenu-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 10 4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="native-package-options">${availablePackages.map((item) => platformLink(release, item, isPreview)).join("")}</div></details>`
+        }
 
-        const template = panel.querySelector("[data-controls-template]");
+        const template = panel.querySelector("[data-controls-template]")
         panel
             .querySelectorAll(".download-controls")
-            .forEach((slot) =>
-                slot.replaceChildren(template.content.cloneNode(true)),
-            );
+            .forEach((slot) => slot.replaceChildren(template.content.cloneNode(true)))
         panel
             .querySelectorAll("[data-current-logo]")
-            .forEach((node) => (node.innerHTML = logos[current]));
-        const currentInfo = info(current);
-        const stableAsset = releaseAsset(data.stable, current);
+            .forEach((node) => (node.innerHTML = logos[current]))
+        const currentInfo = info(current)
+        const stableAsset = releaseAsset(data.stable, current)
         panel.querySelectorAll("[data-stable-download]").forEach((link) => {
             if (data.hasStableRelease && stableAsset) {
-                link.href = stableAsset.browserDownloadUrl;
-                link.removeAttribute("aria-disabled");
-                link.removeAttribute("tabindex");
+                link.href = stableAsset.browserDownloadUrl
+                link.removeAttribute("aria-disabled")
+                link.removeAttribute("tabindex")
             } else {
-                link.removeAttribute("href");
-                link.setAttribute("aria-disabled", "true");
-                link.setAttribute("tabindex", "-1");
+                link.removeAttribute("href")
+                link.setAttribute("aria-disabled", "true")
+                link.setAttribute("tabindex", "-1")
             }
-        });
+        })
         panel
             .querySelectorAll("[data-stable-label]")
             .forEach(
@@ -230,7 +198,7 @@ const asset = (release, platform) =>
                     (node.textContent = data.hasStableRelease
                         ? `Download for ${currentInfo.label}`
                         : "No stable release yet"),
-            );
+            )
         panel
             .querySelectorAll("[data-stable-meta]")
             .forEach(
@@ -238,56 +206,43 @@ const asset = (release, platform) =>
                     (node.textContent = data.hasStableRelease
                         ? `${cleanVersion(data.stable.tagName)} · ${currentInfo.detail} · ${currentInfo.extension}`
                         : "Check back soon"),
-            );
+            )
         panel.querySelectorAll("[data-other-platforms]").forEach((list) => {
             list.innerHTML =
                 data.platforms
                     .filter((platform) => platform.id !== current)
                     .map((platform) =>
-                        platformLink(
-                            data.stable,
-                            platform,
-                            false,
-                            data.hasStableRelease,
-                        ),
+                        platformLink(data.stable, platform, false, data.hasStableRelease),
                     )
-                    .join("") + nativePackageGroup(data.stable);
-        });
+                    .join("") + nativePackageGroup(data.stable)
+        })
         panel.querySelectorAll("[data-preview-platforms]").forEach((list) => {
             list.innerHTML = data.latestPreview
                 ? data.platforms
-                      .map((platform) =>
-                          platformLink(data.latestPreview, platform, true),
-                      )
+                      .map((platform) => platformLink(data.latestPreview, platform, true))
                       .join("") + nativePackageGroup(data.latestPreview, true)
-                : '<p class="empty-state">No preview available.</p>';
-        });
+                : '<p class="empty-state">No preview available.</p>'
+        })
 
         panel.addEventListener(
             "toggle",
             (event) => {
-                if (!event.target.matches(".download-menu") || !event.target.open)
-                    return;
-                panel
-                    .querySelectorAll(".download-menu[open]")
-                    .forEach((details) => {
-                        if (details !== event.target)
-                            details.removeAttribute("open");
-                    });
+                if (!event.target.matches(".download-menu") || !event.target.open) return
+                panel.querySelectorAll(".download-menu[open]").forEach((details) => {
+                    if (details !== event.target) details.removeAttribute("open")
+                })
             },
             true,
-        );
+        )
         panel.querySelectorAll(".stable-menu.disabled").forEach((menu) => {
-            menu.addEventListener("click", (event) => event.preventDefault());
-        });
+            menu.addEventListener("click", (event) => event.preventDefault())
+        })
         document.addEventListener("click", (event) => {
-            const target = event.target as Node | null;
-            panel
-                .querySelectorAll(".download-menu[open]")
-                .forEach((menu) => {
-                    if (!menu.contains(target)) menu.removeAttribute("open");
-                });
-        });
+            const target = event.target as Node | null
+            panel.querySelectorAll(".download-menu[open]").forEach((menu) => {
+                if (!menu.contains(target)) menu.removeAttribute("open")
+            })
+        })
     }
 </script>
 
@@ -440,11 +395,7 @@ const asset = (release, platform) =>
         > summary:hover,
         > summary:focus-visible,
         &[open] > summary {
-            background: color-mix(
-                in srgb,
-                var(--dl-accent) 16%,
-                var(--dl-surface-alt)
-            );
+            background: color-mix(in srgb, var(--dl-accent) 16%, var(--dl-surface-alt));
         }
 
         &.disabled > summary {
