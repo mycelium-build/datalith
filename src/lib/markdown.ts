@@ -6,6 +6,14 @@ export type RouteResolver = (target: string) => string | null
 
 const WIKILINK = /^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/
 
+export function normalizeTarget(target: string): string {
+    return target
+        .trim()
+        .replace(/^\.\//, "")
+        .replace(/\.(md|todotxt|graph)$/i, "")
+        .toLowerCase()
+}
+
 const rendererCache = new WeakMap<RouteResolver, Marked>()
 
 function createRenderer(resolver: RouteResolver): Marked {
@@ -30,11 +38,7 @@ function createRenderer(resolver: RouteResolver): Marked {
                     }
                 },
                 renderer(token) {
-                    const target = token.target
-                        .trim()
-                        .replace(/^\.\//, "")
-                        .replace(/\.(md|todotxt|graph)$/i, "")
-                    const route = resolver(target)
+                    const route = resolver(normalizeTarget(token.target))
                     if (route) {
                         return `<a href="${escapeHtml(route)}">${escapeHtml(token.label)}</a>`
                     }
