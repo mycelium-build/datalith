@@ -13,8 +13,13 @@ export function versionParts(tag: string): number[] | null {
 export function compareVersions(left: ComparableRelease, right: ComparableRelease): number {
     const a = versionParts(left.tagName) ?? [0, 0, 0, 0]
     const b = versionParts(right.tagName) ?? [0, 0, 0, 0]
-    for (let index = 0; index < a.length; index += 1) {
+    for (let index = 0; index < 3; index += 1) {
         if (a[index] !== b[index]) return b[index] - a[index]
+    }
+    if (a[3] !== b[3]) {
+        if (a[3] === 0) return -1
+        if (b[3] === 0) return 1
+        return a[3] - b[3]
     }
     return new Date(right.publishedAt ?? 0).getTime() - new Date(left.publishedAt ?? 0).getTime()
 }

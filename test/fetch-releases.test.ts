@@ -18,16 +18,20 @@ describe("versionParts", () => {
 })
 
 describe("compareVersions", () => {
-    it("sorts newest first, release above release candidate", () => {
+    it("sorts newest first, release above release candidates", () => {
         const releases = [
             { tagName: "v1.2.3", publishedAt: "2026-01-01T00:00:00Z" },
             { tagName: "v1.2.3-rc.1", publishedAt: "2026-01-02T00:00:00Z" },
+            { tagName: "v1.2.3-rc.4", publishedAt: "2026-01-04T00:00:00Z" },
+            { tagName: "v1.2.3-rc.2", publishedAt: "2026-01-03T00:00:00Z" },
             { tagName: "v1.10.0", publishedAt: "2026-01-03T00:00:00Z" },
         ]
         const sorted = [...releases].sort(compareVersions)
         expect(sorted.map((release) => release.tagName)).toEqual([
             "v1.10.0",
             "v1.2.3",
+            "v1.2.3-rc.4",
+            "v1.2.3-rc.2",
             "v1.2.3-rc.1",
         ])
     })
