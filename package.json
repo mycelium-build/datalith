@@ -13,6 +13,7 @@
     "prebuild": "npm run sync-docs && npm run sync-assets && npm run build-icons && npm run build-themes && npm run fetch-releases",
     "build": "astro build",
     "preview": "astro preview",
+    "test": "vitest run",
     "astro": "astro"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "d3-force": "^3.0.0",
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
+    "dompurify": "^3.4.13",
     "marked": "^18.0.9",
     "sharp": "^0.35.3"
   },
@@ -29,6 +31,7 @@
     "@types/d3-drag": "^3.0.7",
     "@types/d3-force": "^3.0.10",
     "@types/d3-selection": "^3.0.11",
-    "@types/d3-zoom": "^3.0.8"
+    "@types/d3-zoom": "^3.0.8",
+    "vitest": "^4.1.10"
   }
 }
