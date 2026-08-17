@@ -65,6 +65,7 @@ import Icon from "./Icon.astro";
         .join("line");
 
     let dragged = false;
+    let touched = false;
 
     const node = g
         .append("g")
@@ -72,6 +73,9 @@ import Icon from "./Icon.astro";
         .selectAll<SVGGElement, NodeDatum>("g")
         .data(nodes)
         .join("g")
+        .attr("tabindex", 0)
+        .attr("role", "link")
+        .attr("aria-label", (d) => d.label)
         .call(
             drag<SVGGElement, NodeDatum>()
                 .on("start", (event, d) => {
@@ -95,6 +99,11 @@ import Icon from "./Icon.astro";
         )
         .on("click", (event, d) => {
             if (dragged) return;
+            window.location.href = docUrl(d.route);
+        })
+        .on("keydown", (event, d) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
             window.location.href = docUrl(d.route);
         });
 
@@ -195,8 +204,6 @@ import Icon from "./Icon.astro";
 
     svg.call(zoomBehavior);
 
-    let touched = false;
-
     function fitView() {
         if (!nodes.length) return;
         const xs = nodes.map((n) => n.x ?? 0);
@@ -273,6 +280,10 @@ import Icon from "./Icon.astro";
         }
         :global(.nodes circle.inactive) {
             opacity: 0.22;
+        }
+        :global(.nodes g:focus-visible circle) {
+            stroke: var(--dl-fg);
+            stroke-width: 2;
         }
         :global(.node-label rect) {
             fill: var(--dl-surface-alt);
