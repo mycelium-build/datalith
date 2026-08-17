@@ -15,6 +15,7 @@ src/data/themes/
 src/components/Icon.astro
 src/assets/icons/
 public/fonts/
+public/datalith.png
 src/styles/themes.css
 
 # dependencies

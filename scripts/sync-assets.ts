@@ -3,6 +3,8 @@ import { mkdir, readdir, copyFile, rm, stat } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import sharp from "sharp"
+
 import { resolveDatalithSource } from "./lib/source.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -45,4 +47,10 @@ for (const { from, to } of copies) {
     copiedCount += await copyTree(sourcePath, destinationPath)
 }
 
-console.log(`Synced ${copiedCount} asset files from ${sourceRoot}`)
+const faviconSource = path.join(sourceRoot, "assets", "logo", "datalith.png")
+const faviconDestination = path.join(siteRoot, "public", "datalith.png")
+await sharp(faviconSource).resize(512, 512).toFile(faviconDestination)
+
+console.log(
+    `Synced ${copiedCount} asset files and the favicon from ${sourceRoot}`,
+)
