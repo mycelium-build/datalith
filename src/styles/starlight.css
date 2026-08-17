@@ -1,0 +1,148 @@
+/* Starlight skin driven by the Datalith theme variables. */
+:root {
+    --sl-font: var(--font-sans);
+    --sl-font-system: var(--font-sans);
+    --sl-font-mono: var(--font-mono);
+    --sl-color-text: var(--dl-fg);
+    --sl-color-text-accent: var(--dl-accent);
+    --sl-color-text-invert: var(--dl-accent-fg);
+    --sl-color-bg: var(--dl-bg);
+    --sl-color-bg-nav: var(--dl-bg);
+    --sl-color-bg-sidebar: var(--dl-bg);
+    --sl-color-bg-inline-code: var(--dl-surface-alt);
+    --sl-color-bg-accent: var(--dl-accent);
+    --sl-color-accent: var(--dl-accent);
+    --sl-color-accent-high: var(--dl-accent);
+    --sl-color-accent-low: color-mix(in srgb, var(--dl-accent) 16%, transparent);
+    --sl-color-gray-1: var(--dl-fg);
+    --sl-color-gray-2: var(--dl-fg);
+    --sl-color-gray-3: var(--dl-muted);
+    --sl-color-gray-4: var(--dl-muted);
+    --sl-color-gray-5: var(--dl-surface-alt);
+    --sl-color-gray-6: var(--dl-surface);
+    --sl-color-black: var(--dl-bg);
+    --sl-color-white: var(--dl-fg);
+    --sl-color-hairline: color-mix(in srgb, var(--dl-fg) 12%, transparent);
+    --sl-color-hairline-light: color-mix(in srgb, var(--dl-fg) 7%, transparent);
+    --sl-color-hairline-shade: var(--dl-bg);
+    --sl-color-backdrop-overlay: color-mix(in srgb, var(--dl-bg) 72%, transparent);
+    --sl-color-banner-text: var(--dl-fg);
+    --sl-color-asides-text-accent: var(--dl-muted);
+    --sl-color-red: var(--dl-red);
+    --sl-color-red-high: var(--dl-red);
+    --sl-color-red-low: color-mix(in srgb, var(--dl-red) 18%, transparent);
+    --sl-color-green: var(--dl-green);
+    --sl-color-green-high: var(--dl-green);
+    --sl-color-green-low: color-mix(in srgb, var(--dl-green) 18%, transparent);
+    --sl-color-blue: var(--dl-blue);
+    --sl-color-blue-high: var(--dl-blue);
+    --sl-color-blue-low: color-mix(in srgb, var(--dl-blue) 18%, transparent);
+    --sl-color-purple: var(--dl-magenta);
+    --sl-color-purple-high: var(--dl-magenta);
+    --sl-color-purple-low: color-mix(in srgb, var(--dl-magenta) 18%, transparent);
+    --sl-color-orange: var(--dl-yellow);
+    --sl-color-orange-high: var(--dl-yellow);
+    --sl-color-orange-low: color-mix(in srgb, var(--dl-yellow) 18%, transparent);
+    --sl-shadow-sm: none;
+    --sl-shadow-md: none;
+    --sl-shadow-lg: none;
+}
+
+.site-title {
+    font-family: var(--font-pixel);
+    font-weight: 700;
+
+    span {
+        color: var(--dl-fg);
+    }
+}
+
+/* Flat, borderless chrome */
+.site-header,
+.site-header > .header,
+.sidebar,
+.sidebar-pane,
+.mobile-toc-toggle,
+.mobile-close {
+    background-color: var(--dl-bg);
+}
+
+@media (width >= 72rem) {
+    .sidebar,
+    .sidebar-pane {
+        border-right: 0;
+    }
+}
+
+.site-header .header {
+    border-bottom: 1px solid color-mix(in srgb, var(--dl-fg) 10%, transparent);
+}
+
+.sidebar a {
+    background: transparent;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--dl-surface-alt);
+    }
+
+    &[aria-current="page"] {
+        background: color-mix(in srgb, var(--dl-accent) 16%, transparent);
+        color: var(--dl-fg);
+    }
+}
+
+.sidebar-pane {
+    border-top: 0;
+}
+
+.card {
+    border-radius: 0;
+    border: 0;
+    background: var(--dl-surface);
+
+    &:hover {
+        background: var(--dl-surface-alt);
+    }
+}
+
+:where(a.card).card svg {
+    color: var(--dl-accent);
+}
+
+/* Table of contents */
+#starlight__on-this-page {
+    > ul > li > a {
+        background: transparent;
+    }
+
+    a[aria-current="true"],
+    a:hover {
+        color: var(--dl-fg);
+    }
+}
+
+/* Pagination */
+.pagination a {
+    border: 0;
+    border-radius: 0;
+    background: var(--dl-surface);
+
+    &:hover {
+        background: var(--dl-surface-alt);
+    }
+}
+
+/* Mobile menu button */
+.mobile-menu-toggle {
+    background-color: var(--dl-surface-alt);
+}
+
+/* Notice/aside styling */
+.aside {
+    border-radius: 0;
+}
+
+.aside.starlight-theme-default {
+    border-inline-start-color: var(--dl-accent);
+}

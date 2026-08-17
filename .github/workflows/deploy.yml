@@ -1,76 +1,84 @@
 name: Deploy website
 
 on:
-  workflow_dispatch:
-    inputs:
-      source_ref:
-        description: Datalith git ref to use for documentation
-        required: true
-        default: main
-        type: string
+    workflow_dispatch:
+        inputs:
+            source_ref:
+                description: Datalith git ref to use for documentation
+                required: true
+                default: main
+                type: string
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+    contents: read
+    pages: write
+    id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+    group: pages
+    cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Check out website
-        uses: actions/checkout@v4
+    build:
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Check out website
+              uses: actions/checkout@v4
 
-      - name: Create datalith-bot token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.AUTOMATION_APP_ID }}
-          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
-          owner: mycelium-build
-          repositories: datalith
-          permission-contents: read
+            - name: Create datalith-bot token
+              id: app-token
+              uses: actions/create-github-app-token@v2
+              with:
+                  app-id: ${{ secrets.AUTOMATION_APP_ID }}
+                  private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+                  owner: mycelium-build
+                  repositories: datalith
+                  permission-contents: read
 
-      - name: Check out Datalith documentation source
-        uses: actions/checkout@v4
-        with:
-          repository: mycelium-build/datalith
-          ref: ${{ inputs.source_ref }}
-          path: datalith-source
-          token: ${{ steps.app-token.outputs.token }}
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: npm
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+            - name: Check build environment
+              env:
+                  DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
+              run: |
+                  if [ -n "${DATALITH_SOURCE_DIR:-}" ]; then
+                      echo "::error::DATALITH_SOURCE_DIR must not be set in CI"
+                      exit 1
+                  fi
+                  if [ -z "${DATALITH_READ_TOKEN}" ]; then
+                      echo "::error::DATALITH_READ_TOKEN must be set in CI"
+                      exit 1
+                  fi
 
-      - name: Install dependencies
-        run: npm ci
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Build site
-        env:
-          DATALITH_SOURCE_DIR: ${{ github.workspace }}/datalith-source
-          RELEASE_REPOSITORY: mycelium-build/datalith
-          DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
-          SITE_BASE: /datalith-site
-        run: npm run build
+            - name: Lint, format check and test
+              run: npm run lint && npm run fmt:check && npm test
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+            - name: Build site
+              env:
+                  RELEASE_REPOSITORY: mycelium-build/datalith
+                  DATALITH_SOURCE_REF: ${{ inputs.source_ref }}
+                  DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
+                  SITE_BASE: /datalith-site
+              run: npm run build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
+            - name: Configure Pages
+              uses: actions/configure-pages@v5
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            - name: Upload Pages artifact
+              uses: actions/upload-pages-artifact@v4
+              with:
+                  path: dist
+
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4

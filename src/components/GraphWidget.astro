@@ -1,0 +1,289 @@
+---
+import Icon from "./Icon.astro"
+---
+
+<section class="graph-widget" data-graph-widget aria-label="Documentation graph">
+    <svg data-graph-canvas role="img" aria-label="Documentation graph"></svg>
+    <div class="graph-hint">
+        <Icon name="graph" /><span>Drag to pan · scroll to zoom · click a node to open it</span>
+    </div>
+</section>
+
+<script>
+    import { drag } from "d3-drag"
+    import { select } from "d3-selection"
+    import {
+        forceCenter,
+        forceCollide,
+        forceLink,
+        forceManyBody,
+        forceSimulation,
+        type SimulationNodeDatum,
+    } from "d3-force"
+    import { zoom, zoomIdentity } from "d3-zoom"
+
+    import { docUrl } from "../lib/route"
+    import graphData from "../data/graph.json"
+
+    const root = document.querySelector("[data-graph-widget]")
+    if (!root) throw new Error("graph widget missing host")
+
+    interface NodeDatum extends SimulationNodeDatum {
+        id: string
+        label: string
+        route: string
+    }
+    type EdgeDatum = {
+        source: string | NodeDatum
+        target: string | NodeDatum
+    }
+
+    const svg = select(root).select<SVGSVGElement>("[data-graph-canvas]")
+    const g = svg.append<SVGGElement>("g")
+
+    const nodes: NodeDatum[] = graphData.nodes.map((n) => ({ ...n }))
+    const links: EdgeDatum[] = graphData.edges.map((e) => ({ ...e }))
+
+    let w = root.clientWidth
+    let h = root.clientHeight
+    svg.attr("width", w).attr("height", h)
+
+    const degree = (id: string) =>
+        graphData.edges.filter((e) => e.source === id || e.target === id).length
+
+    const link = g.append("g").attr("class", "links").selectAll("line").data(links).join("line")
+
+    let dragged = false
+    let touched = false
+
+    const node = g
+        .append("g")
+        .attr("class", "nodes")
+        .selectAll<SVGGElement, NodeDatum>("g")
+        .data(nodes)
+        .join("g")
+        .attr("tabindex", 0)
+        .attr("role", "link")
+        .attr("aria-label", (d) => d.label)
+        .call(
+            drag<SVGGElement, NodeDatum>()
+                .on("start", (event, d) => {
+                    touched = true
+                    dragged = false
+                    if (!event.active) simulation.alphaTarget(0.3).restart()
+                    d.fx = d.x
+                    d.fy = d.y
+                })
+                .on("drag", (event, d) => {
+                    dragged = true
+                    d.fx = event.x
+                    d.fy = event.y
+                })
+                .on("end", (event, d) => {
+                    if (!event.active) simulation.alphaTarget(0)
+                    d.fx = null
+                    d.fy = null
+                    setTimeout(() => (dragged = false), 0)
+                }),
+        )
+        .on("click", (event, d) => {
+            if (dragged) return
+            window.location.href = docUrl(d.route)
+        })
+        .on("keydown", (event, d) => {
+            if (event.key !== "Enter" && event.key !== " ") return
+            event.preventDefault()
+            window.location.href = docUrl(d.route)
+        })
+
+    node.append("circle").attr("r", (d) => 7 + Math.min(5, degree(d.id)) * 2)
+
+    const label = g.append("g").attr("class", "node-label")
+    label.append("rect").attr("height", 16).attr("rx", 3).attr("y", -12)
+    label.append("text").attr("text-anchor", "middle").attr("y", 0).attr("font-size", 11)
+
+    let hovered: NodeDatum | null = null
+
+    function positionLabel(d: NodeDatum) {
+        const text = label.select<SVGTextElement>("text")
+        const rect = label.select<SVGRectElement>("rect")
+        text.text(d.label)
+        const width = text.node()?.getComputedTextLength() ?? 0
+        rect.attr("width", width + 10).attr("x", -(width + 10) / 2)
+        label.attr("transform", `translate(${d.x},${(d.y ?? 0) + 26})`).style("display", null)
+    }
+
+    const simulation = forceSimulation<NodeDatum>(nodes)
+        .force(
+            "link",
+            forceLink<NodeDatum, EdgeDatum>(links)
+                .id((d) => d.id)
+                .distance(110)
+                .strength(0.45),
+        )
+        .force("charge", forceManyBody<NodeDatum>().strength(-320))
+        .force("center", forceCenter<NodeDatum>(0, 0))
+        .force("collide", forceCollide<NodeDatum>(22))
+        .alphaDecay(0.02)
+        .on("tick", () => {
+            link.attr("x1", (d) => (d.source as NodeDatum).x ?? 0)
+                .attr("y1", (d) => (d.source as NodeDatum).y ?? 0)
+                .attr("x2", (d) => (d.target as NodeDatum).x ?? 0)
+                .attr("y2", (d) => (d.target as NodeDatum).y ?? 0)
+            node.attr("transform", (d) => `translate(${d.x},${d.y})`)
+            if (hovered) positionLabel(hovered)
+        })
+
+    function neighborSet(d: NodeDatum): Set<string> {
+        const set = new Set<string>([d.id])
+        for (const l of link.data()) {
+            const source = l.source as NodeDatum
+            const target = l.target as NodeDatum
+            if (source.id === d.id) set.add(target.id)
+            if (target.id === d.id) set.add(source.id)
+        }
+        return set
+    }
+
+    node.on("mouseenter", (event, d) => {
+        hovered = d
+        const set = neighborSet(d)
+        link.classed("inactive", (l) => {
+            const s = l.source as NodeDatum
+            const t = l.target as NodeDatum
+            return !(set.has(s.id) && set.has(t.id))
+        })
+        link.classed("active", (l) => {
+            const s = l.source as NodeDatum
+            const t = l.target as NodeDatum
+            return set.has(s.id) && set.has(t.id)
+        })
+        node.classed("inactive", (n) => !set.has(n.id))
+        node.classed("active", (n) => n.id === d.id)
+        positionLabel(d)
+    }).on("mouseleave", () => {
+        hovered = null
+        label.style("display", "none")
+        link.classed("inactive", false)
+        link.classed("active", false)
+        node.classed("inactive", false)
+        node.classed("active", false)
+    })
+
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
+        .scaleExtent([0.4, 3])
+        .filter(
+            (event) =>
+                event.type === "wheel" ||
+                (!event.button && !event.ctrlKey && !event.target.closest(".nodes")),
+        )
+        .on("start", (event) => {
+            if (event.sourceEvent) touched = true
+        })
+        .on("zoom", (event) => g.attr("transform", event.transform))
+
+    svg.call(zoomBehavior)
+
+    function fitView() {
+        if (!nodes.length) return
+        const xs = nodes.map((n) => n.x ?? 0)
+        const ys = nodes.map((n) => n.y ?? 0)
+        const cx = (Math.min(...xs) + Math.max(...xs)) / 2
+        const cy = (Math.min(...ys) + Math.max(...ys)) / 2
+        const k = Math.min(1, Math.max(0.55, Math.min(w, h) / 340))
+        svg.call(
+            zoomBehavior.transform,
+            zoomIdentity.translate(w / 2 - cx * k, h / 2 - cy * k).scale(k),
+        )
+    }
+
+    simulation.on("end", () => {
+        if (!touched) fitView()
+    })
+
+    const resizeObserver = new ResizeObserver(() => {
+        const nextW = root.clientWidth
+        const nextH = root.clientHeight
+        if (nextW === w && nextH === h) return
+        w = nextW
+        h = nextH
+        svg.attr("width", w).attr("height", h)
+        const t = svg.property("__zoom") ?? zoomIdentity
+        svg.call(zoomBehavior.transform, zoomIdentity.translate(w / 2, h / 2).scale(t.k))
+    })
+
+    resizeObserver.observe(root)
+    fitView()
+</script>
+
+<style>
+    .graph-widget {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        position: relative;
+
+        :global(svg) {
+            display: block;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        :global(.links line) {
+            stroke: var(--dl-border);
+            stroke-width: 1;
+            opacity: 0.65;
+            transition: opacity 0.15s;
+        }
+        :global(.links line.inactive) {
+            opacity: 0.16;
+        }
+        :global(.links line.active) {
+            stroke: var(--dl-accent);
+            opacity: 1;
+        }
+        :global(.nodes circle) {
+            fill: var(--dl-accent);
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        :global(.nodes g:hover circle),
+        :global(.nodes g.active circle) {
+            stroke: var(--dl-accent);
+            stroke-width: 1.5;
+        }
+        :global(.nodes circle.inactive) {
+            opacity: 0.22;
+        }
+        :global(.nodes g:focus-visible circle) {
+            stroke: var(--dl-fg);
+            stroke-width: 2;
+        }
+        :global(.node-label rect) {
+            fill: var(--dl-surface-alt);
+            stroke: var(--dl-border);
+            stroke-width: 1;
+        }
+        :global(.node-label text) {
+            fill: var(--dl-fg);
+            font-family: var(--font-sans);
+        }
+    }
+
+    .graph-hint {
+        align-items: center;
+        color: var(--dl-muted);
+        display: flex;
+        font-size: 0.72rem;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+
+        .pixel-icon {
+            font-size: 14px;
+        }
+    }
+</style>

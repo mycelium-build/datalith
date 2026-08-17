@@ -1,0 +1,33 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "import"],
+    "categories": { "correctness": "error", "perf": "error", "suspicious": "error" },
+    "rules": {
+        "eqeqeq": ["error", "smart"],
+        "no-unused-vars": ["error", { "ignoreRestSiblings": true }],
+        "no-var": "error",
+        "prefer-const": "error",
+        "prefer-template": "error",
+        "typescript/consistent-type-imports": "error",
+        "typescript/consistent-type-exports": "error",
+        "import/no-duplicates": "error",
+        "import/no-cycle": "error",
+        "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }]
+    },
+    "overrides": [
+        {
+            "files": ["**/*.astro"],
+            "rules": {
+                "sort-imports": [
+                    "error",
+                    {
+                        "ignoreCase": true,
+                        "allowSeparatedGroups": true,
+                        "memberSyntaxSortOrder": ["none", "all", "single", "multiple"]
+                    }
+                ]
+            }
+        }
+    ],
+    "options": { "denyWarnings": true }
+}

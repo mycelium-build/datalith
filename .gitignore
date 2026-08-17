@@ -12,8 +12,10 @@ src/data/search.json
 src/data/logo.txt
 src/data/themes.json
 src/data/themes/
+src/components/Icon.astro
 src/assets/icons/
 public/fonts/
+public/datalith.png
 src/styles/themes.css
 
 # dependencies
@@ -28,6 +30,3 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
-
-# temp
-temp/

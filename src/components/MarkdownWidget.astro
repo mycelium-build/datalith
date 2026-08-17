@@ -1,0 +1,188 @@
+<section class="md-widget" data-md-widget>
+    <div class="md-toolbar">
+        <div class="md-modes" role="group" aria-label="Editor mode">
+            <button type="button" class="is-active" data-md-mode="write">Write</button>
+            <button type="button" data-md-mode="preview">Preview</button>
+        </div>
+    </div>
+    <div class="md-body">
+        <textarea data-md-input spellcheck="false" aria-label="Markdown editor">
+            # Welcome to Datalith A **local-first** workspace for the files that matter. ## Try it -
+            Write with Markdown, [[formats/Markdown|plain text]] - Link notes together with
+            [[Basics|wiki links]] - Visualize them in the [[formats/Graph|graph view]] > Type here,
+            the preview updates as you write. ```md Everything stays a plain file on your machine.
+            ```
+        </textarea>
+        <div class="md-preview md-prose" data-md-preview hidden></div>
+    </div>
+</section>
+
+<script>
+    import { docUrl } from "../lib/route"
+    import searchData from "../data/search.json"
+    import { normalizeTarget, renderMarkdown } from "../lib/markdown"
+
+    const root = document.querySelector("[data-md-widget]")
+    if (!root) throw new Error("markdown widget missing host")
+    const input = root.querySelector<HTMLTextAreaElement>("[data-md-input]")!
+    const preview = root.querySelector<HTMLElement>("[data-md-preview]")!
+    const modes = [...root.querySelectorAll<HTMLButtonElement>("[data-md-mode]")]
+
+    const byPath = new Map(
+        searchData.documents.map((doc) => [
+            doc.route
+                .replace(/^\/docs\/vault\//, "")
+                .replace(/\/$/, "")
+                .toLowerCase(),
+            doc.route,
+        ]),
+    )
+    const byTitle = new Map(searchData.documents.map((doc) => [doc.title.toLowerCase(), doc.route]))
+
+    function resolver(target: string): string | null {
+        const route =
+            byPath.get(normalizeTarget(target)) ?? byTitle.get(normalizeTarget(target)) ?? null
+        return route ? docUrl(route) : null
+    }
+
+    function render() {
+        preview.innerHTML = renderMarkdown(input.value, resolver)
+    }
+
+    function setMode(mode: "write" | "preview") {
+        const isWrite = mode === "write"
+        input.hidden = !isWrite
+        preview.hidden = isWrite
+        for (const button of modes)
+            button.classList.toggle("is-active", button.dataset.mdMode === mode)
+        if (!isWrite) render()
+    }
+
+    for (const button of modes)
+        button.addEventListener("click", () =>
+            setMode(button.dataset.mdMode as "write" | "preview"),
+        )
+</script>
+
+<style is:global>
+    .md-widget {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .md-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 0.6rem;
+    }
+
+    .md-modes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.15rem;
+        background: var(--dl-surface-alt);
+        padding: 0.15rem;
+
+        button {
+            color: var(--dl-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.4rem 0.8rem;
+            &.is-active {
+                background: var(--dl-accent);
+                color: var(--dl-accent-fg);
+            }
+        }
+    }
+
+    .md-body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+
+        textarea {
+            background: var(--dl-surface-alt);
+            border: 0;
+            color: var(--dl-fg);
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            min-height: 0;
+            outline: 0;
+            padding: 0.85rem 0.95rem;
+            resize: none;
+            white-space: pre-wrap;
+            &:focus-visible {
+                outline: 2px solid var(--dl-accent);
+                outline-offset: -2px;
+            }
+        }
+    }
+    .md-preview {
+        background: var(--dl-surface-alt);
+        flex: 1;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0.85rem 0.95rem;
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 0.7rem;
+        }
+        h2 {
+            font-size: 1.15rem;
+            margin: 1rem 0 0.5rem;
+        }
+        h3 {
+            font-size: 1rem;
+            margin: 0.85rem 0 0.4rem;
+        }
+
+        p {
+            margin: 0 0 0.6rem;
+        }
+
+        ul,
+        ol {
+            margin: 0 0 0.6rem;
+            padding-left: 1.3rem;
+        }
+        li {
+            margin: 0.15rem 0;
+        }
+
+        a {
+            text-decoration: underline;
+        }
+
+        code {
+            background: var(--dl-bg);
+            font-size: 0.82em;
+            padding: 0.1rem 0.3rem;
+        }
+        pre {
+            background: var(--dl-bg);
+            margin: 0 0 0.6rem;
+            padding: 0.7rem 0.85rem;
+            overflow-x: auto;
+
+            code {
+                background: transparent;
+                padding: 0;
+            }
+        }
+
+        blockquote {
+            border-inline-start: 3px solid var(--dl-accent);
+            margin: 0 0 0.6rem;
+            padding: 0.1rem 0 0.1rem 0.8rem;
+        }
+    }
+</style>

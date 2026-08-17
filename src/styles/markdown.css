@@ -1,0 +1,51 @@
+/* Shared typography for rendered Markdown (Starlight docs + widget preview). */
+.md-prose,
+.sl-markdown-content {
+    :is(h1, h2, h3, h4, h5, h6) {
+        font-family: var(--font-pixel);
+        font-weight: 700;
+        line-height: 1.15;
+    }
+
+    a {
+        color: var(--dl-accent);
+        text-underline-offset: 3px;
+
+        &:hover {
+            text-decoration-color: var(--dl-accent);
+        }
+    }
+
+    code {
+        font-family: var(--font-mono);
+    }
+
+    :not(pre) > code {
+        color: var(--dl-fg);
+    }
+
+    blockquote {
+        border-inline-start-color: var(--dl-accent);
+        color: var(--dl-muted);
+    }
+
+    hr {
+        border-color: color-mix(in srgb, var(--dl-fg) 12%, transparent);
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th {
+        color: var(--dl-fg);
+    }
+
+    :is(td, th) {
+        border-color: color-mix(in srgb, var(--dl-fg) 14%, transparent);
+    }
+
+    .unresolved {
+        color: var(--dl-muted);
+    }
+}
