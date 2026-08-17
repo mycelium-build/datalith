@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url"
 import { resolveDatalithSource } from "./lib/source.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const { root: sourceRoot, cleanup } = await resolveDatalithSource()
+const { root: sourceRoot } = await resolveDatalithSource()
 const sourceVault = path.join(sourceRoot, "docs", "vault")
 const destinationVault = path.join(siteRoot, "src", "content", "docs", "vault")
 const sourceUrl = "https://github.com/mycelium-build/datalith/blob/main/docs/vault"
@@ -200,8 +200,6 @@ await writeFile(
     path.join(dataDirectory, "search.json"),
     `${JSON.stringify({ documents }, null, 2)}\n`,
 )
-
-await cleanup()
 
 console.log(`Imported ${markdownFiles.length} Markdown files from ${sourceVault}`)
 console.log(
