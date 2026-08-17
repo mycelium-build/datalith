@@ -63,6 +63,9 @@ jobs:
             - name: Lint, format check and test
               run: npm run lint && npm run fmt:check && npm test
 
+            - name: Check license notices
+              run: npm run licenses:check
+
             - name: Build site
               env:
                   RELEASE_REPOSITORY: mycelium-build/datalith
