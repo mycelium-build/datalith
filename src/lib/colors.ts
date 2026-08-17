@@ -1,5 +1,7 @@
-export function rgbToHsl(rgb: [number, number, number]): [number, number, number] {
-	const [r0, g0, b0] = rgb;
+export type RGB = [number, number, number];
+export type HSL = [number, number, number];
+
+export function rgbToHsl([r0, g0, b0]: RGB): HSL {
 	const r = r0 / 255;
 	const g = g0 / 255;
 	const b = b0 / 255;
@@ -20,12 +22,11 @@ export function rgbToHsl(rgb: [number, number, number]): [number, number, number
 	return [h, s, l];
 }
 
-export function hslToRgb(hsl: [number, number, number]): [number, number, number] {
-	const [h, s, l] = hsl;
+export function hslToRgb([h, s, l]: HSL): RGB {
 	const c = (1 - Math.abs(2 * l - 1)) * s;
 	const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
 	const m = l - c / 2;
-	let rgb: [number, number, number];
+	let rgb: RGB;
 	const arm = Math.floor(h * 6) % 6;
 	if (arm === 0) rgb = [c + m, x + m, m];
 	else if (arm === 1) rgb = [x + m, c + m, m];
@@ -33,10 +34,10 @@ export function hslToRgb(hsl: [number, number, number]): [number, number, number
 	else if (arm === 3) rgb = [m, x + m, c + m];
 	else if (arm === 4) rgb = [x + m, m, c + m];
 	else rgb = [c + m, m, x + m];
-	return rgb.map((v) => Math.min(255, Math.max(0, Math.round(v * 255)))) as [number, number, number];
+	return rgb.map((v) => Math.min(255, Math.max(0, Math.round(v * 255)))) as RGB;
 }
 
-export function hexToRgb(hex: string): [number, number, number] {
+export function hexToRgb(hex: string): RGB {
 	const clean = hex.replace('#', '');
 	const value = clean.length === 3 ? clean.split('').map((ch) => ch + ch).join('') : clean;
 	return [
