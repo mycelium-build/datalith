@@ -9,7 +9,7 @@ const sourceRoot = path.resolve(
 )
 
 const copies = [
-    { from: path.join("assets", "datalith.txt"), to: path.join("src", "data", "logo.txt") },
+    { from: path.join("assets", "logo", "datalith.txt"), to: path.join("src", "data", "logo.txt") },
     { from: path.join("assets", "fonts", "Pixeloid"), to: path.join("public", "fonts") },
     { from: path.join("assets", "themes"), to: path.join("src", "data", "themes") },
     { from: path.join("assets", "icons"), to: path.join("src", "assets", "icons") },
