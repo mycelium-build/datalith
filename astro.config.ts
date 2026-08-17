@@ -21,6 +21,7 @@ export default defineConfig({
             customCss: [
                 "./src/styles/base.css",
                 "./src/styles/themes.css",
+                "./src/styles/markdown.css",
                 "./src/styles/starlight.css",
             ],
             components: {
