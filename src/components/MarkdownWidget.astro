@@ -22,9 +22,7 @@
     import searchData from "../data/search.json"
     import { normalizeTarget, renderMarkdown } from "../lib/markdown"
 
-    const root =
-        document.currentScript?.closest("[data-md-widget]") ??
-        document.querySelector("[data-md-widget]")
+    const root = document.querySelector("[data-md-widget]")
     if (!root) throw new Error("markdown widget missing host")
     const input = root.querySelector<HTMLTextAreaElement>("[data-md-input]")!
     const preview = root.querySelector<HTMLElement>("[data-md-preview]")!

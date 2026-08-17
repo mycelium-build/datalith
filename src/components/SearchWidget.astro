@@ -27,9 +27,7 @@ import Icon from "./Icon.astro"
     import searchData from "../data/search.json"
     import { escapeHtml, sanitizeHtml } from "../lib/html"
 
-    const root =
-        document.currentScript?.closest("[data-search-widget]") ??
-        document.querySelector("[data-search-widget]")
+    const root = document.querySelector("[data-search-widget]")
     if (!root) throw new Error("search widget missing host")
     const input = root.querySelector<HTMLInputElement>("[data-search-input]")!
     const body = root.querySelector<HTMLElement>("[data-search-body]")!

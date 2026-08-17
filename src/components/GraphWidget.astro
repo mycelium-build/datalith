@@ -25,9 +25,7 @@ import Icon from "./Icon.astro"
     import { docUrl } from "../lib/route"
     import graphData from "../data/graph.json"
 
-    const root =
-        document.currentScript?.closest("[data-graph-widget]") ??
-        document.querySelector("[data-graph-widget]")
+    const root = document.querySelector("[data-graph-widget]")
     if (!root) throw new Error("graph widget missing host")
 
     interface NodeDatum extends SimulationNodeDatum {
@@ -210,9 +208,7 @@ import Icon from "./Icon.astro"
         w = nextW
         h = nextH
         svg.attr("width", w).attr("height", h)
-        const t = (select(root).property("__zoom") ?? zoomIdentity) as {
-            k: number
-        }
+        const t = svg.property("__zoom") ?? zoomIdentity
         svg.call(zoomBehavior.transform, zoomIdentity.translate(w / 2, h / 2).scale(t.k))
     })
 

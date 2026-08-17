@@ -70,9 +70,7 @@ import Icon from "./Icon.astro"
     import checkIcon from "../assets/icons/check.svg?raw"
     import { escapeHtml, sanitizeHtml } from "../lib/html"
 
-    const root =
-        document.currentScript?.closest("[data-todo-widget]") ??
-        document.querySelector("[data-todo-widget]")
+    const root = document.querySelector("[data-todo-widget]")
     if (!root) throw new Error("todo widget missing host")
     const list = root.querySelector<HTMLUListElement>("[data-todo-list]")!
     const form = root.querySelector<HTMLFormElement>("[data-todo-add]")!
@@ -113,9 +111,15 @@ import Icon from "./Icon.astro"
         const priorityMatch = rest.match(/^\(([A-Z])\)\s*/)
         const priority = priorityMatch ? priorityMatch[1] : null
         if (priority && priorityMatch) rest = rest.slice(priorityMatch[0].length)
-        const dateMatch = rest.match(/^(\d{4}-\d{2}-\d{2})\s*/)
-        const date = dateMatch ? dateMatch[1] : null
-        if (date && dateMatch) rest = rest.slice(dateMatch[0].length)
+        const leadingDate = rest.match(/^(\d{4}-\d{2}-\d{2})\s*/)
+        const dueDate = rest.match(/\bdue:(\d{4}-\d{2}-\d{2})/)
+        const date = leadingDate?.[1] ?? dueDate?.[1] ?? null
+        if (leadingDate) rest = rest.slice(leadingDate[0].length)
+        if (dueDate)
+            rest = rest
+                .replace(/due:\d{4}-\d{2}-\d{2}/, " ")
+                .replace(/\s+/g, " ")
+                .trim()
         const projects = [...rest.matchAll(/\+([\w-]+)/g)].map((match) => match[1])
         const contexts = [...rest.matchAll(/@([\w-]+)/g)].map((match) => match[1])
         const indent = line.match(/^\s*/)![0].length
