@@ -10,6 +10,7 @@ import MarkdownWidget from "../components/MarkdownWidget.astro";
 import TodoWidget from "../components/TodoWidget.astro";
 import GraphWidget from "../components/GraphWidget.astro";
 import stars from "../data/stars.json";
+import { themeInitScript } from "../../scripts/theme-init.ts";
 
 const baseUrl = import.meta.env.BASE_URL;
 const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`;
@@ -28,36 +29,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
         />
         <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
         <title>Datalith · From pixels to knowledge</title>
-        <script is:inline>
-            (function () {
-                var mode = "light";
-                var id = "datalith-light";
-                try {
-                    var raw = localStorage.getItem("datalith:theme");
-                    if (raw) {
-                        var parsed = JSON.parse(raw);
-                        if (parsed.mode === "dark") mode = "dark";
-                    } else if (
-                        window.matchMedia &&
-                        window.matchMedia("(prefers-color-scheme: dark)")
-                            .matches
-                    ) {
-                        mode = "dark";
-                    }
-                    raw = localStorage.getItem("datalith:theme");
-                    if (raw) {
-                        var parsed = JSON.parse(raw);
-                        id =
-                            (mode === "dark" ? parsed.dark : parsed.light) ||
-                            id;
-                    }
-                } catch (error) {
-                    /* ignore storage errors */
-                }
-                document.documentElement.dataset.datalithTheme = id;
-                document.documentElement.dataset.mode = mode;
-            })();
-        </script>
+        <script is:inline set:html={themeInitScript} />
     </head>
     <body>
         <div class="page-shell">
@@ -136,7 +108,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 The enchanted monolith<br/>that remembers.
                             </h2>
                             <p>
-                                Datalith's is a monolith, enchanted to find and visual every note you have ever written.
+                                Datalith is a monolith, enchanted to find and visualize every note you have ever written.
                                 A note is a pixel, a link between two notes another.
                                 Tend them, and the picture sharpens into focus:
                                 a private personal encyclopedia, one of a kind, built to outlast any app, service, or trend.
@@ -217,7 +189,7 @@ const starCount = Number(stars.stargazersCount ?? 0);
                                 <div>
                                     <h2 class="display">Local first</h2>
                                     <p>
-                                        Your Vault is a folder you own with open formats file that outlive apps.<br/>
+                                        Your Vault is a folder you own, with open format files that outlive apps.<br/>
                                         Your encyclopedia can never be taken from you.
                                     </p>
                                 </div>
