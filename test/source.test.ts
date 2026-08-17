@@ -29,7 +29,6 @@ describe("resolveDatalithSource", () => {
         vi.stubEnv("CI", undefined)
         const source = await resolveDatalithSource()
         expect(source.root).toBe("/tmp/datalith-vault")
-        await source.cleanup()
     })
 
     it("throws when CI is set without a source dir or token", async () => {
@@ -45,6 +44,5 @@ describe("resolveDatalithSource", () => {
         vi.stubEnv("CI", undefined)
         const source = await resolveDatalithSource()
         expect(source.root.endsWith(path.join("datalith"))).toBe(true)
-        await source.cleanup()
     })
 })

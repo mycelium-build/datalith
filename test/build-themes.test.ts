@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 
-import { translateTheme, slug, CURATED_LIGHT, CURATED_DARK } from "../scripts/lib/themes.ts"
+import {
+    cssDeclarationLines,
+    translateTheme,
+    slug,
+    CURATED_LIGHT,
+    CURATED_DARK,
+} from "../scripts/lib/themes.ts"
 
 describe("translateTheme", () => {
     it("prefers primary.background over accent.background for the accent", () => {
@@ -74,5 +80,19 @@ describe("curated theme lists", () => {
     it("keeps the light and dark lists disjoint", () => {
         const overlap = CURATED_LIGHT.filter((name) => CURATED_DARK.includes(name))
         expect(overlap).toEqual([])
+    })
+})
+
+describe("cssDeclarationLines", () => {
+    it("only emits custom properties, never metadata keys", () => {
+        const variables = translateTheme({ name: "A", colors: {} }, "dark")
+        const lines = cssDeclarationLines(variables)
+        expect(lines.split("\n").every((line) => line.trim().startsWith("--"))).toBe(true)
+        expect(lines).not.toContain("\tmode:")
+        expect(lines).not.toContain("\taccent:")
+        expect(lines).not.toContain("\tfg:")
+        expect(lines).not.toContain("\tbg:")
+        expect(lines).toContain("--dl-bg:")
+        expect(lines).toContain("--dl-accent:")
     })
 })
