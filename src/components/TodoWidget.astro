@@ -75,6 +75,7 @@ import Icon from "./Icon.astro";
     import arrowDownAZIcon from "../assets/icons/arrow-down-a-z.svg?raw";
     import arrowUpAZIcon from "../assets/icons/arrow-up-a-z.svg?raw";
     import checkIcon from "../assets/icons/check.svg?raw";
+    import { escapeHtml, sanitizeHtml } from "../lib/html";
 
     const root =
         document.currentScript?.closest("[data-todo-widget]") ??
@@ -184,24 +185,28 @@ import Icon from "./Icon.astro";
             .map((c) => pill(`@${c}`, "var(--dl-green)"))
             .join("");
         return `
-			<li class="${classes}" data-todo-index="${index}">
+			<li class="${classes}" data-todo-index="${index}" tabindex="0" role="button" aria-label="Toggle task: ${escapeHtml(description)}">
 				<span class="todo-check" aria-hidden="true">${done ? checkIcon : ""}</span>
 				${priorityBadge}
 				${date ? `<time class="todo-date">${date}</time>` : ""}
-				<span class="todo-text">${description}</span>
+				<span class="todo-text">${escapeHtml(description)}</span>
 				${projectPills}${contextPills}
 			</li>`;
     }
 
     function visibleTasks() {
-        const parsed = tasks.map(parseLine);
+        const parsed = tasks.map((line, index) => ({
+            task: parseLine(line),
+            index,
+        }));
         let shown = parsed.filter(
-            (task) => filter === "all" || (filter === "done") === task.done,
+            ({ task }) =>
+                filter === "all" || (filter === "done") === task.done,
         );
         if (search.trim()) {
             const q = search.trim().toLowerCase();
             shown = shown.filter(
-                (task) =>
+                ({ task }) =>
                     task.description.toLowerCase().includes(q) ||
                     task.projects.some((p) => p.toLowerCase().includes(q)) ||
                     task.contexts.some((c) => c.toLowerCase().includes(q)),
@@ -213,14 +218,16 @@ import Icon from "./Icon.astro";
         shown.sort((a, b) => {
             if (sort === "priority")
                 return (
-                    (priorityRank(a.priority) - priorityRank(b.priority)) * dir
+                    (priorityRank(a.task.priority) -
+                        priorityRank(b.task.priority)) *
+                    dir
                 );
             if (sort === "date") {
-                const da = a.date ?? "9999-99-99";
-                const db = b.date ?? "9999-99-99";
+                const da = a.task.date ?? "9999-99-99";
+                const db = b.task.date ?? "9999-99-99";
                 return da.localeCompare(db) * dir;
             }
-            return a.description.localeCompare(b.description) * dir;
+            return a.task.description.localeCompare(b.task.description) * dir;
         });
         return shown;
     }
@@ -232,13 +239,22 @@ import Icon from "./Icon.astro";
         progress.style.width =
             total > 0 ? `${Math.round((done / total) * 100)}%` : "0%";
         list.innerHTML = shown.length
-            ? shown
-                  .map((task, index) =>
-                      renderLine(task, tasks.indexOf(task.line)),
-                  )
-                  .join("")
+            ? sanitizeHtml(
+                  shown
+                      .map(({ task, index }) => renderLine(task, index))
+                      .join(""),
+              )
             : '<li class="todo-empty">No tasks to display</li>';
         sortDirButton.setAttribute("aria-pressed", String(descending));
+    }
+
+    function toggleTask(index: number) {
+        const line = tasks[index];
+        if (line === undefined) return;
+        tasks[index] = /^\s*x\s+/.test(line)
+            ? line.replace(/^\s*x\s+/, "")
+            : `x ${line}`;
+        render();
     }
 
     list.addEventListener("click", (event) => {
@@ -246,12 +262,17 @@ import Icon from "./Icon.astro";
             "[data-todo-index]",
         );
         if (!row) return;
-        const index = Number(row.dataset.todoIndex);
-        const line = tasks[index];
-        tasks[index] = /^\s*x\s+/.test(line)
-            ? line.replace(/^\s*x\s+/, "")
-            : `x ${line}`;
-        render();
+        toggleTask(Number(row.dataset.todoIndex));
+    });
+
+    list.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const row = (event.target as HTMLElement).closest<HTMLLIElement>(
+            "[data-todo-index]",
+        );
+        if (!row) return;
+        event.preventDefault();
+        toggleTask(Number(row.dataset.todoIndex));
     });
 
     filterSelect.addEventListener("change", () => {
@@ -499,6 +520,10 @@ import Icon from "./Icon.astro";
         min-height: 2rem;
         &:hover {
             background: color-mix(in srgb, var(--dl-accent) 10%, transparent);
+        }
+        &:focus-visible {
+            outline: 2px solid var(--dl-accent);
+            outline-offset: -2px;
         }
         &.is-done {
             .todo-check {
