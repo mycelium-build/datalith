@@ -38,19 +38,24 @@ jobs:
                   repositories: datalith
                   permission-contents: read
 
-            - name: Check out Datalith documentation source
-              uses: actions/checkout@v4
-              with:
-                  repository: mycelium-build/datalith
-                  ref: ${{ inputs.source_ref }}
-                  path: datalith-source
-                  token: ${{ steps.app-token.outputs.token }}
-
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: 24
                   cache: npm
+
+            - name: Check build environment
+              env:
+                  DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
+              run: |
+                  if [ -n "${DATALITH_SOURCE_DIR:-}" ]; then
+                      echo "::error::DATALITH_SOURCE_DIR must not be set in CI"
+                      exit 1
+                  fi
+                  if [ -z "${DATALITH_READ_TOKEN}" ]; then
+                      echo "::error::DATALITH_READ_TOKEN must be set in CI"
+                      exit 1
+                  fi
 
             - name: Install dependencies
               run: npm ci
@@ -60,8 +65,8 @@ jobs:
 
             - name: Build site
               env:
-                  DATALITH_SOURCE_DIR: ${{ github.workspace }}/datalith-source
                   RELEASE_REPOSITORY: mycelium-build/datalith
+                  DATALITH_SOURCE_REF: ${{ inputs.source_ref }}
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
                   SITE_BASE: /datalith-site
               run: npm run build
