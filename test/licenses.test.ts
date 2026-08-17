@@ -15,15 +15,25 @@ describe("THIRD-PARTY-NOTICES.md", () => {
         const lockfile = await readJson("package-lock.json")
         const packages = lockfile.packages as Record<
             string,
-            { version?: string; license?: string; dev?: boolean }
+            {
+                version?: string
+                license?: string
+                dev?: boolean
+                optional?: boolean
+                devOptional?: boolean
+            }
         >
         const notice = await readFile(path.join(siteRoot, "THIRD-PARTY-NOTICES.md"), "utf8")
 
         const missing: string[] = []
         for (const [key, info] of Object.entries(packages)) {
             if (key === "") continue
-            if (info.dev) continue
-            const name = key.replace(/^node_modules\//, "")
+            if (info.dev || info.optional || info.devOptional) continue
+            const name =
+                key
+                    .replace(/^node_modules\//, "")
+                    .split("/node_modules/")
+                    .pop() ?? key
             const display = `\`${name}\` ${info.version}`
             if (!notice.includes(display)) missing.push(display)
         }
