@@ -25,6 +25,7 @@ import Icon from "./Icon.astro";
     import searchData from "../data/search.json";
     import fileIcon from "../assets/icons/file.svg?raw";
     import { docUrl } from "../lib/route";
+    import { escapeHtml, sanitizeHtml } from "../lib/html";
 
     const root =
         document.currentScript?.closest("[data-search-widget]") ??
@@ -62,20 +63,6 @@ import Icon from "./Icon.astro";
         const slice = content.slice(start, start + 140);
         const lead = start > 0 ? "…" : "";
         return lead + slice;
-    }
-
-    function escapeHtml(text: string): string {
-        return text.replace(
-            /[&<>"']/g,
-            (ch) =>
-                ({
-                    "&": "&amp;",
-                    "<": "&lt;",
-                    ">": "&gt;",
-                    '"': "&quot;",
-                    "'": "&#39;",
-                })[ch]!,
-        );
     }
 
     function highlight(text: string, query: string): string {
@@ -122,9 +109,10 @@ import Icon from "./Icon.astro";
                 '<li class="search-empty">No matches — try another term.</li>';
             return;
         }
-        list.innerHTML = results
-            .map(
-                ({ doc }) => `
+        list.innerHTML = sanitizeHtml(
+            results
+                .map(
+                    ({ doc }) => `
 				<li>
 					<a href="${docUrl(doc.route)}">
 						<span class="result-line">
@@ -135,11 +123,16 @@ import Icon from "./Icon.astro";
 						<span class="result-snippet">${highlight(snippet(doc.content, q), q)}</span>
 					</a>
 				</li>`,
-            )
-            .join("");
+                )
+                .join(""),
+        );
     }
 
-    input.addEventListener("input", () => render(input.value));
+    let inputTimer: number | undefined;
+    input.addEventListener("input", () => {
+        window.clearTimeout(inputTimer);
+        inputTimer = window.setTimeout(() => render(input.value), 120);
+    });
     input.addEventListener("blur", () => {
         setTimeout(() => {
             if (!root.contains(document.activeElement)) {
