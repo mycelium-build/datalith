@@ -1,0 +1,68 @@
+import { execFile } from "node:child_process"
+import { mkdtemp, rm } from "node:fs/promises"
+import os from "node:os"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import { promisify } from "node:util"
+
+const execFileAsync = promisify(execFile)
+
+const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
+const DEFAULT_REPOSITORY = "mycelium-build/datalith"
+const DEFAULT_SOURCE_REF = "main"
+
+export interface DatalithSource {
+    root: string
+    cleanup: () => Promise<void>
+}
+
+export function resolveLocalSource(): string {
+    const sourceDir = process.env.DATALITH_SOURCE_DIR
+    if (sourceDir) {
+        if (process.env.CI) {
+            throw new Error(
+                "DATALITH_SOURCE_DIR must not be set in CI: documentation and assets are fetched with DATALITH_READ_TOKEN",
+            )
+        }
+        return path.resolve(sourceDir)
+    }
+    return path.join(siteRoot, "..", "datalith")
+}
+
+export async function resolveDatalithSource(): Promise<DatalithSource> {
+    if (process.env.DATALITH_SOURCE_DIR) {
+        return { root: resolveLocalSource(), cleanup: async () => {} }
+    }
+
+    const token = process.env.DATALITH_READ_TOKEN
+    if (token) return cloneRepository(token)
+
+    if (process.env.CI) {
+        throw new Error("DATALITH_READ_TOKEN must be set in CI")
+    }
+    return { root: path.join(siteRoot, "..", "datalith"), cleanup: async () => {} }
+}
+
+async function cloneRepository(token: string): Promise<DatalithSource> {
+    const repository = process.env.RELEASE_REPOSITORY ?? DEFAULT_REPOSITORY
+    const ref = process.env.DATALITH_SOURCE_REF ?? DEFAULT_SOURCE_REF
+    const directory = await mkdtemp(path.join(os.tmpdir(), "datalith-site-"))
+    const url = `https://x-access-token:${token}@github.com/${repository}.git`
+    await execFileAsync("git", [
+        "clone",
+        "--depth",
+        "1",
+        "--single-branch",
+        "--branch",
+        ref,
+        url,
+        directory,
+    ])
+    console.log(`Cloned ${repository}@${ref} into ${directory}`)
+    return {
+        root: directory,
+        cleanup: async () => {
+            await rm(directory, { recursive: true, force: true })
+        },
+    }
+}

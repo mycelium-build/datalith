@@ -3,10 +3,10 @@ import { mkdir, readdir, copyFile, rm, stat } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { resolveDatalithSource } from "./lib/source.ts"
+
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const sourceRoot = path.resolve(
-    process.env.DATALITH_SOURCE_DIR ?? path.join(siteRoot, "..", "datalith"),
-)
+const { root: sourceRoot, cleanup } = await resolveDatalithSource()
 
 const copies = [
     { from: path.join("assets", "logo", "datalith.txt"), to: path.join("src", "data", "logo.txt") },
@@ -44,5 +44,7 @@ for (const { from, to } of copies) {
     await rm(destinationPath, { recursive: true, force: true })
     copiedCount += await copyTree(sourcePath, destinationPath)
 }
+
+await cleanup()
 
 console.log(`Synced ${copiedCount} asset files from ${sourceRoot}`)
