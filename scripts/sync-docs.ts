@@ -8,9 +8,9 @@ const sourceVault = path.join(sourceRoot, 'docs', 'vault');
 const destinationVault = path.join(siteRoot, 'src', 'content', 'docs', 'vault');
 const sourceUrl = 'https://github.com/mycelium-build/datalith/blob/main/docs/vault';
 
-const markdownFiles = [];
+const markdownFiles: string[] = [];
 
-async function collectMarkdown(directory, relativeDirectory = '') {
+async function collectMarkdown(directory: string, relativeDirectory = ''): Promise<void> {
 	for (const entry of await readdir(directory, { withFileTypes: true })) {
 		const relativePath = path.join(relativeDirectory, entry.name);
 		const absolutePath = path.join(directory, entry.name);
@@ -19,25 +19,30 @@ async function collectMarkdown(directory, relativeDirectory = '') {
 	}
 }
 
-function titleFromMarkdown(markdown, fallback) {
+function titleFromMarkdown(markdown: string, fallback: string): string {
 	const heading = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim();
 	return heading ?? fallback;
 }
 
-function parseFrontmatter(markdown) {
+function parseFrontmatter(markdown: string): { body: string; frontmatter: string } {
 	const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
 	if (!match) return { body: markdown, frontmatter: '' };
 	return { body: markdown.slice(match[0].length), frontmatter: match[1] };
 }
 
-function routeFor(relativePath) {
+function routeFor(relativePath: string): string {
 	const withoutExtension = relativePath.replace(/\.md$/i, '');
 	return `docs/vault/${withoutExtension.split(path.sep).map((segment) => segment.toLowerCase()).join('/')}`;
 }
 
-function buildDocumentIndex() {
-	const byPath = new Map();
-	const byStem = new Map();
+interface DocumentIndex {
+	byPath: Map<string, string>;
+	byStem: Map<string, Array<{ normalizedPath: string; route: string }>>;
+}
+
+function buildDocumentIndex(): DocumentIndex {
+	const byPath = new Map<string, string>();
+	const byStem = new Map<string, Array<{ normalizedPath: string; route: string }>>();
 	for (const relativePath of markdownFiles) {
 		const normalizedPath = relativePath.split(path.sep).join('/').replace(/\.md$/i, '');
 		const route = routeFor(relativePath);
@@ -50,7 +55,7 @@ function buildDocumentIndex() {
 	return { byPath, byStem };
 }
 
-function wikiTarget(target, currentPath, index) {
+function wikiTarget(target: string, currentPath: string, index: DocumentIndex): string {
 	const normalizedTarget = target.trim().replace(/^\.\//, '').replace(/\.(md|todotxt|graph)$/i, '');
 	if (/^https?:\/\//i.test(normalizedTarget)) return normalizedTarget;
 
@@ -68,13 +73,13 @@ function wikiTarget(target, currentPath, index) {
 	return `${sourceUrl}/${target.replaceAll('\\', '/')}`;
 }
 
-function relativeMarkdownLink(currentRoute, targetRoute) {
+function relativeMarkdownLink(currentRoute: string, targetRoute: string): string {
 	const fromDirectory = `/${currentRoute}`;
 	const relative = path.posix.relative(fromDirectory, `/${targetRoute}`);
 	return `${relative || '.'}/`;
 }
 
-function rewriteWikiLinks(markdown, currentPath, index, edges) {
+function rewriteWikiLinks(markdown: string, currentPath: string, index: DocumentIndex, edges: Set<string>): string {
 	const currentRoute = routeFor(currentPath);
 	let inFence = false;
 	return markdown
@@ -104,7 +109,7 @@ function rewriteWikiLinks(markdown, currentPath, index, edges) {
 		.join('\n');
 }
 
-function searchContent(markdown) {
+function searchContent(markdown: string): string {
 	return markdown
 		.replace(/^---[\s\S]*?---\r?\n?/, '')
 		.replace(/```[\s\S]*?```/g, ' ')
@@ -115,7 +120,7 @@ function searchContent(markdown) {
 		.trim();
 }
 
-function addStarlightFrontmatter(markdown, relativePath) {
+function addStarlightFrontmatter(markdown: string, relativePath: string): string {
 	const { body, frontmatter } = parseFrontmatter(markdown);
 	const title = titleFromMarkdown(body, path.basename(relativePath, '.md'));
 	const route = routeFor(relativePath);
@@ -130,8 +135,8 @@ const index = buildDocumentIndex();
 await rm(destinationVault, { recursive: true, force: true });
 await mkdir(destinationVault, { recursive: true });
 
-const edges = new Set();
-const documents = [];
+const edges = new Set<string>();
+const documents: Array<{ route: string; name: string; path: string; title: string; content: string }> = [];
 
 for (const relativePath of markdownFiles) {
 	const sourcePath = path.join(sourceVault, relativePath);

@@ -14,7 +14,7 @@ const copies = [
 
 const extensions = /\.(svg|json|txt|ttf)$/i;
 
-async function copyTree(sourcePath, destinationPath) {
+async function copyTree(sourcePath: string, destinationPath: string): Promise<number> {
 	const info = await stat(sourcePath);
 	if (info.isFile()) {
 		await mkdir(path.dirname(destinationPath), { recursive: true });
