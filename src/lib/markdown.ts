@@ -1,16 +1,11 @@
 import { Marked } from 'marked';
+import { escapeHtml, sanitizeHtml } from './html';
 
 export type RouteResolver = (target: string) => string | null;
 
-function escapeHtml(text: string): string {
-	return text
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;');
-}
-
 const WIKILINK = /^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/;
+
+const rendererCache = new WeakMap<RouteResolver, Marked>();
 
 function createRenderer(resolver: RouteResolver): Marked {
 	const md = new Marked({ gfm: true, breaks: false });
@@ -48,5 +43,10 @@ function createRenderer(resolver: RouteResolver): Marked {
 }
 
 export function renderMarkdown(source: string, resolver: RouteResolver = () => null): string {
-	return createRenderer(resolver).parse(source, { async: false });
+	let md = rendererCache.get(resolver);
+	if (!md) {
+		md = createRenderer(resolver);
+		rendererCache.set(resolver, md);
+	}
+	return sanitizeHtml(md.parse(source, { async: false }));
 }

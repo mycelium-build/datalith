@@ -1,5 +1,5 @@
 import logoSource from '../data/logo.txt?raw';
-import { whiten } from './whiten';
+import { whiten } from './colors.ts';
 
 const TIER_COLORS: Record<string, string> = {
 	M: 'light',
