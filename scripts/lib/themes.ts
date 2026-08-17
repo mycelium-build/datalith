@@ -48,6 +48,13 @@ export function slug(name: string): string {
         .replace(/^-+|-+$/g, "")
 }
 
+export function cssDeclarationLines(variables: ThemeVariables): string {
+    return Object.entries(variables)
+        .filter(([name]) => name.startsWith("--"))
+        .map(([name, value]) => `\t${name}: ${value};`)
+        .join("\n")
+}
+
 export function translateTheme(entry: ThemeEntry, mode: ThemeMode): ThemeVariables {
     const colors = entry.colors ?? {}
     const highlight = entry.highlight ?? {}
