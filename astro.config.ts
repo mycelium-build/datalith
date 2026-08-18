@@ -15,7 +15,7 @@ export default defineConfig({
                 {
                     icon: "github",
                     label: "GitHub",
-                    href: "https://github.com/mycelium-build/datalith",
+                    href: "https://github.com/mycelium-build/datalith-app",
                 },
             ],
             customCss: [

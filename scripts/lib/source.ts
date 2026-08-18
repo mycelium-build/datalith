@@ -8,7 +8,7 @@ import { promisify } from "node:util"
 const execFileAsync = promisify(execFile)
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
-const DEFAULT_REPOSITORY = "mycelium-build/datalith"
+const DEFAULT_REPOSITORY = "mycelium-build/datalith-app"
 const DEFAULT_SOURCE_REF = "main"
 // Deterministic temp clone so every prebuild step shares one checkout instead of cloning the repository once per script.
 // Reused across steps; replaced when the ref changes (stale marker).

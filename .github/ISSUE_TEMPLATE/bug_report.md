@@ -28,7 +28,7 @@ If applicable, paste the full browser console or network error. Remove any token
 - OS and version: [e.g. macOS 15, Windows 11, Ubuntu 24.04]
 - Site URL or commit: [e.g. production site or local branch]
 
-If this concerns the Datalith desktop application rather than this website, please report it in the [Datalith issue tracker](https://github.com/mycelium-build/datalith/issues).
+If this concerns the Datalith desktop application rather than this website, please report it in the [Datalith issue tracker](https://github.com/mycelium-build/datalith-app/issues).
 
 **Additional context**  
 Add any other context about the problem here.

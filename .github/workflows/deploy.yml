@@ -89,7 +89,7 @@ jobs:
 
             - name: Build site
               env:
-                  RELEASE_REPOSITORY: mycelium-build/datalith
+                  RELEASE_REPOSITORY: mycelium-build/datalith-app
                   DATALITH_SOURCE_REF: ${{ inputs.source_ref || 'main' }}
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
                   SITE_BASE: /datalith-site

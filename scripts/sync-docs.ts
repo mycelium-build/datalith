@@ -9,7 +9,7 @@ const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const { root: sourceRoot } = await resolveDatalithSource()
 const sourceVault = path.join(sourceRoot, "docs", "vault")
 const destinationVault = path.join(siteRoot, "src", "content", "docs", "vault")
-const sourceUrl = "https://github.com/mycelium-build/datalith/blob/main/docs/vault"
+const sourceUrl = "https://github.com/mycelium-build/datalith-app/blob/main/docs/vault"
 
 const markdownFiles: string[] = []
 

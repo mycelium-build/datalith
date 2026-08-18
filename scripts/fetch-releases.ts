@@ -6,7 +6,7 @@ import { compareVersions, platformForAsset, versionParts } from "./lib/releases.
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const outputPath = path.join(siteRoot, "src", "data", "releases.json")
-const repository = process.env.RELEASE_REPOSITORY ?? "mycelium-build/datalith"
+const repository = process.env.RELEASE_REPOSITORY ?? "mycelium-build/datalith-app"
 const endpoint = `https://api.github.com/repos/${repository}/releases?per_page=100`
 const token = process.env.DATALITH_READ_TOKEN ?? process.env.GITHUB_TOKEN
 const includeDrafts = process.env.INCLUDE_DRAFT_RELEASES === "true"
