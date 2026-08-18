@@ -1,0 +1,88 @@
+---
+import "../styles/base.css"
+import "../styles/themes.css"
+
+import Icon from "../components/Icon.astro"
+import stars from "../data/stars.json"
+import { themeInitScript } from "../../scripts/theme-init.ts"
+
+interface Props {
+    title: string
+    description?: string
+}
+
+const { title, description } = Astro.props
+
+const baseUrl = import.meta.env.BASE_URL
+const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`
+const githubUrl = "https://github.com/mycelium-build/datalith"
+const privacyUrl = `${baseUrl.replace(/\/$/, "")}/privacy/`
+const termsUrl = `${baseUrl.replace(/\/$/, "")}/terms/`
+const noticesUrl = `${baseUrl.replace(/\/$/, "")}/notices/`
+const starCount = Number(stars.stargazersCount ?? 0)
+---
+
+<!doctype html>
+<html lang="en" data-datalith-theme="datalith-light" data-mode="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        {description && <meta name="description" content={description} />}
+        <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
+        <title>{title}</title>
+        <script is:inline set:html={themeInitScript} />
+    </head>
+    <body>
+        <div class="page-shell">
+            <header class="site-header">
+                <a class="brand" href={baseUrl}>Datalith</a>
+                <nav aria-label="Main navigation">
+                    <a href={docsUrl}>Documentation</a>
+                    <a class="github-link" href={githubUrl} target="_blank" rel="noreferrer">
+                        <Icon name="star" />
+                        <span>GitHub</span>
+                        {
+                            starCount > 0 && (
+                                <span class="star-count" aria-label={`${starCount} stars`}>
+                                    {starCount}
+                                </span>
+                            )
+                        }
+                    </a>
+                </nav>
+            </header>
+
+            <main>
+                <slot />
+            </main>
+
+            <footer class="site-footer">
+                <span>© {new Date().getFullYear()} Datalith</span>
+                <a href={privacyUrl}>Privacy</a>
+                <a href={termsUrl}>Terms</a>
+                <a href={noticesUrl}>Third-party notices</a>
+                <span>Built pixel by pixel.</span>
+            </footer>
+        </div>
+    </body>
+</html>
+
+<style>
+    .github-link {
+        align-items: center;
+        display: inline-flex;
+        gap: 0.4rem;
+
+        .pixel-icon {
+            color: var(--dl-yellow);
+            font-size: 14px;
+        }
+    }
+
+    .star-count {
+        background: var(--dl-surface-alt);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.12rem 0.4rem;
+    }
+</style>
