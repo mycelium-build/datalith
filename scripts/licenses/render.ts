@@ -21,28 +21,46 @@ function firstLine(content: string): string | undefined {
         .find((line) => line.length > 0)
 }
 
+// Keep generated notices ordered identically across locales and CI runners.
+function compareStrings(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0
+}
+
+function shortTitle(content: string): string {
+    const title = (firstLine(content) ?? "License")
+        .replace(/^#+\s*/, "")
+        .replace(/\s+/g, " ")
+        .trim()
+    if (!title) return "License"
+    return title.length > 80 ? `${title.slice(0, 77).trimEnd()}...` : title
+}
+
+function normalizeLicenseText(content: string): string {
+    return content.replace(/[ \t]+$/gm, "").trim()
+}
+
 function renderLicense(license: ILicense): string[] {
-    const lines: string[] = [`### ${firstLine(license.content) ?? "License"}`]
+    const lines: string[] = [`### ${shortTitle(license.content)}`]
     lines.push("")
     lines.push("Used by:")
     lines.push("")
     for (const dependency of [...license.dependencies].sort((a, b) => {
         const [nameA, versionA] = splitDependency(a)
         const [nameB, versionB] = splitDependency(b)
-        return nameA.localeCompare(nameB) || versionA.localeCompare(versionB)
+        return compareStrings(nameA, nameB) || compareStrings(versionA, versionB)
     })) {
         const [name, version] = splitDependency(dependency)
         lines.push(version ? `- \`${name}\` ${version}` : `- \`${name}\``)
     }
     lines.push("")
     lines.push("```")
-    lines.push(license.content.trim())
+    lines.push(normalizeLicenseText(license.content))
     if (license.notices.length > 0) {
         lines.push("")
         lines.push("With the following notices:")
         lines.push("")
         for (const notice of license.notices) {
-            lines.push(notice.trim())
+            lines.push(normalizeLicenseText(notice))
         }
     }
     lines.push("```")
@@ -54,7 +72,7 @@ async function renderNpmDependencies(): Promise<string> {
     const licenses = await getProjectLicenses(path.join(siteRoot, "package.json"), {
         replace: { dompurify: "./node_modules/dompurify/LICENSE" },
     })
-    const ordered = [...licenses].sort((a, b) => a.content.localeCompare(b.content))
+    const ordered = [...licenses].sort((a, b) => compareStrings(a.content, b.content))
 
     const lines: string[] = [
         "## npm dependencies",
