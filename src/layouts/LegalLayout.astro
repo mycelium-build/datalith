@@ -1,0 +1,57 @@
+---
+import "../styles/base.css"
+import "../styles/themes.css"
+import "../styles/legal.css"
+
+import { themeInitScript } from "../../scripts/theme-init.ts"
+
+interface Props {
+    title: string
+    description?: string
+}
+
+const { title, description } = Astro.props
+const baseUrl = import.meta.env.BASE_URL
+const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`
+const githubUrl = "https://github.com/mycelium-build/datalith"
+const privacyUrl = `${baseUrl.replace(/\/$/, "")}/privacy/`
+const termsUrl = `${baseUrl.replace(/\/$/, "")}/terms/`
+const noticesUrl = `${baseUrl.replace(/\/$/, "")}/notices/`
+---
+
+<!doctype html>
+<html lang="en" data-datalith-theme="datalith-light" data-mode="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        {description && <meta name="description" content={description} />}
+        <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
+        <title>{title} · Datalith</title>
+        <script is:inline set:html={themeInitScript} />
+    </head>
+    <body>
+        <div class="page-shell">
+            <header class="site-header">
+                <a class="brand" href={baseUrl}>Datalith</a>
+                <nav aria-label="Main navigation">
+                    <a href={docsUrl}>Documentation</a>
+                    <a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
+                </nav>
+            </header>
+
+            <main>
+                <div class="legal-shell">
+                    <slot />
+                </div>
+            </main>
+
+            <footer class="site-footer">
+                <span>© {new Date().getFullYear()} Datalith</span>
+                <a href={privacyUrl}>Privacy</a>
+                <a href={termsUrl}>Terms</a>
+                <a href={noticesUrl}>Third-party notices</a>
+                <span>Built pixel by pixel.</span>
+            </footer>
+        </div>
+    </body>
+</html>
