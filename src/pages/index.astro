@@ -1,6 +1,4 @@
 ---
-import "../styles/base.css"
-import "../styles/themes.css"
 import "../styles/markdown.css"
 
 import DownloadPanel from "../components/DownloadPanel.astro"
@@ -9,11 +7,11 @@ import Icon from "../components/Icon.astro"
 import MarkdownWidget from "../components/MarkdownWidget.astro"
 import MonolithLogo from "../components/MonolithLogo.astro"
 import SearchWidget from "../components/SearchWidget.astro"
+import SiteLayout from "../layouts/SiteLayout.astro"
 import ThemePicker from "../components/ThemePicker.astro"
 import TodoWidget from "../components/TodoWidget.astro"
 
 import stars from "../data/stars.json"
-import { themeInitScript } from "../../scripts/theme-init.ts"
 
 const baseUrl = import.meta.env.BASE_URL
 const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`
@@ -21,260 +19,210 @@ const githubUrl = "https://github.com/mycelium-build/datalith"
 const starCount = Number(stars.stargazersCount ?? 0)
 ---
 
-<!doctype html>
-<html lang="en" data-datalith-theme="datalith-light" data-mode="light">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
-        <meta
-            name="description"
-            content="Datalith is a fast, local-first Vault for notes, tasks and linked ideas. Search, visualize, and keep them in a private encyclopedia that lasts."
-        />
-        <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
-        <title>Datalith · From pixels to knowledge</title>
-        <script is:inline set:html={themeInitScript} />
-    </head>
-    <body>
-        <div class="page-shell">
-            <header class="site-header">
-                <a class="brand" href={baseUrl}>Datalith</a>
-                <nav aria-label="Main navigation">
-                    <a href={docsUrl}>Documentation</a>
-                    <a class="github-link" href={githubUrl} target="_blank" rel="noreferrer">
-                        <Icon name="star" />
-                        <span>GitHub</span>
-                        {
-                            starCount > 0 && (
-                                <span class="star-count" aria-label={`${starCount} stars`}>
-                                    {starCount}
-                                </span>
-                            )
-                        }
-                    </a>
-                </nav>
-            </header>
-
-            <main>
-                <section class="hero" aria-label="Datalith">
-                    <div class="hero-grid">
-                        <div class="hero-logo" aria-hidden="true">
-                            <MonolithLogo cell={9} />
-                        </div>
-                        <div class="hero-copy">
-                            <p class="eyebrow">A personal encyclopedia</p>
-                            <h1 class="display">
-                                From pixel to<br /><em>knowledge.</em>
-                            </h1>
-                            <p class="hero-sub">
-                                A local-first Vault where notes, links, and tasks sharpen into a
-                                monolith that lasts.
-                            </p>
-                            <div class="hero-actions">
-                                <a class="pixel-button" href="#download"
-                                    ><Icon name="download" /><span>Download Datalith</span></a
-                                >
-                                <a class="hero-link" href={docsUrl}>Documentation</a>
-                                <a
-                                    class="hero-link external"
-                                    href={githubUrl}
-                                    target="_blank"
-                                    rel="noreferrer">GitHub <Icon name="arrowUpRight" /></a
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="intro" aria-label="About Datalith">
-                    <div class="intro-panel">
-                        <span class="corner corner-tl" aria-hidden="true"></span>
-                        <span class="corner corner-tr" aria-hidden="true"></span>
-                        <span class="corner corner-bl" aria-hidden="true"></span>
-                        <span class="corner corner-br" aria-hidden="true"></span>
-                        <div class="intro-copy">
-                            <p class="eyebrow">A little magic</p>
-                            <h2 class="display">
-                                The enchanted monolith<br />that remembers.
-                            </h2>
-                            <p>
-                                Datalith is a monolith, enchanted to find and visualize every note
-                                you have ever written. A note is a pixel, a link between two notes
-                                another. Tend them, and the picture sharpens into focus: a private
-                                personal encyclopedia, one of a kind, built to outlast any app,
-                                service, or trend.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="download-section" id="download" aria-labelledby="download-heading">
-                    <div class="section-heading">
-                        <p class="eyebrow">Start today</p>
-                        <h2 class="display" id="download-heading">Begin your encyclopedia.</h2>
-                        <p>
-                            Download Datalith and lay the first pixel of your own knowledge. Free,
-                            open source, for macOS, Windows, and Linux.
-                        </p>
-                    </div>
-                    <DownloadPanel />
-                </section>
-
-                <section class="bento" aria-label="Datalith features">
-                    <div class="bento-col">
-                        <article class="bento-tile tile-fast">
-                            <div class="tile-head">
-                                <Icon name="bolt" class="tile-glyph" />
-                                <div>
-                                    <h2 class="display">Instant, every time</h2>
-                                    <p>
-                                        Opens in a blink, even on Vaults of 10k+ notes.<br />
-                                        So reading and writing never wait on you.
-                                    </p>
-                                </div>
-                            </div>
-                        </article>
-
-                        <article class="bento-tile tile-md">
-                            <header class="tile-head">
-                                <Icon name="note" />
-                                <div>
-                                    <h2 class="display">Write in Markdown</h2>
-                                    <p>Notes with preview, wiki links, and properties.</p>
-                                </div>
-                            </header>
-                            <MarkdownWidget />
-                        </article>
-
-                        <article class="bento-tile tile-todo">
-                            <header class="tile-head">
-                                <Icon name="todo" />
-                                <div>
-                                    <h2 class="display">Tasks that stay files</h2>
-                                    <p>A real todo.txt editor: priorities, projects, subtasks.</p>
-                                </div>
-                            </header>
-                            <TodoWidget />
-                        </article>
-
-                        <article class="bento-tile tile-local">
-                            <div class="tile-head">
-                                <Icon name="folder" class="tile-glyph" />
-                                <div>
-                                    <h2 class="display">Local first</h2>
-                                    <p>
-                                        Your Vault is a folder you own, with open format files that
-                                        outlive apps.<br />
-                                        Your encyclopedia can never be taken from you.
-                                    </p>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-
-                    <div class="bento-col">
-                        <article class="bento-tile tile-search">
-                            <header class="tile-head">
-                                <Icon name="search" />
-                                <div>
-                                    <h2 class="display">Every thought, findable</h2>
-                                    <p>
-                                        Relevance-ranked search across names and content, as you
-                                        type.<br />
-                                        The right note surfaces even when you only half-remember it.
-                                    </p>
-                                </div>
-                            </header>
-                            <SearchWidget />
-                        </article>
-
-                        <article class="bento-tile tile-graph">
-                            <header class="tile-head">
-                                <Icon name="graph" />
-                                <div>
-                                    <h2 class="display">Ideas, connected by design</h2>
-                                    <p>
-                                        Wiki links become a living graph.<br />
-                                        Follow a thread and rediscover what you forgot you knew.
-                                    </p>
-                                </div>
-                            </header>
-                            <GraphWidget />
-                        </article>
-
-                        <article class="bento-tile tile-theme">
-                            <header class="tile-head">
-                                <Icon name="palette" />
-                                <div>
-                                    <h2 class="display">Make it yours</h2>
-                                    <p>
-                                        Dozens of themes, light and dark.<br />
-                                        Knowledge shaped into a familiar place is easier to come back
-                                        to.
-                                    </p>
-                                </div>
-                            </header>
-                            <ThemePicker variant="full" />
-                        </article>
-
-                        <article class="bento-tile tile-private">
-                            <div class="tile-head">
-                                <Icon name="lock" class="tile-glyph" />
-                                <div>
-                                    <h2 class="display">Private by default</h2>
-                                    <p>Your files never leave your machine.</p>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                </section>
-
-                <section class="open-source" aria-label="Open source">
-                    <div>
-                        <p class="eyebrow">Open source</p>
-                        <h2 class="display">MIT-licensed. Star it on GitHub.</h2>
-                    </div>
-                    <a class="pixel-button" href={githubUrl} target="_blank" rel="noreferrer">
-                        <Icon name="star" />
-                        <span>Star on GitHub</span>
-                        {
-                            starCount > 0 && (
-                                <span class="star-count-inverse" aria-label={`${starCount} stars`}>
-                                    {starCount}
-                                </span>
-                            )
-                        }
-                    </a>
-                </section>
-
-                <section class="final-cta" aria-label="Download Datalith">
-                    <div class="final-cta-mark" aria-hidden="true">
-                        <MonolithLogo cell={6} />
-                    </div>
-                    <div class="final-cta-copy">
-                        <p class="eyebrow">Ready to begin?</p>
-                        <h2 class="display">Plant your monolith in a folder of your own.</h2>
-                        <p>
-                            One download, one empty folder and a lifetime of knowledge sharpens into
-                            focus.
-                        </p>
-                    </div>
-                    <a class="pixel-button" href="#download">
-                        <Icon name="download" />
-                        <span>Download Datalith</span>
-                    </a>
-                </section>
-            </main>
-
-            <footer class="site-footer">
-                <span>© {new Date().getFullYear()} Datalith</span>
-                <a href={`${baseUrl}privacy/`}>Privacy</a>
-                <a href={`${baseUrl}terms/`}>Terms</a>
-                <a href={`${baseUrl}notices/`}>Third-party notices</a>
-                <span>Built pixel by pixel.</span>
-            </footer>
+<SiteLayout
+    title="Datalith · From pixels to knowledge"
+    description="Datalith is a fast, local-first Vault for notes, tasks and linked ideas. Search, visualize, and keep them in a private encyclopedia that lasts."
+>
+    <section class="hero" aria-label="Datalith">
+        <div class="hero-grid">
+            <div class="hero-logo" aria-hidden="true">
+                <MonolithLogo cell={9} />
+            </div>
+            <div class="hero-copy">
+                <p class="eyebrow">A personal encyclopedia</p>
+                <h1 class="display">
+                    From pixel to<br /><em>knowledge.</em>
+                </h1>
+                <p class="hero-sub">
+                    A local-first Vault where notes, links, and tasks sharpen into a monolith that
+                    lasts.
+                </p>
+                <div class="hero-actions">
+                    <a class="pixel-button" href="#download"
+                        ><Icon name="download" /><span>Download Datalith</span></a
+                    >
+                    <a class="hero-link" href={docsUrl}>Documentation</a>
+                    <a class="hero-link external" href={githubUrl} target="_blank" rel="noreferrer"
+                        >GitHub <Icon name="arrowUpRight" /></a
+                    >
+                </div>
+            </div>
         </div>
-    </body>
-</html>
+    </section>
+
+    <section class="intro" aria-label="About Datalith">
+        <div class="intro-panel">
+            <span class="corner corner-tl" aria-hidden="true"></span>
+            <span class="corner corner-tr" aria-hidden="true"></span>
+            <span class="corner corner-bl" aria-hidden="true"></span>
+            <span class="corner corner-br" aria-hidden="true"></span>
+            <div class="intro-copy">
+                <p class="eyebrow">A little magic</p>
+                <h2 class="display">
+                    The enchanted monolith<br />that remembers.
+                </h2>
+                <p>
+                    Datalith is a monolith, enchanted to find and visualize every note you have ever
+                    written. A note is a pixel, a link between two notes another. Tend them, and the
+                    picture sharpens into focus: a private personal encyclopedia, one of a kind,
+                    built to outlast any app, service, or trend.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="download-section" id="download" aria-labelledby="download-heading">
+        <div class="section-heading">
+            <p class="eyebrow">Start today</p>
+            <h2 class="display" id="download-heading">Begin your encyclopedia.</h2>
+            <p>
+                Download Datalith and lay the first pixel of your own knowledge. Free, open source,
+                for macOS, Windows, and Linux.
+            </p>
+        </div>
+        <DownloadPanel />
+    </section>
+
+    <section class="bento" aria-label="Datalith features">
+        <div class="bento-col">
+            <article class="bento-tile tile-fast">
+                <div class="tile-head">
+                    <Icon name="bolt" class="tile-glyph" />
+                    <div>
+                        <h2 class="display">Instant, every time</h2>
+                        <p>
+                            Opens in a blink, even on Vaults of 10k+ notes.<br />
+                            So reading and writing never wait on you.
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bento-tile tile-md">
+                <header class="tile-head">
+                    <Icon name="note" />
+                    <div>
+                        <h2 class="display">Write in Markdown</h2>
+                        <p>Notes with preview, wiki links, and properties.</p>
+                    </div>
+                </header>
+                <MarkdownWidget />
+            </article>
+
+            <article class="bento-tile tile-todo">
+                <header class="tile-head">
+                    <Icon name="todo" />
+                    <div>
+                        <h2 class="display">Tasks that stay files</h2>
+                        <p>A real todo.txt editor: priorities, projects, subtasks.</p>
+                    </div>
+                </header>
+                <TodoWidget />
+            </article>
+
+            <article class="bento-tile tile-local">
+                <div class="tile-head">
+                    <Icon name="folder" class="tile-glyph" />
+                    <div>
+                        <h2 class="display">Local first</h2>
+                        <p>
+                            Your Vault is a folder you own, with open format files that outlive
+                            apps.<br />
+                            Your encyclopedia can never be taken from you.
+                        </p>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="bento-col">
+            <article class="bento-tile tile-search">
+                <header class="tile-head">
+                    <Icon name="search" />
+                    <div>
+                        <h2 class="display">Every thought, findable</h2>
+                        <p>
+                            Relevance-ranked search across names and content, as you type.<br />
+                            The right note surfaces even when you only half-remember it.
+                        </p>
+                    </div>
+                </header>
+                <SearchWidget />
+            </article>
+
+            <article class="bento-tile tile-graph">
+                <header class="tile-head">
+                    <Icon name="graph" />
+                    <div>
+                        <h2 class="display">Ideas, connected by design</h2>
+                        <p>
+                            Wiki links become a living graph.<br />
+                            Follow a thread and rediscover what you forgot you knew.
+                        </p>
+                    </div>
+                </header>
+                <GraphWidget />
+            </article>
+
+            <article class="bento-tile tile-theme">
+                <header class="tile-head">
+                    <Icon name="palette" />
+                    <div>
+                        <h2 class="display">Make it yours</h2>
+                        <p>
+                            Dozens of themes, light and dark.<br />
+                            Knowledge shaped into a familiar place is easier to come back to.
+                        </p>
+                    </div>
+                </header>
+                <ThemePicker variant="full" />
+            </article>
+
+            <article class="bento-tile tile-private">
+                <div class="tile-head">
+                    <Icon name="lock" class="tile-glyph" />
+                    <div>
+                        <h2 class="display">Private by default</h2>
+                        <p>Your files never leave your machine.</p>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="open-source" aria-label="Open source">
+        <div>
+            <p class="eyebrow">Open source</p>
+            <h2 class="display">MIT-licensed. Star it on GitHub.</h2>
+        </div>
+        <a class="pixel-button" href={githubUrl} target="_blank" rel="noreferrer">
+            <Icon name="star" />
+            <span>Star on GitHub</span>
+            {
+                starCount > 0 && (
+                    <span class="star-count-inverse" aria-label={`${starCount} stars`}>
+                        {starCount}
+                    </span>
+                )
+            }
+        </a>
+    </section>
+
+    <section class="final-cta" aria-label="Download Datalith">
+        <div class="final-cta-mark" aria-hidden="true">
+            <MonolithLogo cell={6} />
+        </div>
+        <div class="final-cta-copy">
+            <p class="eyebrow">Ready to begin?</p>
+            <h2 class="display">Plant your monolith in a folder of your own.</h2>
+            <p>One download, one empty folder and a lifetime of knowledge sharpens into focus.</p>
+        </div>
+        <a class="pixel-button" href="#download">
+            <Icon name="download" />
+            <span>Download Datalith</span>
+        </a>
+    </section>
+</SiteLayout>
 
 <style>
     html {
@@ -349,23 +297,6 @@ const starCount = Number(stars.stargazersCount ?? 0)
             color: var(--dl-fg);
         }
     }
-    .github-link {
-        align-items: center;
-        display: inline-flex;
-        gap: 0.4rem;
-
-        .pixel-icon {
-            color: var(--dl-yellow);
-            font-size: 14px;
-        }
-    }
-    .star-count {
-        background: var(--dl-surface-alt);
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 0.12rem 0.4rem;
-    }
-
     .intro {
         padding: clamp(3rem, 7vw, 5.5rem) 0;
     }

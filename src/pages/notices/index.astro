@@ -1,16 +1,10 @@
 ---
-import "../../styles/base.css"
-import "../../styles/themes.css"
 import "../../styles/markdown.css"
+import SiteLayout from "../../layouts/SiteLayout.astro"
 
 import { fileURLToPath } from "node:url"
 import { Marked } from "marked"
 import { readFile } from "node:fs/promises"
-import { themeInitScript } from "../../../scripts/theme-init.ts"
-
-const baseUrl = import.meta.env.BASE_URL
-const docsUrl = `${baseUrl.replace(/\/$/, "")}/docs/vault/welcome/`
-const githubUrl = "https://github.com/mycelium-build/datalith"
 
 const noticesSource = await readFile(
     fileURLToPath(new URL("../../../THIRD-PARTY-NOTICES.md", import.meta.url)),
@@ -20,49 +14,15 @@ const md = new Marked({ gfm: true, breaks: false })
 const noticesHtml = md.parse(noticesSource, { async: false })
 ---
 
-<!doctype html>
-<html lang="en" data-datalith-theme="datalith-light" data-mode="light">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
-        <meta
-            name="description"
-            content="Third-party software and assets distributed with Datalith, and the licenses under which they are provided."
-        />
-        <link rel="icon" type="image/png" href={`${baseUrl}datalith.png`} />
-        <title>Third-party notices · Datalith</title>
-        <script is:inline set:html={themeInitScript} />
-    </head>
-    <body>
-        <div class="page-shell">
-            <header class="site-header">
-                <a class="brand" href={baseUrl}>Datalith</a>
-                <nav aria-label="Main navigation">
-                    <a href={docsUrl}>Documentation</a>
-                    <a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
-                </nav>
-            </header>
-
-            <main>
-                <div class="md-prose notices" set:html={noticesHtml} />
-            </main>
-
-            <footer class="site-footer">
-                <span>© {new Date().getFullYear()} Datalith</span>
-                <a href={`${baseUrl}privacy/`}>Privacy</a>
-                <a href={`${baseUrl}terms/`}>Terms</a>
-                <span>Built pixel by pixel.</span>
-            </footer>
-        </div>
-    </body>
-</html>
+<SiteLayout
+    title="Third-party notices · Datalith"
+    description="Third-party software and assets distributed with Datalith, and the licenses under which they are provided."
+>
+    <div class="content-panel md-prose notices" set:html={noticesHtml} />
+</SiteLayout>
 
 <style>
     .notices {
-        border: 1px solid var(--dl-border);
-        background: var(--dl-surface);
-        padding: clamp(1.75rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
-
         :is(h1, h2, h3, h4, h5, h6) {
             color: var(--dl-fg);
         }
