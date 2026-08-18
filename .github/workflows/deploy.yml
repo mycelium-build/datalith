@@ -1,6 +1,13 @@
 name: Deploy website
 
 on:
+    workflow_run:
+        workflows:
+            - CI
+        types:
+            - completed
+        branches:
+            - main
     workflow_dispatch:
         inputs:
             source_ref:
@@ -20,13 +27,27 @@ concurrency:
 
 jobs:
     build:
+        if: >-
+            github.event_name == 'workflow_dispatch' ||
+            (github.event.workflow_run.conclusion == 'success' &&
+            github.event.workflow_run.event == 'push' &&
+            github.event.workflow_run.head_branch == 'main')
         runs-on: ubuntu-latest
         environment:
             name: github-pages
             url: ${{ steps.deployment.outputs.page_url }}
         steps:
             - name: Check out website
+              if: github.event_name == 'workflow_run'
               uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+
+            - name: Check out website for manual deployment
+              if: github.event_name == 'workflow_dispatch'
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.ref }}
 
             - name: Create datalith-bot token
               id: app-token
@@ -62,23 +83,14 @@ jobs:
 
             - name: Sync assets
               env:
-                  DATALITH_SOURCE_REF: ${{ inputs.source_ref }}
+                  DATALITH_SOURCE_REF: ${{ inputs.source_ref || 'main' }}
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
               run: npm run sync-assets
-
-            - name: Lint, format check and test
-              run: npm run lint && npm run fmt:check && npm test
-
-            - name: Check license notices
-              run: npm run licenses:check
-
-            - name: Check policy pages
-              run: npm run policies:check
 
             - name: Build site
               env:
                   RELEASE_REPOSITORY: mycelium-build/datalith
-                  DATALITH_SOURCE_REF: ${{ inputs.source_ref }}
+                  DATALITH_SOURCE_REF: ${{ inputs.source_ref || 'main' }}
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
                   SITE_BASE: /datalith-site
               run: npm run build
