@@ -66,6 +66,9 @@ jobs:
             - name: Check license notices
               run: npm run licenses:check
 
+            - name: Check policy pages
+              run: npm run policies:check
+
             - name: Build site
               env:
                   RELEASE_REPOSITORY: mycelium-build/datalith
