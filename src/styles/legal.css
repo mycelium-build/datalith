@@ -1,11 +1,5 @@
 /* Styling for the policygen-generated Privacy Policy and Terms pages. */
 
-.legal-shell {
-    background: var(--dl-surface);
-    border: 1px solid var(--dl-border);
-    padding: clamp(1.75rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
-}
-
 #policygen-privacy-policy,
 #policygen-tos {
     .heading,
