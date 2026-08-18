@@ -60,8 +60,20 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
+            - name: Sync assets
+              env:
+                  DATALITH_SOURCE_REF: ${{ inputs.source_ref }}
+                  DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
+              run: npm run sync-assets
+
             - name: Lint, format check and test
               run: npm run lint && npm run fmt:check && npm test
+
+            - name: Check license notices
+              run: npm run licenses:check
+
+            - name: Check policy pages
+              run: npm run policies:check
 
             - name: Build site
               env:

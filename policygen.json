@@ -1,0 +1,73 @@
+{
+    "$schema": "https://policygen.xyz/schemas/0.6/schema.json",
+    "output": {
+        "fileType": "astro",
+        "cssFramework": "classes",
+        "locales": ["en"],
+        "astroLayout": {
+            "path": "../../layouts/LegalLayout.astro"
+        },
+        "privacyFilePath": "./src/pages/privacy/index.astro",
+        "termsFilePath": "./src/pages/terms/index.astro"
+    },
+    "entity": {
+        "name": "Mycelium Build",
+        "website": "https://mycelium-build.github.io",
+        "address": "Registered address to be completed"
+    },
+    "privacy": {
+        "privacyEmail": "rom100main@proton.me",
+        "platforms": ["web", "desktop"],
+        "locations": ["eu", "uk", "us", "other"],
+        "socialSignIn": false,
+        "personalInformation": [],
+        "sensitiveInformation": [],
+        "thirdPartyData": [],
+        "paymentData": false,
+        "paymentProcessors": [],
+        "appUsageData": false,
+        "thirdPartyDisclosure": false,
+        "thirdPartyDisclosureEntities": [],
+        "thirdPartySharing": false,
+        "thirdPartySharingEntities": [],
+        "securityMeasures": true,
+        "webTracking": false,
+        "thirdPartyAnalytics": false,
+        "serviceRequirements": [],
+        "legalBasis": [],
+        "usStatePrivacyLaws": false,
+        "dpo": false,
+        "cpraCompliance": false,
+        "vcdpaCompliance": false,
+        "cookieConsent": false,
+        "dataBreachNotification": false,
+        "crossBorderTransfers": false,
+        "coppaCompliance": false
+    },
+    "terms": {
+        "supportEmail": "rom100main@proton.me",
+        "underEighteen": false,
+        "underThirteen": false,
+        "purchasableGoods": false,
+        "subscription": false,
+        "freeTrial": false,
+        "autoRenew": false,
+        "refundPolicy": "none",
+        "userContent": false,
+        "userContentLicense": false,
+        "userAccounts": false,
+        "governingLaw": "France",
+        "disputeResolution": "litigation",
+        "mediation": false,
+        "prohibitedUses": [],
+        "serviceSLA": false,
+        "serviceSLAAmount": 0,
+        "serviceSLARefund": false,
+        "liabilityLimitation": true,
+        "liabilityLimitationType": "amount_paid",
+        "liabilityLimitationAmount": 0,
+        "forceMajeure": true,
+        "dmcaTakedown": false,
+        "taxLiability": false
+    }
+}

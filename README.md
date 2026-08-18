@@ -1,29 +1,25 @@
-# Datalith website
+# Datalith - From pixel to knowledge
 
-Static download and documentation website for [Datalith](https://github.com/mycelium-build/datalith), built with [Astro Starlight](https://starlight.astro.build/).
+The official website for [Datalith](https://github.com/mycelium-build/datalith), a local-first Vault where notes, links, and tasks sharpen into a monolith that lasts.
 
-## Local development
+Datalith is a desktop application for building a private personal encyclopedia from files you own. Write notes, manage tasks, connect ideas, and search inside. Available on macOS, Windows, and Linux.
 
-The build imports from `../datalith` by default. Override that location with `DATALITH_SOURCE_DIR` (local builds only). When `DATALITH_SOURCE_DIR` is unset, `sync-docs` and `sync-assets` clone the Datalith repository at `DATALITH_SOURCE_REF` (default `main`) using `DATALITH_READ_TOKEN`. In CI the token is required and `DATALITH_SOURCE_DIR` must not be set. The build scripts read environment variables from a `.env` file in the project root when present (see `.env.example`).
+For more info go to [Datalith's website](https://mycelium-build.github.io/datalith/)
 
-```sh
-npm install
-npm run build
-npm run dev
-```
+## Support
 
-The `prebuild` step regenerates everything that comes from the Datalith repo:
+For bug reports and feature requests about Datalith's website, [open an issue on GitHub](https://github.com/mycelium-build/datalith-site/issues).
 
-- `sync-docs` imports the documentation vault and derives the docs search index (`src/data/search.json`) and docs graph (`src/data/graph.json`).
-- `sync-assets` copies the app icon source (`datalith.txt`), pixel icons, theme JSON files, and Pixeloid fonts.
-- `build-icons` generates `src/components/Icon.astro` from the synced `src/assets/icons/*.svg` files.
-- `build-themes` translates the curated gpui-component theme JSONs into the CSS variables used by the whole site (`src/styles/themes.css` and `src/data/themes.json`).
-- `fetch-releases` pulls published releases and the GitHub star count.
+## Changelog
 
-The workflow uses the organization's `datalith-bot` GitHub App to read the Datalith repository. Add the existing app credentials as Actions secrets named `AUTOMATION_APP_ID` and `AUTOMATION_APP_PRIVATE_KEY`.
+See website [CHANGELOG.md](CHANGELOG.md) for a list of changes in each version.
 
-## Deployment
+## Development
 
-The deployment workflow is intentionally manual for now. Run **Actions → Deploy website → Run workflow** and choose the Datalith ref to import.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and project guidelines.
 
-The `datalith-bot` installation must include the `datalith` repository. Its token needs read-only Contents access to `datalith`.
+## Licensing
+
+Datalith's original source code and artwork are licensed under the [MIT License](https://github.com/mycelium-build/datalith/blob/main/LICENSE).
+The website source is also available under the [MIT License](LICENSE).
+Imported assets and dependencies retain their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -12,6 +12,7 @@
         text-underline-offset: 3px;
 
         &:hover {
+            text-decoration: underline;
             text-decoration-color: var(--dl-accent);
         }
     }

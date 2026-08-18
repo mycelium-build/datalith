@@ -51,6 +51,4 @@ const faviconSource = path.join(sourceRoot, "assets", "logo", "datalith.png")
 const faviconDestination = path.join(siteRoot, "public", "datalith.png")
 await sharp(faviconSource).resize(512, 512).toFile(faviconDestination)
 
-console.log(
-    `Synced ${copiedCount} asset files and the favicon from ${sourceRoot}`,
-)
+console.log(`Synced ${copiedCount} asset files and the favicon from ${sourceRoot}`)

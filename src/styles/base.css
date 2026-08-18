@@ -108,6 +108,12 @@ ol {
     padding: 0 clamp(1.25rem, 5vw, 3rem);
 }
 
+.content-panel {
+    background: var(--dl-surface);
+    border: 1px solid var(--dl-border);
+    padding: clamp(1.75rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
+}
+
 .display {
     font-family: var(--font-pixel);
     font-weight: 700;

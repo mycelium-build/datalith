@@ -1,0 +1,39 @@
+---
+import "../../styles/markdown.css"
+import SiteLayout from "../../layouts/SiteLayout.astro"
+
+import { fileURLToPath } from "node:url"
+import { Marked } from "marked"
+import { readFile } from "node:fs/promises"
+
+const noticesSource = await readFile(
+    fileURLToPath(new URL("../../../THIRD-PARTY-NOTICES.md", import.meta.url)),
+    "utf-8",
+)
+const md = new Marked({ gfm: true, breaks: false })
+const noticesHtml = md.parse(noticesSource, { async: false })
+---
+
+<SiteLayout
+    title="Third-party notices · Datalith"
+    description="Third-party software and assets distributed with Datalith, and the licenses under which they are provided."
+>
+    <div class="content-panel md-prose notices" set:html={noticesHtml} />
+</SiteLayout>
+
+<style>
+    .notices {
+        :is(h1, h2, h3, h4, h5, h6) {
+            color: var(--dl-fg);
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+        }
+
+        pre {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+    }
+</style>
