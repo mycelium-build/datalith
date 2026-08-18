@@ -8,6 +8,17 @@ import { renderBundledAssets } from "./assets.ts"
 
 export const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
 
+interface LockfilePackage {
+    version?: string
+    dev?: boolean
+    optional?: boolean
+    devOptional?: boolean
+}
+
+interface Lockfile {
+    packages: Record<string, LockfilePackage>
+}
+
 function splitDependency(dependency: string): [string, string] {
     const at = dependency.lastIndexOf("@")
     if (at <= 0) return [dependency, ""]
@@ -36,7 +47,29 @@ function shortTitle(content: string): string {
 }
 
 function normalizeLicenseText(content: string): string {
-    return content.replace(/[ \t]+$/gm, "").trim()
+    return content
+        .replace(/\r\n?/g, "\n")
+        .replace(/[ \t]+$/gm, "")
+        .trim()
+}
+
+async function productionDependencies(): Promise<Set<string>> {
+    const lockfile = JSON.parse(
+        await readFile(path.join(siteRoot, "package-lock.json"), "utf-8"),
+    ) as Lockfile
+    const dependencies = new Set<string>()
+
+    for (const [key, info] of Object.entries(lockfile.packages)) {
+        if (!key || !info.version || info.dev || info.optional || info.devOptional) continue
+        const name =
+            key
+                .replace(/^node_modules\//, "")
+                .split("/node_modules/")
+                .pop() ?? key
+        dependencies.add(`${name}@${info.version}`)
+    }
+
+    return dependencies
 }
 
 function renderLicense(license: ILicense): string[] {
@@ -72,14 +105,22 @@ async function renderNpmDependencies(): Promise<string> {
     const licenses = await getProjectLicenses(path.join(siteRoot, "package.json"), {
         replace: { dompurify: "./node_modules/dompurify/LICENSE" },
     })
-    const ordered = [...licenses].sort((a, b) => compareStrings(a.content, b.content))
+    const included = await productionDependencies()
+    const ordered = licenses
+        .map((license) => ({
+            ...license,
+            dependencies: license.dependencies.filter((dependency) => included.has(dependency)),
+        }))
+        .filter((license) => license.dependencies.length > 0)
+        .sort((a, b) => compareStrings(a.content, b.content))
 
     const lines: string[] = [
         "## npm dependencies",
         "",
         "This section lists the production dependencies of Datalith Website and",
         "the license under which each is distributed. It is generated from the",
-        "installed `node_modules` tree with the `generate-license-file` npm",
+        "installed `node_modules` tree, filtered to the non-optional production",
+        "packages in `package-lock.json`, with the `generate-license-file` npm",
         "package (https://www.npmjs.com/package/generate-license-file); do not",
         "edit it by hand.",
         "",
@@ -101,5 +142,5 @@ export async function renderNotices(): Promise<string> {
     const bundledAssets = await renderBundledAssets(siteRoot)
     const npmDependencies = await renderNpmDependencies()
 
-    return `${intro.trim()}\n\n${bundledAssets}\n\n${npmDependencies}`
+    return `${intro.replace(/\r\n?/g, "\n").trim()}\n\n${bundledAssets}\n\n${npmDependencies}`
 }

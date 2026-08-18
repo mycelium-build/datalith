@@ -6,5 +6,6 @@ notices, and the license text under which each is distributed.
 
 The bundled-assets section is generated from `scripts/licenses/assets.json`. The
 production-dependency section is generated from the installed `node_modules`
-tree with the `generate-license-file` npm package. This file is produced by
+tree, filtered to non-optional production packages from `package-lock.json`,
+with the `generate-license-file` npm package. This file is produced by
 `scripts/licenses/generate.ts`; do not edit it by hand.

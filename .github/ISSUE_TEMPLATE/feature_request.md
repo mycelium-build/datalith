@@ -13,7 +13,7 @@ Describe the user problem or opportunity behind the request.
 Describe the website behavior or feature you would like to see added.
 
 **Affected area**
-Which part of the site is affected? 
+Which part of the site is affected?
 For example: landing page, downloads, documentation, search, graph, theme picker, responsive layout, or build tooling.
 
 **Alternatives considered**

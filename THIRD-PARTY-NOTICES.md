@@ -6,7 +6,8 @@ notices, and the license text under which each is distributed.
 
 The bundled-assets section is generated from `scripts/licenses/assets.json`. The
 production-dependency section is generated from the installed `node_modules`
-tree with the `generate-license-file` npm package. This file is produced by
+tree, filtered to non-optional production packages from `package-lock.json`,
+with the `generate-license-file` npm package. This file is produced by
 `scripts/licenses/generate.ts`; do not edit it by hand.
 
 ## Bundled assets
@@ -189,7 +190,7 @@ with others.
 
 The OFL allows the licensed fonts to be used, studied, modified and
 redistributed freely as long as they are not sold by themselves. The
-fonts, including any derivative works, can be bundled, embedded, 
+fonts, including any derivative works, can be bundled, embedded,
 redistributed and/or sold with any software provided that any reserved
 names are not used by derivative works. The fonts and derivatives,
 however, cannot be released under any other type of license. The
@@ -765,7 +766,8 @@ Used by: Tokyo Night
 
 This section lists the production dependencies of Datalith Website and
 the license under which each is distributed. It is generated from the
-installed `node_modules` tree with the `generate-license-file` npm
+installed `node_modules` tree, filtered to the non-optional production
+packages in `package-lock.json`, with the `generate-license-file` npm
 package (https://www.npmjs.com/package/generate-license-file); do not
 edit it by hand.
 
@@ -1241,7 +1243,6 @@ Used by:
 - `@types/nlcst` 2.0.3
 - `@types/node` 24.13.3
 - `@types/sax` 1.2.7
-- `@types/trusted-types` 2.0.7
 - `@types/unist` 2.0.11
 - `@types/unist` 3.0.3
 
@@ -1274,7 +1275,6 @@ MIT License
 Used by:
 
 - `lightningcss` 1.33.0
-- `lightningcss-darwin-arm64` 1.33.0
 
 ```
 Mozilla Public License Version 2.0
@@ -5615,7 +5615,6 @@ limitations under the License.
 
 Used by:
 
-- `@img/sharp-darwin-arm64` 0.35.3
 - `sharp` 0.35.3
 
 ```
@@ -6760,16 +6759,6 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
-### LGPL-3.0-or-later
-
-Used by:
-
-- `@img/sharp-libvips-darwin-arm64` 1.3.2
-
-```
-LGPL-3.0-or-later
-```
-
 ### License
 
 Used by:
@@ -6794,12 +6783,7 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Used by:
 
-- `@astrojs/compiler-binding-darwin-arm64` 0.3.2
-- `@bruits/satteri-darwin-arm64` 0.9.5
-- `@esbuild/darwin-arm64` 0.28.2
-- `@pagefind/darwin-arm64` 1.5.2
 - `@pagefind/default-ui` 1.5.2
-- `@rolldown/binding-darwin-arm64` 1.2.3
 - `am-i-vibing` 0.4.0
 - `pagefind` 1.5.2
 - `process-ancestry` 0.1.0
@@ -8385,37 +8369,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
-
-### MIT License
-
-Used by:
-
-- `fsevents` 2.3.3
-
-```
-MIT License
------------
-
-Copyright (C) 2010-2020 by Philipp Dunkel, Ben Noordhuis, Elan Shankar, Paul Miller
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
 ```
 
 ### MIT License

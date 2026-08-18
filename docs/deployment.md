@@ -2,12 +2,12 @@
 
 The website is deployed to [mycelium-build.github.io/datalith-site](https://mycelium-build.github.io/datalith-site/) through GitHub Pages.
 
-Deployment is intentionally manual. 
+Deployment is intentionally manual.
 The workflow imports documentation and assets from a selected ref of the `datalith` repository before publishing the site.
 
 ## GitHub setup
 
-The workflow uses the organization's `datalith-bot` GitHub App to read the Datalith repository. 
+The workflow uses the organization's `datalith-bot` GitHub App to read the Datalith repository.
 Configure these Actions secrets in the `datalith-site` repository:
 
 - `AUTOMATION_APP_ID`

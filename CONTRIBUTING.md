@@ -56,12 +56,14 @@ npm run licenses:check
 ### Installation
 
 1. Clone the repository:
+
     ```bash
     git clone https://github.com/mycelium-build/datalith-site.git
     cd datalith-site
     ```
 
 2. Build the project:
+
     ```bash
     npm ci
     npm run build
@@ -77,6 +79,7 @@ npm run licenses:check
 1. Make changes to the source code in the `src/` and `scripts/` directories.
 
 2. Run tests:
+
     ```bash
     npm test
     ```

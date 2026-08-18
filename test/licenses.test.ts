@@ -41,6 +41,39 @@ describe("THIRD-PARTY-NOTICES.md", () => {
         expect(missing).toEqual([])
     })
 
+    it("excludes optional npm packages", async () => {
+        const lockfile = await readJson("package-lock.json")
+        const packages = lockfile.packages as Record<
+            string,
+            {
+                version?: string
+                dev?: boolean
+                optional?: boolean
+                devOptional?: boolean
+            }
+        >
+        const notice = await readFile(path.join(siteRoot, "THIRD-PARTY-NOTICES.md"), "utf8")
+        const required = new Set<string>()
+        const optional = new Set<string>()
+
+        for (const [key, info] of Object.entries(packages)) {
+            if (key === "" || info.dev || info.devOptional) continue
+            const name =
+                key
+                    .replace(/^node_modules\//, "")
+                    .split("/node_modules/")
+                    .pop() ?? key
+            const display = `\`${name}\` ${info.version}`
+            if (info.optional) optional.add(display)
+            else required.add(display)
+        }
+
+        const includedOptional = [...optional].filter(
+            (display) => !required.has(display) && notice.includes(display),
+        )
+        expect(includedOptional).toEqual([])
+    })
+
     it("reproduces every bundled-asset license file", async () => {
         const manifest = await readJson("scripts/licenses/assets.json")
         const assets = manifest.assets as Array<{ license_file?: string }>

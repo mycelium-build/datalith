@@ -54,7 +54,10 @@ async function readLicenseText(siteRoot: string, relative: string): Promise<stri
     if (!content.trim()) {
         throw new Error(`empty asset license file: ${relative}`)
     }
-    return content.replace(/\n+$/, "")
+    return content
+        .replace(/\r\n?/g, "\n")
+        .replace(/[ \t]+$/gm, "")
+        .replace(/\n+$/, "")
 }
 
 export async function renderBundledAssets(siteRoot: string): Promise<string> {
