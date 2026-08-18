@@ -56,7 +56,7 @@ jobs:
                   app-id: ${{ secrets.AUTOMATION_APP_ID }}
                   private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
                   owner: mycelium-build
-                  repositories: datalith
+                  repositories: datalith-app
                   permission-contents: read
 
             - name: Set up Node.js

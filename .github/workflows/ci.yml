@@ -16,6 +16,16 @@ jobs:
             - name: Check out repository
               uses: actions/checkout@v4
 
+            - name: Create datalith-bot token
+              id: app-token
+              uses: actions/create-github-app-token@v2
+              with:
+                  app-id: ${{ secrets.AUTOMATION_APP_ID }}
+                  private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+                  owner: mycelium-build
+                  repositories: datalith-app
+                  permission-contents: read
+
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
@@ -24,6 +34,12 @@ jobs:
 
             - name: Install dependencies
               run: npm ci
+
+            - name: Sync assets
+              env:
+                  DATALITH_SOURCE_REF: main
+                  DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
+              run: npm run sync-assets
 
             - name: Lint
               run: npm run lint
