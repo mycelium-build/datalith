@@ -61,6 +61,14 @@ const NO_DATA_LEGAL_BASIS_SECTION = `  <!-- Legal Basis -->
     </p>
   </section>`
 
+const NO_DATA_THIRD_PARTY_SHARING_SECTION = `  <!-- Third Party Sharing -->
+  <section id="section-third-party-sharing" class="section">
+    <h2 class="subheading">Information sharing and disclosure</h2>
+    <p class="paragraph">
+      We do not share any information, because we do not collect any.
+    </p>
+  </section>`
+
 const NO_DATA_RETENTION_SECTION = `  <!-- Data Retention -->
   <section id="section-data-retention" class="section">
     <h2 class="subheading">Data retention</h2>
@@ -87,6 +95,11 @@ export function fixPrivacyHtml(source: string): FixResult {
     for (const [start, end, section] of [
         ["<!-- Use of Information -->", "<!-- Legal Basis -->", NO_DATA_USE_SECTION],
         ["<!-- Legal Basis -->", "<!-- Third Party Sharing -->", NO_DATA_LEGAL_BASIS_SECTION],
+        [
+            "<!-- Third Party Sharing -->",
+            "<!-- Web Tracking -->",
+            NO_DATA_THIRD_PARTY_SHARING_SECTION,
+        ],
         ["<!-- Data Retention -->", "<!-- Data Breach Notification -->", NO_DATA_RETENTION_SECTION],
     ]) {
         const { html: next, changed } = replaceSection(html, "privacy", start, end, section)
