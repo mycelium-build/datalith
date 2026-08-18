@@ -1,9 +1,10 @@
 import { readFile } from "node:fs/promises"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 
 import { describe, expect, it } from "vitest"
 
-const siteRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
+const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 
 async function readJson(relativePath: string): Promise<Record<string, unknown>> {
     const content = await readFile(path.join(siteRoot, relativePath), "utf8")
