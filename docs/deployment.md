@@ -1,6 +1,6 @@
 # Deployment
 
-The website is deployed to [mycelium-build.github.io/datalith-site](https://mycelium-build.github.io/datalith-site/) through GitHub Pages.
+The website is deployed to [mycelium-build.github.io/datalith](https://mycelium-build.github.io/datalith/) through GitHub Pages.
 
 Deployment is intentionally manual.
 The workflow imports documentation and assets from a selected ref of the `datalith` repository before publishing the site.
@@ -8,7 +8,7 @@ The workflow imports documentation and assets from a selected ref of the `datali
 ## GitHub setup
 
 The workflow uses the organization's `datalith-bot` GitHub App to read the Datalith repository.
-Configure these Actions secrets in the `datalith-site` repository:
+Configure these Actions secrets in the `datalith` repository:
 
 - `AUTOMATION_APP_ID`
 - `AUTOMATION_APP_PRIVATE_KEY`
@@ -17,13 +17,13 @@ The App installation must include the `datalith` repository with read-only Conte
 
 ## Deploy
 
-1. Open the **Actions** tab in the `datalith-site` repository.
+1. Open the **Actions** tab in the `datalith` repository.
 2. Select **Deploy website**.
 3. Select **Run workflow**.
 4. Enter the Datalith Git ref to import, or keep `main`.
 5. Start the workflow and wait for the GitHub Pages deployment to complete.
 
-The workflow sets `SITE_BASE` to `/datalith-site` and passes the selected ref to the documentation, asset, and release-data synchronization steps.
+The workflow sets `SITE_BASE` to `/datalith` and passes the selected ref to the documentation, asset, and release-data synchronization steps.
 
 ## Build requirements
 

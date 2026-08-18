@@ -14,7 +14,7 @@ const includeDrafts = process.env.INCLUDE_DRAFT_RELEASES === "true"
 function githubHeaders(): Record<string, string> {
     return {
         accept: "application/vnd.github+json",
-        "user-agent": "datalith-site-build",
+        "user-agent": "datalith-build",
         ...(token ? { authorization: `Bearer ${token}` } : {}),
     }
 }

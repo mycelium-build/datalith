@@ -12,7 +12,7 @@ const DEFAULT_REPOSITORY = "mycelium-build/datalith-app"
 const DEFAULT_SOURCE_REF = "main"
 // Deterministic temp clone so every prebuild step shares one checkout instead of cloning the repository once per script.
 // Reused across steps; replaced when the ref changes (stale marker).
-const CLONE_DIRECTORY = path.join(os.tmpdir(), "datalith-site-source")
+const CLONE_DIRECTORY = path.join(os.tmpdir(), "datalith-source")
 const CLONE_REF_MARKER = ".datalith-ref"
 
 export interface DatalithSource {

@@ -59,7 +59,7 @@ npm run licenses:check
 
     ```bash
     git clone https://github.com/mycelium-build/datalith.git
-    cd datalith-site
+    cd datalith
     ```
 
 2. Build the project:
