@@ -1,5 +1,6 @@
 ---
 import Icon from "./Icon.astro"
+import { isPreviewAheadOfStable } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
 
 const repositoryUrl = `https://github.com/${releaseData.repository}`
@@ -8,7 +9,7 @@ const sourceReleases = releaseData.releases ?? []
 const stableReleases = sourceReleases.filter((release) => release.prerelease === false)
 const previewReleases = sourceReleases.filter((release) => release.prerelease === true)
 const realStable = stableReleases[0]
-const latestPreview = previewReleases[0]
+const latestPreview = previewReleases.find((release) => isPreviewAheadOfStable(release, realStable))
 const hasStableRelease = Boolean(realStable)
 const stable = realStable
 const platforms = [
@@ -81,23 +82,38 @@ const asset = (release, platform) => release?.assets.find((item) => item.platfor
                 </details>
             </div>
             <div class="secondary-row">
-                <details class="download-menu preview-menu">
-                    <summary
-                        ><span class="spark" aria-hidden="true">✦</span> Download preview <span
-                            class="rc-badge">RC</span
-                        ><Icon name="chevronDown" /></summary
-                    >
-                    <div class="menu-card">
-                        <div class="preview-heading">
-                            <div>
-                                <p class="menu-title">
-                                    Preview {version(latestPreview?.tagName)}
-                                </p><small>Try upcoming features before release.</small>
-                            </div><span class="rc-badge">RC</span>
-                        </div>
-                        <div data-preview-platforms></div>
-                    </div>
-                </details>
+                {
+                    latestPreview && (
+                        <details class="download-menu preview-menu">
+                            <summary>
+                                <span class="spark" aria-hidden="true">
+                                    ✦
+                                </span>{" "}
+                                Download preview{" "}
+                                <>
+                                    <span class="rc-badge">RC</span>
+                                    <Icon name="chevronDown" />
+                                </>
+                            </summary>
+                            <div class="menu-card">
+                                <div class="preview-heading">
+                                    <>
+                                        <div>
+                                            <>
+                                                <p class="menu-title">
+                                                    Preview {version(latestPreview.tagName)}
+                                                </p>
+                                                <small>Try upcoming features before release.</small>
+                                            </>
+                                        </div>
+                                        <span class="rc-badge">RC</span>
+                                    </>
+                                </div>
+                                <div data-preview-platforms />
+                            </div>
+                        </details>
+                    )
+                }
                 <nav class="release-links" aria-label="Release links">
                     <a
                         href={`${repositoryUrl}/blob/main/CHANGELOG.md`}

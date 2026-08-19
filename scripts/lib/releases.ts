@@ -24,6 +24,25 @@ export function compareVersions(left: ComparableRelease, right: ComparableReleas
     return new Date(right.publishedAt ?? 0).getTime() - new Date(left.publishedAt ?? 0).getTime()
 }
 
+export function isPreviewAheadOfStable(
+    preview: ComparableRelease,
+    stable: ComparableRelease | undefined,
+): boolean {
+    if (!stable) return true
+
+    const previewParts = versionParts(preview.tagName)
+    const stableParts = versionParts(stable.tagName)
+    if (!previewParts || !stableParts) return false
+
+    for (let index = 0; index < 3; index += 1) {
+        if (previewParts[index] !== stableParts[index]) {
+            return previewParts[index] > stableParts[index]
+        }
+    }
+
+    return false
+}
+
 export function platformForAsset(name: string): string {
     const lowerName = name.toLowerCase()
     if (

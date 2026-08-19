@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { versionParts, compareVersions, platformForAsset } from "../scripts/lib/releases.ts"
+import {
+    versionParts,
+    compareVersions,
+    isPreviewAheadOfStable,
+    platformForAsset,
+} from "../scripts/lib/releases.ts"
 
 describe("versionParts", () => {
     it("parses semver tags", () => {
@@ -34,6 +39,18 @@ describe("compareVersions", () => {
             "v1.2.3-rc.2",
             "v1.2.3-rc.1",
         ])
+    })
+})
+
+describe("isPreviewAheadOfStable", () => {
+    it("hides a preview once its stable version has been released", () => {
+        expect(isPreviewAheadOfStable({ tagName: "v0.1.0-rc.4" }, { tagName: "v0.1.0" })).toBe(
+            false,
+        )
+    })
+
+    it("keeps the preview for a later release line", () => {
+        expect(isPreviewAheadOfStable({ tagName: "v0.1.1-rc.1" }, { tagName: "v0.1.0" })).toBe(true)
     })
 })
 
