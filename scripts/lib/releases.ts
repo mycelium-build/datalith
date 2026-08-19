@@ -43,6 +43,16 @@ export function isPreviewAheadOfStable(
     return false
 }
 
+export type AssetArch = "x64" | "arm64"
+
+export function archForAsset(name: string): AssetArch | null {
+    const lowerName = name.toLowerCase()
+    if (lowerName.includes("aarch64") || lowerName.includes("arm64")) return "arm64"
+    if (lowerName.includes("x86_64") || lowerName.includes("amd64") || lowerName.includes("x64"))
+        return "x64"
+    return null
+}
+
 export function platformForAsset(name: string): string {
     const lowerName = name.toLowerCase()
     if (

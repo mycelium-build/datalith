@@ -5,6 +5,7 @@ import {
     compareVersions,
     isPreviewAheadOfStable,
     platformForAsset,
+    archForAsset,
 } from "../scripts/lib/releases.ts"
 
 describe("versionParts", () => {
@@ -63,5 +64,31 @@ describe("platformForAsset", () => {
         expect(platformForAsset("datalith-1.0.0-x86_64.pkg.tar.zst")).toBe("linux-arch")
         expect(platformForAsset("datalith-1.0.0-x86_64.AppImage")).toBe("linux")
         expect(platformForAsset("checksums.txt")).toBe("other")
+    })
+})
+
+describe("archForAsset", () => {
+    it("detects arm64 assets across packaging conventions", () => {
+        expect(archForAsset("Datalith_0.1.0_aarch64.dmg")).toBe("arm64")
+        expect(archForAsset("datalith_0.1.0_arm64-setup.exe")).toBe("arm64")
+        expect(archForAsset("datalith_0.1.0-1_arm64.deb")).toBe("arm64")
+        expect(archForAsset("datalith-0.1.0-1.aarch64.rpm")).toBe("arm64")
+        expect(archForAsset("datalith_0.1.0_aarch64.AppImage")).toBe("arm64")
+    })
+
+    it("detects x64 assets across packaging conventions", () => {
+        expect(archForAsset("datalith_0.1.0_x64-setup.exe")).toBe("x64")
+        expect(archForAsset("Datalith_0.1.0_x64.dmg")).toBe("x64")
+        expect(archForAsset("datalith_0.1.0_x86_64.AppImage")).toBe("x64")
+        expect(archForAsset("datalith_0.1.0.rc.5-1_amd64.deb")).toBe("x64")
+        expect(archForAsset("datalith-0.1.0.rc.5-1.x86_64.rpm")).toBe("x64")
+        expect(archForAsset("datalith_0.1.0rc.5-1-x86_64.pkg.tar.zst")).toBe("x64")
+    })
+
+    it("returns null for assets without an architecture token", () => {
+        expect(archForAsset("SHA256SUMS")).toBeNull()
+        expect(archForAsset("LICENSE-GPL-3.0")).toBeNull()
+        expect(archForAsset("datalith-0.1.0.spdx.json")).toBeNull()
+        expect(archForAsset("datalith-0.1.0-corresponding-source.tar.zst")).toBeNull()
     })
 })

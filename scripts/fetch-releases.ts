@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { compareVersions, platformForAsset, versionParts } from "./lib/releases.ts"
+import { archForAsset, compareVersions, platformForAsset, versionParts } from "./lib/releases.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const outputPath = path.join(siteRoot, "src", "data", "releases.json")
@@ -54,6 +54,7 @@ async function main(): Promise<void> {
             assets: release.assets.map((asset) => ({
                 name: asset.name,
                 platform: platformForAsset(asset.name),
+                arch: archForAsset(asset.name),
                 browserDownloadUrl: asset.browser_download_url,
                 size: asset.size,
             })),
