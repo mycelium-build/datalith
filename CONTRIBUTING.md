@@ -51,7 +51,7 @@ npm run licenses:check
 
 - Node.js and npm
 - Git
-- A checkout of the Datalith repository at `../datalith`, or a local source path configured with `DATALITH_SOURCE_DIR`
+- A checkout of the Datalith repository at `../datalith-app`, or a local source path configured with `DATALITH_SOURCE_DIR`
 
 ### Installation
 
