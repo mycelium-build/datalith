@@ -1,0 +1,82 @@
+---
+import bases from "../data/bases.json"
+import { docUrl } from "../lib/route"
+---
+
+<div class="base-widget" role="table" aria-label="The Docs Vault rendered as a Base table view">
+    <div class="base-head" role="row">
+        <span role="columnheader">name</span>
+        <span role="columnheader">category</span>
+    </div>
+    <div class="base-body">
+        {
+            bases.rows.map((row) => (
+                <div class="base-row" role="row">
+                    <span class="base-name" role="cell">
+                        <a href={docUrl(row.route)}>{row.name}</a>
+                    </span>
+                    <span class="base-category" role="cell">
+                        {row.category}
+                    </span>
+                </div>
+            ))
+        }
+    </div>
+</div>
+
+<style>
+    .base-widget {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.78rem;
+        min-height: 0;
+        overflow: hidden;
+    }
+    .base-head,
+    .base-row {
+        column-gap: 0.8rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    }
+    .base-head {
+        border-bottom: 1px solid var(--dl-border);
+        color: var(--dl-muted);
+        padding: 0.3rem 0.65rem;
+    }
+    .base-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+    .base-row {
+        align-items: center;
+        border-bottom: 1px solid color-mix(in srgb, var(--dl-border) 45%, transparent);
+        padding: 0.32rem 0.65rem;
+
+        &:nth-child(odd) {
+            background: color-mix(in srgb, var(--dl-fg) 3%, transparent);
+        }
+    }
+    .base-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        a {
+            color: var(--dl-accent);
+            font-weight: 700;
+            text-decoration: none;
+
+            &:hover,
+            &:focus-visible {
+                text-decoration: underline;
+            }
+        }
+    }
+    .base-category {
+        color: var(--dl-fg);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
