@@ -1,6 +1,7 @@
 ---
 import "../styles/markdown.css"
 
+import BaseWidget from "../components/BaseWidget.astro"
 import DownloadPanel from "../components/DownloadPanel.astro"
 import GraphWidget from "../components/GraphWidget.astro"
 import Icon from "../components/Icon.astro"
@@ -118,6 +119,20 @@ const starCount = Number(stars.stargazersCount ?? 0)
                     </div>
                 </header>
                 <TodoWidget />
+            </article>
+
+            <article class="bento-tile tile-base">
+                <header class="tile-head">
+                    <Icon name="layoutDashboard" />
+                    <div>
+                        <h2 class="display">Your notes, as databases</h2>
+                        <p>
+                            A .base file queries your Vault and renders it as a table, a list, a
+                            cards, or a graph.
+                        </p>
+                    </div>
+                </header>
+                <BaseWidget />
             </article>
 
             <article class="bento-tile tile-local">
@@ -429,6 +444,7 @@ const starCount = Number(stars.stargazersCount ?? 0)
     }
 
     .tile-md,
+    .tile-base,
     .tile-graph,
     .tile-todo {
         aspect-ratio: 1 / 1;
@@ -438,6 +454,11 @@ const starCount = Number(stars.stargazersCount ?? 0)
     }
     .tile-todo {
         .todo-widget {
+            flex-grow: 1;
+        }
+    }
+    .tile-base {
+        .base-widget {
             flex-grow: 1;
         }
     }
