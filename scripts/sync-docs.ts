@@ -144,12 +144,13 @@ function searchContent(markdown: string): string {
 
 function addStarlightFrontmatter(markdown: string, relativePath: string): string {
     const { body, frontmatter } = parseFrontmatter(markdown)
-    const title = titleFromMarkdown(body, path.basename(relativePath, ".md"))
     const route = routeFor(relativePath)
-    let fields = frontmatter ? `${frontmatter}\n` : ""
-    if (!/^title\s*:/m.test(fields)) fields += `title: ${JSON.stringify(title)}\n`
-    if (!/^slug\s*:/m.test(fields)) fields += `slug: ${route}\n`
-    return `---\n${fields}---\n\n${body.trimStart()}`
+    const fields = frontmatter
+        .split("\n")
+        .filter((line) => !/^title\s*:/.test(line))
+        .join("\n")
+    const title = path.basename(relativePath, ".md")
+    return `---\n${fields}\ntitle: ${JSON.stringify(title)}\nslug: ${route}\n---\n\n${body.trimStart()}`
 }
 
 await collectMarkdown(sourceVault)
