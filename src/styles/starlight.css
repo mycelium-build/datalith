@@ -180,7 +180,7 @@ site-search button[data-open-modal]::before {
     mask: url("../assets/icons/search.svg") no-repeat center / contain;
 }
 
-#starlight__search .pagefind-ui__form::before {
+#starlight__search .pagefind-ui__form::before { /* stylelint-disable-line selector-class-pattern -- Pagefind's BEM class name */
     width: 14px;
     height: 14px;
     top: calc(25px * var(--pagefind-ui-scale));
