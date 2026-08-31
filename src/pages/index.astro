@@ -3,6 +3,7 @@ import "../styles/markdown.css"
 
 import BaseWidget from "../components/BaseWidget.astro"
 import DownloadPanel from "../components/DownloadPanel.astro"
+import FileTreeWidget from "../components/FileTreeWidget.astro"
 import GraphWidget from "../components/GraphWidget.astro"
 import Icon from "../components/Icon.astro"
 import MarkdownWidget from "../components/MarkdownWidget.astro"
@@ -121,23 +122,9 @@ const starCount = Number(stars.stargazersCount ?? 0)
                 <TodoWidget />
             </article>
 
-            <article class="bento-tile tile-base">
-                <header class="tile-head">
-                    <Icon name="layoutDashboard" />
-                    <div>
-                        <h2 class="display">Your notes, as databases</h2>
-                        <p>
-                            A .base file queries your Vault and renders it as a table, a list, a
-                            cards, or a graph.
-                        </p>
-                    </div>
-                </header>
-                <BaseWidget />
-            </article>
-
             <article class="bento-tile tile-local">
-                <div class="tile-head">
-                    <Icon name="folder" class="tile-glyph" />
+                <header class="tile-head">
+                    <Icon name="folder" />
                     <div>
                         <h2 class="display">Local first</h2>
                         <p>
@@ -146,7 +133,8 @@ const starCount = Number(stars.stargazersCount ?? 0)
                             Your encyclopedia can never be taken from you.
                         </p>
                     </div>
-                </div>
+                </header>
+                <FileTreeWidget />
             </article>
         </div>
 
@@ -177,6 +165,20 @@ const starCount = Number(stars.stargazersCount ?? 0)
                     </div>
                 </header>
                 <GraphWidget />
+            </article>
+
+            <article class="bento-tile tile-base">
+                <header class="tile-head">
+                    <Icon name="layoutDashboard" />
+                    <div>
+                        <h2 class="display">Your notes, as databases</h2>
+                        <p>
+                            A .base file queries your Vault and renders it as a table, a list, a
+                            cards, or a graph.
+                        </p>
+                    </div>
+                </header>
+                <BaseWidget />
             </article>
 
             <article class="bento-tile tile-theme">
@@ -443,6 +445,7 @@ const starCount = Number(stars.stargazersCount ?? 0)
         }
     }
 
+    .tile-local,
     .tile-md,
     .tile-base,
     .tile-graph,
@@ -459,6 +462,11 @@ const starCount = Number(stars.stargazersCount ?? 0)
     }
     .tile-base {
         .base-widget {
+            flex-grow: 1;
+        }
+    }
+    .tile-local {
+        .file-tree {
             flex-grow: 1;
         }
     }
