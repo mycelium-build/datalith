@@ -142,6 +142,21 @@ function searchContent(markdown: string): string {
         .trim()
 }
 
+function demoteHeadings(markdown: string): string {
+    let inFence = false
+    return markdown
+        .split(/\r?\n/)
+        .map((line) => {
+            if (/^\s*(```|~~~)/.test(line)) {
+                inFence = !inFence
+                return line
+            }
+            if (inFence) return line
+            return line.replace(/^(#{1,5})( )/, "#$1$2")
+        })
+        .join("\n")
+}
+
 function addStarlightFrontmatter(markdown: string, relativePath: string): string {
     const { body, frontmatter } = parseFrontmatter(markdown)
     const route = routeFor(relativePath)
@@ -150,7 +165,7 @@ function addStarlightFrontmatter(markdown: string, relativePath: string): string
         .filter((line) => !/^title\s*:/.test(line))
         .join("\n")
     const title = path.basename(relativePath, ".md")
-    return `---\n${fields}\ntitle: ${JSON.stringify(title)}\nslug: ${route}\n---\n\n${body.trimStart()}`
+    return `---\n${fields}\ntitle: ${JSON.stringify(title)}\nslug: ${route}\n---\n\n${demoteHeadings(body.trimStart())}`
 }
 
 await collectMarkdown(sourceVault)
