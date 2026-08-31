@@ -57,6 +57,14 @@
     }
 }
 
+/* Page title heading (Starlight anchors it at id="_top"). */
+#_top {
+    font-family: var(--font-pixel);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+}
+
 /* Flat, borderless chrome */
 .site-header,
 .site-header > .header,
