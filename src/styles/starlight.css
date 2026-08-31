@@ -180,13 +180,15 @@ site-search button[data-open-modal]::before {
     mask: url("../assets/icons/search.svg") no-repeat center / contain;
 }
 
-#starlight__search .pagefind-ui__form::before { /* stylelint-disable-line selector-class-pattern -- Pagefind's BEM class name */
+/* stylelint-disable selector-class-pattern -- Pagefind's BEM class name */
+#starlight__search .pagefind-ui__form::before {
     width: 14px;
     height: 14px;
     top: calc(25px * var(--pagefind-ui-scale));
     left: calc(22px * var(--pagefind-ui-scale));
     mask-image: url("../assets/icons/search.svg");
 }
+/* stylelint-enable selector-class-pattern */
 
 /* Pagination arrows use the app's pixel arrows. */
 .pagination-links a > svg {
