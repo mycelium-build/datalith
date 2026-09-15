@@ -15,7 +15,7 @@ with the `generate-license-file` npm package. This file is produced by
 This section lists non-npm assets distributed with Datalith Website. It
 is generated from `scripts/licenses/assets.json`; do not edit it by hand.
 
-### Datalith logo
+### Datalith logos (Stable and Preview)
 
 - Identifier: `datalith-logo`
 - Kind: artwork
@@ -140,7 +140,7 @@ The following license texts are reproduced in full for the bundled assets listed
 
 ### LICENSE
 
-Used by: Datalith logo, Datalith pixel-art icons
+Used by: Datalith logos (Stable and Preview), Datalith pixel-art icons
 
 ```
 MIT License

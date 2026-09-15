@@ -4,6 +4,7 @@ import { isPreviewAheadOfStable } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
 
 const repositoryUrl = `https://github.com/${releaseData.repository}`
+const assetBase = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/`
 const sourceReleases = releaseData.releases ?? []
 // Keep the two channels deliberately disjoint: stable downloads must never fall back to a RC.
 const stableReleases = sourceReleases.filter((release) => release.prerelease === false)
@@ -110,9 +111,14 @@ const asset = (release, platform, arch) =>
                     latestPreview && (
                         <details class="download-menu preview-menu">
                             <summary>
-                                <span class="spark" aria-hidden="true">
-                                    ✦
-                                </span>{" "}
+                                <img
+                                    class="preview-icon"
+                                    src={`${assetBase}datalith-preview.png`}
+                                    width="24"
+                                    height="24"
+                                    alt=""
+                                    aria-hidden="true"
+                                />
                                 Download preview{" "}
                                 <>
                                     <span class="rc-badge">RC</span>
@@ -658,8 +664,11 @@ const asset = (release, platform, arch) =>
         padding: 0.16rem 0.38rem;
     }
 
-    .spark {
-        color: var(--dl-yellow);
+    .preview-icon {
+        display: block;
+        flex: 0 0 auto;
+        height: 1.5rem;
+        width: 1.5rem;
     }
 
     .preview-heading {
