@@ -1,0 +1,189 @@
+---
+import bases from "../data/bases.json"
+import { docUrl } from "../lib/route"
+import Icon from "./Icon.astro"
+
+type FileNode = { kind: "file"; name: string; route: string }
+type FolderNode = { kind: "folder"; name: string; children: Node[] }
+type Node = FolderNode | FileNode
+
+const rootPrefix = "/docs/vault/"
+const root: FolderNode = { kind: "folder", name: "", children: [] }
+
+const sorted = [...bases.rows].sort((a, b) => a.route.localeCompare(b.route))
+for (const row of sorted) {
+    const segments = row.route.replace(rootPrefix, "").split("/").filter(Boolean)
+    let folder = root
+    for (const segment of segments.slice(0, -1)) {
+        let child = folder.children.find(
+            (candidate): candidate is FolderNode =>
+                candidate.kind === "folder" && candidate.name === segment,
+        )
+        if (!child) {
+            child = { kind: "folder", name: segment, children: [] }
+            folder.children.push(child)
+        }
+        folder = child
+    }
+    folder.children.push({ kind: "file", name: row.name, route: row.route })
+}
+
+const sortChildren = (folder: FolderNode) => {
+    folder.children.sort((a, b) => {
+        if (a.kind !== b.kind) return a.kind === "folder" ? -1 : 1
+        return a.name.localeCompare(b.name)
+    })
+    for (const child of folder.children) {
+        if (child.kind === "folder") sortChildren(child)
+    }
+}
+sortChildren(root)
+
+type FlatRow = {
+    kind: "folder" | "file"
+    name: string
+    depth: number
+    route?: string
+    path: string[]
+}
+const flatten = (folder: FolderNode, depth: number, path: string[]): FlatRow[] =>
+    folder.children.flatMap((child) =>
+        child.kind === "folder"
+            ? [
+                  { kind: "folder", name: child.name, depth, path },
+                  ...flatten(child, depth + 1, [...path, child.name]),
+              ]
+            : [{ kind: "file", name: child.name, depth, path, route: child.route }],
+    )
+const rows = flatten(root, 0, [])
+---
+
+<nav class="file-tree" data-file-tree aria-label="The Docs Vault, a folder of open files">
+    <ul>
+        {
+            rows.map((row) => (
+                <li
+                    style={`--depth: ${row.depth}`}
+                    data-tree-path={row.path.join(" ")}
+                    hidden={row.path.length > 0}
+                >
+                    {row.kind === "folder" ? (
+                        <button
+                            type="button"
+                            class="tree-row"
+                            data-tree-folder={row.name}
+                            aria-expanded="false"
+                        >
+                            <span class="folder-icon" aria-hidden="true">
+                                <Icon name="folder" class="icon-closed" />
+                                <Icon name="folderOpen" class="icon-open" />
+                            </span>
+                            <span class="tree-name">{row.name}</span>
+                        </button>
+                    ) : (
+                        <a class="tree-row" href={docUrl(row.route ?? "")}>
+                            <Icon name="note" />
+                            <span class="tree-name">{row.name}.md</span>
+                        </a>
+                    )}
+                </li>
+            ))
+        }
+    </ul>
+</nav>
+
+<script>
+    const setup = (tree: HTMLElement) => {
+        const open = new Set<string>()
+        const rows = Array.from(tree.querySelectorAll<HTMLElement>("li[data-tree-path]"))
+        const apply = () => {
+            for (const row of rows) {
+                const path = (row.dataset.treePath ?? "").split(" ").filter(Boolean)
+                row.hidden = !path.every((folder) => open.has(folder))
+            }
+        }
+        tree.addEventListener("click", (event) => {
+            const button = (event.target as HTMLElement).closest<HTMLElement>("[data-tree-folder]")
+            if (!button) return
+            const name = button.dataset.treeFolder ?? ""
+            if (open.has(name)) {
+                open.delete(name)
+            } else {
+                open.add(name)
+            }
+            button.setAttribute("aria-expanded", String(open.has(name)))
+            apply()
+        })
+        apply()
+    }
+    document.querySelectorAll<HTMLElement>("[data-file-tree]").forEach(setup)
+</script>
+
+<style>
+    .file-tree {
+        flex: 1;
+        font-size: 0.82rem;
+        min-height: 0;
+        overflow-y: auto;
+    }
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .tree-row {
+        align-items: center;
+        color: var(--dl-fg);
+        column-gap: 0.55rem;
+        display: flex;
+        padding: 0.3rem 0.5rem;
+        padding-left: calc(0.5rem + var(--depth) * 1.1rem);
+
+        .pixel-icon {
+            color: var(--dl-muted);
+            font-size: 14px;
+        }
+    }
+    button.tree-row {
+        background: none;
+        border: 0;
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+        width: 100%;
+    }
+    .folder-icon {
+        display: inline-flex;
+
+        :global(.icon-open) {
+            display: none;
+        }
+    }
+    button[aria-expanded="true"] .folder-icon {
+        :global(.icon-closed) {
+            display: none;
+        }
+        :global(.icon-open) {
+            display: inline-flex;
+        }
+    }
+    a.tree-row,
+    button.tree-row {
+        text-decoration: none;
+
+        &:hover,
+        &:focus-visible {
+            background: color-mix(in srgb, var(--dl-fg) 5%, transparent);
+
+            .tree-name,
+            .pixel-icon {
+                color: var(--dl-accent);
+            }
+        }
+    }
+    .tree-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>

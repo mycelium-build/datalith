@@ -57,6 +57,14 @@
     }
 }
 
+/* Page title heading (Starlight anchors it at id="_top"). */
+#_top {
+    font-family: var(--font-pixel);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+}
+
 /* Flat, borderless chrome */
 .site-header,
 .site-header > .header,
@@ -120,6 +128,111 @@
     a:hover {
         color: var(--dl-fg);
     }
+}
+
+/* Mobile TOC toggle uses the app's pixel chevrons. */
+#starlight__mobile-toc .toggle svg.caret {
+    display: none;
+}
+
+#starlight__mobile-toc .toggle::after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-color: currentcolor;
+    mask: url("../assets/icons/chevron-right.svg") no-repeat center / contain;
+}
+
+#starlight__mobile-toc[open] .toggle::after {
+    mask-image: url("../assets/icons/chevron-down.svg");
+}
+
+/* Sidebar group toggles use the app's pixel chevrons. */
+.sidebar details > summary svg.caret {
+    display: none;
+}
+
+.sidebar details > summary::after {
+    content: "";
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-color: currentcolor;
+    mask: url("../assets/icons/chevron-right.svg") no-repeat center / contain;
+}
+
+.sidebar details[open] > summary::after {
+    mask-image: url("../assets/icons/chevron-down.svg");
+}
+
+/* Search uses the app's pixel search icon. */
+site-search button[data-open-modal] > svg {
+    display: none;
+}
+
+site-search button[data-open-modal]::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-color: currentcolor;
+    mask: url("../assets/icons/search.svg") no-repeat center / contain;
+}
+
+/* stylelint-disable selector-class-pattern -- Pagefind's BEM class name */
+#starlight__search .pagefind-ui__form::before {
+    width: 14px;
+    height: 14px;
+    top: calc(25px * var(--pagefind-ui-scale));
+    left: calc(22px * var(--pagefind-ui-scale));
+    mask-image: url("../assets/icons/search.svg");
+}
+/* stylelint-enable selector-class-pattern */
+
+/* Pagination arrows use the app's pixel arrows. */
+.pagination-links a > svg {
+    display: none;
+}
+
+.pagination-links a[rel="prev"]::before,
+.pagination-links a[rel="next"]::before {
+    content: "";
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+    background-color: currentcolor;
+    mask: url("../assets/icons/arrow-left.svg") no-repeat center / contain;
+}
+
+.pagination-links a[rel="next"]::before {
+    mask-image: url("../assets/icons/arrow-right.svg");
+}
+
+/* Code block copy button uses the app's pixel copy icon. */
+.copy button::after {
+    width: 28px;
+    height: 28px;
+    inset: 0;
+    margin: auto;
+    mask-image: url("../assets/icons/copy.svg");
+    mask-size: 100%;
+}
+
+/* Heading anchor links use the app's pixel link icon. */
+.sl-markdown-content .sl-anchor-icon > svg {
+    display: none;
+}
+
+.sl-markdown-content .sl-anchor-icon::before {
+    content: "";
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+    vertical-align: top;
+    transform: translateY(calc((var(--sl-line-height-headings) * 1em - 14px) / 2));
+    background-color: currentcolor;
+    mask: url("../assets/icons/link.svg") no-repeat center / contain;
 }
 
 /* Pagination */

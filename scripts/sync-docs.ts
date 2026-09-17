@@ -15,6 +15,7 @@ const markdownFiles: string[] = []
 
 async function collectMarkdown(directory: string, relativeDirectory = ""): Promise<void> {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
+        if (relativeDirectory === "" && entry.isDirectory() && entry.name === "examples") continue
         const relativePath = path.join(relativeDirectory, entry.name)
         const absolutePath = path.join(directory, entry.name)
         if (entry.isDirectory()) await collectMarkdown(absolutePath, relativePath)
@@ -31,6 +32,11 @@ function parseFrontmatter(markdown: string): { body: string; frontmatter: string
     const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/)
     if (!match) return { body: markdown, frontmatter: "" }
     return { body: markdown.slice(match[0].length), frontmatter: match[1] }
+}
+
+function categoryFromFrontmatter(frontmatter: string): string {
+    const value = frontmatter.match(/^category:\s*(.+)$/m)?.[1]?.trim() ?? ""
+    return value.replace(/^["']|["']$/g, "")
 }
 
 function routeFor(relativePath: string): string {
@@ -136,14 +142,30 @@ function searchContent(markdown: string): string {
         .trim()
 }
 
+function demoteHeadings(markdown: string): string {
+    let inFence = false
+    return markdown
+        .split(/\r?\n/)
+        .map((line) => {
+            if (/^\s*(```|~~~)/.test(line)) {
+                inFence = !inFence
+                return line
+            }
+            if (inFence) return line
+            return line.replace(/^(#{1,5})( )/, "#$1$2")
+        })
+        .join("\n")
+}
+
 function addStarlightFrontmatter(markdown: string, relativePath: string): string {
     const { body, frontmatter } = parseFrontmatter(markdown)
-    const title = titleFromMarkdown(body, path.basename(relativePath, ".md"))
     const route = routeFor(relativePath)
-    let fields = frontmatter ? `${frontmatter}\n` : ""
-    if (!/^title\s*:/m.test(fields)) fields += `title: ${JSON.stringify(title)}\n`
-    if (!/^slug\s*:/m.test(fields)) fields += `slug: ${route}\n`
-    return `---\n${fields}---\n\n${body.trimStart()}`
+    const fields = frontmatter
+        .split("\n")
+        .filter((line) => !/^title\s*:/.test(line))
+        .join("\n")
+    const title = path.basename(relativePath, ".md")
+    return `---\n${fields}\ntitle: ${JSON.stringify(title)}\nslug: ${route}\n---\n\n${demoteHeadings(body.trimStart())}`
 }
 
 await collectMarkdown(sourceVault)
@@ -152,6 +174,7 @@ await rm(destinationVault, { recursive: true, force: true })
 await mkdir(destinationVault, { recursive: true })
 
 const edges = new Set<string>()
+const baseRows: Array<{ name: string; path: string; category: string; route: string }> = []
 const documents: Array<{
     route: string
     name: string
@@ -174,6 +197,12 @@ for (const relativePath of markdownFiles) {
         path: relativePath.split(path.sep).join("/").replace(/\.md$/i, ""),
         title: titleFromMarkdown(rewritten, path.basename(relativePath, ".md")),
         content: searchContent(rewritten),
+    })
+    baseRows.push({
+        name: path.posix.basename(relativePath, ".md"),
+        path: relativePath.split(path.sep).join("/").replace(/\.md$/i, ""),
+        category: categoryFromFrontmatter(parseFrontmatter(original).frontmatter),
+        route: `/${routeFor(relativePath)}/`,
     })
 }
 
@@ -201,7 +230,11 @@ await writeFile(
     `${JSON.stringify({ documents }, null, 2)}\n`,
 )
 
+baseRows.sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path))
+const baseTable = { rows: baseRows.map(({ name, category, route }) => ({ name, category, route })) }
+await writeFile(path.join(dataDirectory, "bases.json"), `${JSON.stringify(baseTable, null, 2)}\n`)
+
 console.log(`Imported ${markdownFiles.length} Markdown files from ${sourceVault}`)
 console.log(
-    `Wrote docs graph (${graphNodes.length} nodes, ${graphEdges.length} edges) and search index (${documents.length} documents)`,
+    `Wrote docs graph (${graphNodes.length} nodes, ${graphEdges.length} edges), search index (${documents.length} documents), and base table (${baseTable.rows.length} rows)`,
 )
