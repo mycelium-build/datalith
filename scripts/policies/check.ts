@@ -20,7 +20,7 @@ const DATE_PATTERN = /Last updated \w+ \d+, \d+/g
 const DATE_PLACEHOLDER = "Last updated <DATE>"
 
 function normalize(html: string): string {
-    return html.replace(DATE_PATTERN, DATE_PLACEHOLDER)
+    return html.replace(/\r\n?/g, "\n").replace(DATE_PATTERN, DATE_PLACEHOLDER)
 }
 
 async function generateFresh(tempDir: string): Promise<void> {
@@ -29,8 +29,8 @@ async function generateFresh(tempDir: string): Promise<void> {
     config.output.termsFilePath = "./gen/terms/index.astro"
     await writeFile(path.join(tempDir, "policygen.json"), JSON.stringify(config, null, 4))
 
-    const bin = path.join(ROOT, "node_modules", ".bin", "policygen")
-    await execFileP(bin, ["generate"], { cwd: tempDir })
+    const bin = fileURLToPath(import.meta.resolve("policygen/dist/index.js"))
+    await execFileP(process.execPath, [bin, "generate"], { cwd: tempDir })
 }
 
 async function main(): Promise<void> {

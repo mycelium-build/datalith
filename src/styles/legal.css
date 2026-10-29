@@ -5,31 +5,31 @@
     .heading,
     .subheading,
     .tertiary {
-        color: var(--dl-fg);
         font-family: var(--font-pixel);
         font-weight: 700;
         line-height: 1.15;
+        color: var(--dl-fg);
     }
 
     .heading {
-        font-size: clamp(1.8rem, 4vw, 2.6rem);
         margin-bottom: var(--space-2);
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
     }
 
     .subheading {
-        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
         margin: var(--space-6) 0 var(--space-3);
+        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
     }
 
     .tertiary {
-        font-size: 1rem;
         margin-bottom: var(--space-5);
+        font-size: 1rem;
     }
 
     .paragraph {
-        color: var(--dl-fg);
-        margin: 0 0 var(--space-4);
         max-width: 70ch;
+        margin: 0 0 var(--space-4);
+        color: var(--dl-fg);
     }
 
     .bold {
@@ -48,8 +48,8 @@
     .list,
     .ordered-list,
     .unordered-list {
-        margin: 0 0 var(--space-4);
         padding-left: var(--space-5);
+        margin: 0 0 var(--space-4);
     }
 
     .list,

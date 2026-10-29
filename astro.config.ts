@@ -10,7 +10,8 @@ export default defineConfig({
     integrations: [
         starlight({
             title: "Datalith",
-            favicon: `${process.env.SITE_BASE ?? ""}/datalith.png`,
+            // Starlight applies Astro's base to this path.
+            favicon: "/datalith.png",
             social: [
                 {
                     icon: "github",

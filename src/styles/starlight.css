@@ -61,8 +61,8 @@
 #_top {
     font-family: var(--font-pixel);
     font-weight: 700;
-    letter-spacing: 0.01em;
     line-height: 1.1;
+    letter-spacing: 0.01em;
 }
 
 /* Flat, borderless chrome */
@@ -95,8 +95,8 @@
     }
 
     &[aria-current="page"] {
-        background: color-mix(in srgb, var(--dl-accent) 16%, transparent);
         color: var(--dl-fg);
+        background: color-mix(in srgb, var(--dl-accent) 16%, transparent);
     }
 }
 
@@ -105,9 +105,9 @@
 }
 
 .card {
-    border-radius: 0;
-    border: 0;
     background: var(--dl-surface);
+    border: 0;
+    border-radius: 0;
 
     &:hover {
         background: var(--dl-surface-alt);
@@ -136,10 +136,10 @@
 }
 
 #starlight__mobile-toc .toggle::after {
-    content: "";
+    flex-shrink: 0;
     width: 14px;
     height: 14px;
-    flex-shrink: 0;
+    content: "";
     background-color: currentcolor;
     mask: url("../assets/icons/chevron-right.svg") no-repeat center / contain;
 }
@@ -154,10 +154,10 @@
 }
 
 .sidebar details > summary::after {
-    content: "";
+    flex-shrink: 0;
     width: 14px;
     height: 14px;
-    flex-shrink: 0;
+    content: "";
     background-color: currentcolor;
     mask: url("../assets/icons/chevron-right.svg") no-repeat center / contain;
 }
@@ -172,20 +172,20 @@ site-search button[data-open-modal] > svg {
 }
 
 site-search button[data-open-modal]::before {
-    content: "";
+    flex-shrink: 0;
     width: 14px;
     height: 14px;
-    flex-shrink: 0;
+    content: "";
     background-color: currentcolor;
     mask: url("../assets/icons/search.svg") no-repeat center / contain;
 }
 
 /* stylelint-disable selector-class-pattern -- Pagefind's BEM class name */
 #starlight__search .pagefind-ui__form::before {
-    width: 14px;
-    height: 14px;
     top: calc(25px * var(--pagefind-ui-scale));
     left: calc(22px * var(--pagefind-ui-scale));
+    width: 14px;
+    height: 14px;
     mask-image: url("../assets/icons/search.svg");
 }
 /* stylelint-enable selector-class-pattern */
@@ -197,10 +197,10 @@ site-search button[data-open-modal]::before {
 
 .pagination-links a[rel="prev"]::before,
 .pagination-links a[rel="next"]::before {
-    content: "";
+    flex-shrink: 0;
     width: 21px;
     height: 21px;
-    flex-shrink: 0;
+    content: "";
     background-color: currentcolor;
     mask: url("../assets/icons/arrow-left.svg") no-repeat center / contain;
 }
@@ -211,9 +211,9 @@ site-search button[data-open-modal]::before {
 
 /* Code block copy button uses the app's pixel copy icon. */
 .copy button::after {
+    inset: 0;
     width: 28px;
     height: 28px;
-    inset: 0;
     margin: auto;
     mask-image: url("../assets/icons/copy.svg");
     mask-size: 100%;
@@ -225,21 +225,21 @@ site-search button[data-open-modal]::before {
 }
 
 .sl-markdown-content .sl-anchor-icon::before {
-    content: "";
     display: inline-block;
     width: 21px;
     height: 21px;
     vertical-align: top;
-    transform: translateY(calc((var(--sl-line-height-headings) * 1em - 14px) / 2));
+    content: "";
     background-color: currentcolor;
     mask: url("../assets/icons/link.svg") no-repeat center / contain;
+    transform: translateY(calc((var(--sl-line-height-headings) * 1em - 14px) / 2));
 }
 
 /* Pagination */
 .pagination a {
+    background: var(--dl-surface);
     border: 0;
     border-radius: 0;
-    background: var(--dl-surface);
 
     &:hover {
         background: var(--dl-surface-alt);

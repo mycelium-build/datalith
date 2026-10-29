@@ -24,6 +24,35 @@ export function compareVersions(left: ComparableRelease, right: ComparableReleas
     return new Date(right.publishedAt ?? 0).getTime() - new Date(left.publishedAt ?? 0).getTime()
 }
 
+export function isPreviewAheadOfStable(
+    preview: ComparableRelease,
+    stable: ComparableRelease | undefined,
+): boolean {
+    if (!stable) return true
+
+    const previewParts = versionParts(preview.tagName)
+    const stableParts = versionParts(stable.tagName)
+    if (!previewParts || !stableParts) return false
+
+    for (let index = 0; index < 3; index += 1) {
+        if (previewParts[index] !== stableParts[index]) {
+            return previewParts[index] > stableParts[index]
+        }
+    }
+
+    return false
+}
+
+export type AssetArch = "x64" | "arm64"
+
+export function archForAsset(name: string): AssetArch | null {
+    const lowerName = name.toLowerCase()
+    if (lowerName.includes("aarch64") || lowerName.includes("arm64")) return "arm64"
+    if (lowerName.includes("x86_64") || lowerName.includes("amd64") || lowerName.includes("x64"))
+        return "x64"
+    return null
+}
+
 export function platformForAsset(name: string): string {
     const lowerName = name.toLowerCase()
     if (

@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import * as v from "valibot"
 
-import { compareVersions, platformForAsset, versionParts } from "./lib/releases.ts"
+import { archForAsset, compareVersions, platformForAsset, versionParts } from "./lib/releases.ts"
 import { parseWith } from "./lib/schema.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -63,6 +63,7 @@ async function main(): Promise<void> {
             assets: release.assets.map((asset) => ({
                 name: asset.name,
                 platform: platformForAsset(asset.name),
+                arch: archForAsset(asset.name),
                 browserDownloadUrl: asset.browser_download_url,
                 size: asset.size,
             })),
