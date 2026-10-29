@@ -11,7 +11,7 @@ on:
     workflow_dispatch:
         inputs:
             source_ref:
-                description: Datalith git ref to use for documentation
+                description: Datalith git ref to use for application assets
                 required: true
                 default: main
                 type: string

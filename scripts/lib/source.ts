@@ -2,12 +2,10 @@ import { execFile } from "node:child_process"
 import { readFile, rm, stat, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
 const execFileAsync = promisify(execFile)
 
-const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const DEFAULT_REPOSITORY = "mycelium-build/datalith-app"
 const DEFAULT_SOURCE_REF = "main"
 // Deterministic temp clone so every prebuild step shares one checkout instead of cloning the repository once per script.
@@ -19,57 +17,50 @@ export interface DatalithSource {
     root: string
 }
 
-export function resolveLocalSource(): string {
+/** Local application checkout from DATALITH_SOURCE_DIR, for testing uncommitted assets. */
+export function resolveLocalSource(): string | undefined {
     const sourceDir = process.env.DATALITH_SOURCE_DIR
-    if (sourceDir) {
-        if (process.env.CI) {
-            throw new Error(
-                "DATALITH_SOURCE_DIR must not be set in CI: documentation and assets are fetched with DATALITH_READ_TOKEN",
-            )
-        }
-        return path.resolve(sourceDir)
-    }
-    return path.join(siteRoot, "..", "datalith")
-}
-
-export async function resolveDatalithSource(): Promise<DatalithSource> {
-    if (process.env.DATALITH_SOURCE_DIR) {
-        return { root: resolveLocalSource() }
-    }
-
-    const token = process.env.DATALITH_READ_TOKEN
-    if (token) return cloneRepository(token)
-
+    if (!sourceDir) return undefined
     if (process.env.CI) {
-        throw new Error("DATALITH_READ_TOKEN must be set in CI")
+        throw new Error("DATALITH_SOURCE_DIR must not be set in CI: assets are cloned from the ref")
     }
-    return { root: path.join(siteRoot, "..", "datalith") }
+    return path.resolve(sourceDir)
 }
 
-async function isUsableClone(ref: string): Promise<boolean> {
+/** Assets source: the local checkout when set, otherwise a clone of DATALITH_SOURCE_REF. */
+export async function resolveDatalithSource(): Promise<DatalithSource> {
+    const local = resolveLocalSource()
+    if (local) return { root: local }
+    return cloneRepository(process.env.DATALITH_SOURCE_REF ?? DEFAULT_SOURCE_REF, CLONE_DIRECTORY)
+}
+
+/** Documentation source: always a clone of the release tag, never a working tree. */
+export async function resolveTagSource(tag: string): Promise<DatalithSource> {
+    return cloneRepository(tag, path.join(os.tmpdir(), `datalith-source-${tag}`))
+}
+
+async function isUsableClone(directory: string, ref: string): Promise<boolean> {
     try {
-        const marker = await readFile(path.join(CLONE_DIRECTORY, CLONE_REF_MARKER), "utf8")
-        await stat(path.join(CLONE_DIRECTORY, ".git"))
+        const marker = await readFile(path.join(directory, CLONE_REF_MARKER), "utf8")
+        await stat(path.join(directory, ".git"))
         return marker.trim() === ref
     } catch {
         return false
     }
 }
 
-async function cloneRepository(token: string): Promise<DatalithSource> {
+async function cloneRepository(ref: string, directory: string): Promise<DatalithSource> {
     const repository = process.env.RELEASE_REPOSITORY ?? DEFAULT_REPOSITORY
-    const ref = process.env.DATALITH_SOURCE_REF ?? DEFAULT_SOURCE_REF
 
-    if (await isUsableClone(ref)) {
-        console.log(`Reusing cloned ${repository}@${ref} at ${CLONE_DIRECTORY}`)
-        return { root: CLONE_DIRECTORY }
+    if (await isUsableClone(directory, ref)) {
+        console.log(`Reusing cloned ${repository}@${ref} at ${directory}`)
+        return { root: directory }
     }
 
-    await rm(CLONE_DIRECTORY, { recursive: true, force: true })
-    await withCredentials(token, async (credentialFile) => {
-        await execFileAsync("git", [
-            "-c",
-            `credential.helper=store --file=${credentialFile}`,
+    await rm(directory, { recursive: true, force: true })
+    const clone = (gitConfig: string[]) =>
+        execFileAsync("git", [
+            ...gitConfig,
             "clone",
             "--depth",
             "1",
@@ -77,12 +68,19 @@ async function cloneRepository(token: string): Promise<DatalithSource> {
             "--branch",
             ref,
             `https://github.com/${repository}.git`,
-            CLONE_DIRECTORY,
+            directory,
         ])
-    })
-    await writeFile(path.join(CLONE_DIRECTORY, CLONE_REF_MARKER), ref)
-    console.log(`Cloned ${repository}@${ref} into ${CLONE_DIRECTORY}`)
-    return { root: CLONE_DIRECTORY }
+    const token = process.env.DATALITH_READ_TOKEN
+    if (token) {
+        await withCredentials(token, (credentialFile) =>
+            clone(["-c", `credential.helper=store --file=${credentialFile}`]),
+        )
+    } else {
+        await clone([])
+    }
+    await writeFile(path.join(directory, CLONE_REF_MARKER), ref)
+    console.log(`Cloned ${repository}@${ref} into ${directory}`)
+    return { root: directory }
 }
 
 async function withCredentials<T>(

@@ -14,7 +14,7 @@
         "licenses:check": "node scripts/licenses/check.ts",
         "policies:generate": "policygen generate && node scripts/policies/generate.ts",
         "policies:check": "node scripts/policies/check.ts",
-        "prebuild": "npm run sync-docs && npm run sync-assets && npm run build-icons && npm run build-themes && npm run fetch-releases",
+        "prebuild": "npm run fetch-releases && npm run sync-docs && npm run sync-assets && npm run build-icons && npm run build-themes",
         "build": "astro build",
         "preview": "astro preview",
         "test": "vp test",

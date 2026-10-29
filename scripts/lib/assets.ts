@@ -43,7 +43,7 @@ export async function syncAssets(sourceRoot: string, siteRoot: string): Promise<
             }
             throw new Error(
                 `Missing required application asset: ${from} (source: ${sourceRoot}). ` +
-                    "Use DATALITH_SOURCE_DIR or DATALITH_SOURCE_REF with the Stable and Preview channel icons (v0.2.0-rc.1 or later).",
+                    "Use DATALITH_SOURCE_REF (or DATALITH_SOURCE_DIR) with the Stable and Preview channel icons (v0.2.0-rc.1 or later).",
                 { cause: error },
             )
         }

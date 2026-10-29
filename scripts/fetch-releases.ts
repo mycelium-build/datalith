@@ -58,6 +58,7 @@ async function main(): Promise<void> {
             tagName: release.tag_name,
             name: release.name || release.tag_name,
             prerelease: release.prerelease,
+            draft: release.draft,
             publishedAt: release.published_at,
             htmlUrl: release.html_url,
             assets: release.assets.map((asset) => ({

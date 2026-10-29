@@ -51,7 +51,6 @@ npm run licenses:check
 
 - Node.js and npm
 - Git
-- A checkout of the Datalith repository at `../datalith-app`, or a local source path configured with `DATALITH_SOURCE_DIR`
 
 ### Installation
 
@@ -62,12 +61,10 @@ npm run licenses:check
     cd datalith
     ```
 
-2. Configure the application source and build the project:
+2. Build the project (application assets and documentation are cloned from GitHub):
 
     ```bash
     npm ci
-    # Set this in your shell, or put it in an untracked .env file:
-    # DATALITH_SOURCE_DIR=../datalith-app
     npm run build
     ```
 
@@ -78,18 +75,19 @@ npm run licenses:check
 
 ### Application assets and source refs
 
-`sync-assets` copies the application's finished PNGs byte for byte:
+`npm run build` fetches everything from the [application repository](https://github.com/mycelium-build/datalith-app) through `prebuild`. On a clean checkout, run `npm run sync-assets` before tests and license checks.
 
-- `assets/logo/stable/datalith.png` → `public/datalith.png` (website and documentation favicon)
-- `assets/logo/preview/datalith.png` → `public/datalith-preview.png` (Preview downloads)
+- **Assets** (logos, fonts, themes, icons) come from `DATALITH_SOURCE_REF` (default: `main`, `v0.2.0-rc.1` or later).
+- **Documentation** comes from the latest stable release (`/docs/vault/`) and the latest RC (`/docs/preview/vault/`).
 
-No icon generation or image resizing is needed. Fonts, themes, pixel icons, and the text logo also come from the selected application checkout. Generated assets are ignored by Git; run `npm run sync-assets` before tests and license checks on a clean checkout. `npm run build` synchronizes documentation and assets again through `prebuild`.
+Optional environment variables:
 
-For local development, set `DATALITH_SOURCE_DIR` to the application checkout. To fetch a branch or release tag, leave that variable unset and provide `DATALITH_READ_TOKEN` plus `DATALITH_SOURCE_REF` (default: `main`). CI uses the existing GitHub App token and forbids a local source directory.
-
-Use application `main`, `v0.2.0-rc.1`, or a later ref containing both channel icons. Older refs such as `v0.1.0` only have a legacy logo and no yellow Preview icon; they are rejected with the missing source path instead of substituting the Stable artwork for Preview. To rebuild that historical site, use its historical website revision.
-
-For GitHub Pages validation, set `SITE_BASE=/datalith` when running `npm run build` and `npm run preview`, then open `/datalith/`. Leave `SITE_BASE` unset for local development at `/`.
+| Variable              | Purpose                                                  |
+| --------------------- | -------------------------------------------------------- |
+| `DATALITH_SOURCE_REF` | Application ref for assets                               |
+| `DATALITH_SOURCE_DIR` | Local application checkout, to test uncommitted assets   |
+| `DATALITH_READ_TOKEN` | GitHub token, to avoid API rate limits                   |
+| `SITE_BASE`           | Base path, e.g. `/datalith` to test GitHub Pages locally |
 
 ### Development Workflow
 

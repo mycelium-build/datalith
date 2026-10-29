@@ -5,6 +5,7 @@ dist/
 
 # Imported from the Datalith repository during the build.
 src/content/docs/vault/
+src/content/docs/preview/
 src/data/releases.json
 src/data/stars.json
 src/data/graph.json
