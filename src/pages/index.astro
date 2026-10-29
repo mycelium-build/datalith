@@ -6,6 +6,7 @@ import BaseWidget from "../components/BaseWidget.astro"
 import DownloadPanel from "../components/DownloadPanel.astro"
 import FileTreeWidget from "../components/FileTreeWidget.astro"
 import GraphWidget from "../components/GraphWidget.astro"
+import HeroScene from "../components/HeroScene.astro"
 import Icon from "../components/Icon.astro"
 import MarkdownWidget from "../components/MarkdownWidget.astro"
 import MonolithLogo from "../components/MonolithLogo.astro"
@@ -25,11 +26,9 @@ const starCount = Number(stars.stargazersCount ?? 0)
     description="Datalith is a fast, local-first Vault for notes, tasks and linked ideas. Search, visualize, and keep them in a private encyclopedia that lasts."
 >
     <section class="hero" aria-label="Datalith">
+        <HeroScene />
         <div class="hero-grid">
-            <div class="hero-logo" aria-hidden="true">
-                <MonolithLogo cell={9} />
-            </div>
-            <div class="hero-copy">
+            <div class="hero-copy" data-hero-copy>
                 <p class="eyebrow">A personal encyclopedia</p>
                 <h1 class="display">
                     From pixel to
@@ -52,6 +51,13 @@ const starCount = Number(stars.stargazersCount ?? 0)
                         GitHub <Icon name="arrowUpRight" />
                     </a>
                 </div>
+            </div>
+            <div class="hero-stage" data-hero-stage aria-hidden="true">
+                <noscript>
+                    <div class="hero-fallback">
+                        <MonolithLogo cell={9} />
+                    </div>
+                </noscript>
             </div>
         </div>
     </section>
@@ -258,23 +264,31 @@ const starCount = Number(stars.stargazersCount ?? 0)
     }
 
     .hero {
+        position: relative;
+        isolation: isolate;
         align-content: center;
         display: grid;
-        min-height: calc(100vh - 5rem);
-        padding: clamp(2rem, 6vw, 5rem) 0;
+        min-height: calc(100svh - 5rem);
+        padding: clamp(1rem, 4vw, 3rem) 0 clamp(7rem, 20vh, 12rem);
     }
     .hero-grid {
+        position: relative;
+        z-index: 1;
         align-items: center;
         display: grid;
         gap: clamp(2rem, 5vw, 4rem);
-        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr);
     }
-    .hero-logo {
+    /* Empty box the scene places the monolith in; its bottom edge is the lake's horizon. */
+    .hero-stage {
+        align-items: center;
         display: flex;
+        height: clamp(18rem, 56vh, 31rem);
         justify-content: center;
-        justify-self: center;
-        width: min(64vw, 32rem);
-        animation: float 3.6s ease-in-out infinite;
+        pointer-events: none;
+    }
+    .hero-fallback {
+        width: min(100%, 14rem);
     }
     @keyframes float {
         0%,
@@ -570,8 +584,14 @@ const starCount = Number(stars.stargazersCount ?? 0)
             grid-template-columns: 1fr;
             text-align: center;
         }
-        .hero-logo {
-            width: 11rem;
+        .hero {
+            padding-bottom: clamp(5rem, 14vh, 8rem);
+        }
+        .hero-grid {
+            gap: 1.5rem;
+        }
+        .hero-stage {
+            height: 18rem;
         }
         .hero-sub {
             margin-inline: auto;

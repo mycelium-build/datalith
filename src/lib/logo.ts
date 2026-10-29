@@ -1,7 +1,7 @@
 import logoSource from "../data/logo.txt?raw"
 import { whiten } from "./colors.ts"
 
-type Tier = "light" | "top" | "right" | "left" | "inscription"
+export type Tier = "light" | "top" | "right" | "left" | "inscription"
 
 const TIER_COLORS: Record<string, Tier> = {
     M: "light",
@@ -11,13 +11,13 @@ const TIER_COLORS: Record<string, Tier> = {
     I: "inscription",
 }
 
-interface LogoCell {
+export interface LogoCell {
     x: number
     y: number
     color: Tier
 }
 
-interface LogoGrid {
+export interface LogoGrid {
     width: number
     height: number
     cells: LogoCell[]
@@ -41,15 +41,21 @@ function parseLogo(source: string): LogoGrid {
     return { width, height, cells }
 }
 
-export function renderLogo(accent: string, cell = 1): string {
-    const grid = parseLogo(logoSource)
-    const colors: Record<Tier, string> = {
+export const LOGO_GRID: LogoGrid = parseLogo(logoSource)
+
+export function logoColors(accent: string): Record<Tier, string> {
+    return {
         light: accent,
         top: "#ffffff",
         right: whiten(accent, 0.35),
         left: whiten(accent, 0.7),
         inscription: "#ffffff",
     }
+}
+
+export function renderLogo(accent: string, cell = 1): string {
+    const grid = LOGO_GRID
+    const colors = logoColors(accent)
     const rects = grid.cells
         .map(
             ({ x, y, color }) =>

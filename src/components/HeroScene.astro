@@ -1,0 +1,46 @@
+<div class="hero-scene" data-hero-scene aria-hidden="true">
+    <canvas></canvas>
+    <span class="hero-tag" data-hero-tag hidden></span>
+</div>
+
+<script>
+    import { mountHeroScene } from "../lib/hero-scene"
+
+    const host = document.querySelector<HTMLElement>("[data-hero-scene]")
+    if (host) mountHeroScene(host)
+</script>
+
+<style>
+    /* The scene bleeds to the viewport edges; keep that from adding a horizontal scrollbar. */
+    :global(body) {
+        overflow-x: clip;
+    }
+
+    .hero-scene {
+        position: absolute;
+        inset-block: 0;
+        left: 50%;
+        z-index: 0;
+        width: 100vw;
+        overflow: hidden;
+        pointer-events: none;
+        translate: -50% 0;
+    }
+
+    canvas {
+        display: block;
+        image-rendering: pixelated;
+    }
+
+    .hero-tag {
+        position: absolute;
+        padding: 0.1rem 0.35rem;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        line-height: 1.4;
+        color: var(--dl-bg);
+        white-space: nowrap;
+        background: var(--dl-fg);
+        translate: -50% calc(-100% - 10px);
+    }
+</style>
