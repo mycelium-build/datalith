@@ -35,4 +35,4 @@ Re-running an old failed run would reuse its old website revision. Wait for the 
 
 ## Build requirements
 
-The CI build requires `DATALITH_READ_TOKEN` from the GitHub App token and does not allow `DATALITH_SOURCE_DIR`. The token is used only to read the selected Datalith ref and fetch release metadata.
+The CI build passes `DATALITH_READ_TOKEN` from the GitHub App token and does not allow `DATALITH_SOURCE_DIR`. The application repository is public, so the token is not strictly required; it authenticates the clone and release metadata requests to avoid API rate limits.
