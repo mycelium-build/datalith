@@ -18,7 +18,7 @@
         "build": "astro build",
         "preview": "astro preview",
         "test": "vp test",
-        "check": "astro sync && vp check && stylelint \"src/styles/*.css\"",
+        "check": "astro sync && vp check && astro check && stylelint \"src/styles/*.css\"",
         "lint": "vp lint && stylelint \"src/styles/*.css\"",
         "lint:fix": "vp lint --fix && stylelint --fix \"src/styles/*.css\"",
         "fmt": "vp fmt",
@@ -38,6 +38,7 @@
         "valibot": "^1.5.0"
     },
     "devDependencies": {
+        "@astrojs/check": "^0.9.12",
         "@astrojs/compiler-rs": "^0.5.2",
         "@types/d3-drag": "^3.0.7",
         "@types/d3-force": "^3.0.10",
@@ -48,6 +49,7 @@
         "stylelint": "^17.16.0",
         "stylelint-config-recess-order": "^7.9.0",
         "stylelint-config-standard": "^40.0.0",
+        "typescript": "^6.0.3",
         "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
         "vite-plus": "1.4.0"
     },
