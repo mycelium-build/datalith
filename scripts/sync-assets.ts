@@ -46,7 +46,7 @@ for (const { from, to } of copies) {
     copiedCount += await copyTree(sourcePath, destinationPath)
 }
 
-const faviconSource = path.join(sourceRoot, "assets", "logo", "datalith.png")
+const faviconSource = path.join(sourceRoot, "assets", "logo", "stable", "datalith.png")
 const faviconDestination = path.join(siteRoot, "public", "datalith.png")
 await sharp(faviconSource).resize(512, 512).toFile(faviconDestination)
 
