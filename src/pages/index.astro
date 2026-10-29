@@ -10,6 +10,7 @@ import HeroScene from "../components/HeroScene.astro"
 import Icon from "../components/Icon.astro"
 import MarkdownWidget from "../components/MarkdownWidget.astro"
 import MonolithLogo from "../components/MonolithLogo.astro"
+import ScreenshotGallery from "../components/ScreenshotGallery.astro"
 import SearchWidget from "../components/SearchWidget.astro"
 import ThemePicker from "../components/ThemePicker.astro"
 import TodoWidget from "../components/TodoWidget.astro"
@@ -224,6 +225,17 @@ const starCount = Number(stars.stargazersCount ?? 0)
                 </div>
             </article>
         </div>
+    </section>
+
+    <section class="screenshots" aria-labelledby="screenshots-heading">
+        <div class="section-heading">
+            <p class="eyebrow">A closer look</p>
+            <h2 class="display" id="screenshots-heading">
+                See it in your Vault.
+            </h2>
+            <p>Notes, search, Bases and tasks, all from the same folder of plain files.</p>
+        </div>
+        <ScreenshotGallery />
     </section>
 
     <section class="open-source" aria-label="Open source">
@@ -524,6 +536,10 @@ const starCount = Number(stars.stargazersCount ?? 0)
         &:last-child {
             margin-bottom: 0;
         }
+    }
+
+    .screenshots {
+        padding-bottom: clamp(3rem, 7vw, 5.5rem);
     }
 
     .open-source {
