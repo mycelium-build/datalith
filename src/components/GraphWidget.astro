@@ -89,7 +89,7 @@ import Icon from "./Icon.astro"
                     setTimeout(() => (dragged = false), 0)
                 }),
         )
-        .on("click", (event, d) => {
+        .on("click", (_event, d) => {
             if (dragged) return
             window.location.href = docUrl(d.route)
         })
@@ -152,7 +152,7 @@ import Icon from "./Icon.astro"
         return set
     }
 
-    node.on("mouseenter", (event, d) => {
+    node.on("mouseenter", (_event, d) => {
         hovered = d
         const set = neighborSet(d)
         link.classed("inactive", (l) => {
