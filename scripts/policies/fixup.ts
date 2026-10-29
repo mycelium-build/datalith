@@ -116,17 +116,8 @@ export function fixTermsHtml(source: string): FixResult {
             replace: '<Layout title="Terms of Service">',
         },
         {
-            find: "You agree that in no event will our total liability to you for all damages, losses, and causes of action exceed the amount paid by you for a time period of  prior to the event.",
-            replace:
-                "Because the Service is provided free of charge, our total liability to you for all damages, losses, and causes of action shall not exceed the amount you paid for the Service.",
-        },
-        {
             find: "outside of the the core service proposition",
             replace: "outside of the core service proposition",
-        },
-        {
-            find: '    <p class="paragraph">\n      \n    </p>\n    <p class="paragraph">\n      \n    </p>\n',
-            replace: "",
         },
     ])
     return { html, changed }

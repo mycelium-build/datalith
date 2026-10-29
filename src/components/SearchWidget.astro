@@ -22,10 +22,10 @@ import Icon from "./Icon.astro"
 </section>
 
 <script>
-    import { docUrl } from "../lib/route"
     import fileIcon from "../assets/icons/file.svg?raw"
     import searchData from "../data/search.json"
     import { escapeHtml, sanitizeHtml } from "../lib/html"
+    import { docUrl } from "../lib/route"
 
     const root = document.querySelector("[data-search-widget]")
     if (!root) throw new Error("search widget missing host")

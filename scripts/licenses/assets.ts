@@ -1,23 +1,27 @@
-/* oxlint-disable no-await-in-loop */
 import { readFile } from "node:fs/promises"
 import path from "node:path"
 
-interface BundledAssetJson {
-    id: string
-    kind: string
-    name: string
-    author?: string
-    copyright?: string
-    source?: string
-    revision?: string
-    license: string
-    license_file: string
-    license_evidence?: string
-}
+import * as v from "valibot"
 
-interface AssetsManifest {
-    assets: BundledAssetJson[]
-}
+import { parseWith } from "../lib/schema.ts"
+
+/** `scripts/licenses/assets.json`: the bundled non-npm assets and their licenses. */
+export const AssetsManifestSchema = v.object({
+    assets: v.array(
+        v.object({
+            id: v.string(),
+            kind: v.string(),
+            name: v.string(),
+            author: v.optional(v.string()),
+            copyright: v.optional(v.string()),
+            source: v.optional(v.string()),
+            revision: v.optional(v.string()),
+            license: v.string(),
+            license_file: v.string(),
+            license_evidence: v.optional(v.string()),
+        }),
+    ),
+})
 
 export interface BundledAsset {
     id: string
@@ -34,7 +38,11 @@ export interface BundledAsset {
 
 async function loadAssets(siteRoot: string): Promise<BundledAsset[]> {
     const manifestPath = path.join(siteRoot, "scripts", "licenses", "assets.json")
-    const manifest = JSON.parse(await readFile(manifestPath, "utf-8")) as AssetsManifest
+    const manifest = parseWith(
+        AssetsManifestSchema,
+        JSON.parse(await readFile(manifestPath, "utf-8")),
+        manifestPath,
+    )
     return manifest.assets.map(
         ({ license_file: licenseFile, license_evidence: licenseEvidence, ...rest }) => ({
             ...rest,

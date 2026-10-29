@@ -2,7 +2,10 @@ import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import * as v from "valibot"
+
 import { archForAsset, compareVersions, platformForAsset, versionParts } from "./lib/releases.ts"
+import { parseWith } from "./lib/schema.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const outputPath = path.join(siteRoot, "src", "data", "releases.json")
@@ -19,6 +22,23 @@ function githubHeaders(): Record<string, string> {
     }
 }
 
+const ReleasesSchema = v.array(
+    v.object({
+        id: v.number(),
+        tag_name: v.string(),
+        name: v.nullable(v.string()),
+        prerelease: v.boolean(),
+        published_at: v.nullable(v.string()),
+        html_url: v.string(),
+        draft: v.boolean(),
+        assets: v.array(
+            v.object({ name: v.string(), browser_download_url: v.string(), size: v.number() }),
+        ),
+    }),
+)
+
+const RepositorySchema = v.object({ stargazers_count: v.number() })
+
 async function main(): Promise<void> {
     const response = await fetch(endpoint, { headers: githubHeaders() })
     if (!response.ok) {
@@ -31,18 +51,7 @@ async function main(): Promise<void> {
         )
     }
 
-    type RawRelease = {
-        id: number
-        tag_name: string
-        name: string
-        prerelease: boolean
-        published_at: string
-        html_url: string
-        draft: boolean
-        assets: Array<{ name: string; browser_download_url: string; size: number }>
-    }
-
-    const releases = ((await response.json()) as RawRelease[])
+    const releases = parseWith(ReleasesSchema, await response.json(), "GitHub Releases response")
         .filter((release) => (includeDrafts || !release.draft) && versionParts(release.tag_name))
         .map((release) => ({
             id: release.id,
@@ -74,8 +83,8 @@ async function main(): Promise<void> {
     })
     let stargazersCount = 0
     if (starsResponse.ok) {
-        const repo = (await starsResponse.json()) as { stargazers_count?: number }
-        stargazersCount = Number(repo.stargazers_count ?? 0)
+        const repo = v.safeParse(RepositorySchema, await starsResponse.json())
+        if (repo.success) stargazersCount = repo.output.stargazers_count
     } else {
         console.warn(
             `GitHub repository request failed with ${starsResponse.status} ${starsResponse.statusText}; star count left at 0`,

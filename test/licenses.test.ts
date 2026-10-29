@@ -2,70 +2,74 @@ import { readFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { describe, expect, it } from "vitest"
+import type * as v from "valibot"
+import { describe, expect, it } from "vite-plus/test"
+
+import { parseWith } from "../scripts/lib/schema.ts"
+import { AssetsManifestSchema } from "../scripts/licenses/assets.ts"
+import { LockfileSchema } from "../scripts/licenses/lockfile.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 
-async function readJson(relativePath: string): Promise<Record<string, unknown>> {
+async function readJson<const TSchema extends v.GenericSchema>(
+    relativePath: string,
+    schema: TSchema,
+): Promise<v.InferOutput<TSchema>> {
     const content = await readFile(path.join(siteRoot, relativePath), "utf8")
-    return JSON.parse(content) as Record<string, unknown>
+    return parseWith(schema, JSON.parse(content), relativePath)
+}
+
+interface LockedPackage {
+    /** How the package is listed in the notices: `` `name` version ``. */
+    display: string
+    dev: boolean
+    optional: boolean
+    devOptional: boolean
+}
+
+async function lockedPackages(): Promise<LockedPackage[]> {
+    const lockfile = await readJson("package-lock.json", LockfileSchema)
+    const packages: LockedPackage[] = []
+    for (const [key, info] of Object.entries(lockfile.packages)) {
+        if (key === "") continue
+        const name =
+            info.name ??
+            key
+                .replace(/^node_modules\//, "")
+                .split("/node_modules/")
+                .pop() ??
+            key
+        packages.push({
+            display: `\`${name}\` ${info.version}`,
+            dev: info.dev ?? false,
+            optional: info.optional ?? false,
+            devOptional: info.devOptional ?? false,
+        })
+    }
+    return packages
 }
 
 describe("THIRD-PARTY-NOTICES.md", () => {
     it("covers every production npm package", async () => {
-        const lockfile = await readJson("package-lock.json")
-        const packages = lockfile.packages as Record<
-            string,
-            {
-                version?: string
-                license?: string
-                dev?: boolean
-                optional?: boolean
-                devOptional?: boolean
-            }
-        >
         const notice = await readFile(path.join(siteRoot, "THIRD-PARTY-NOTICES.md"), "utf8")
 
         const missing: string[] = []
-        for (const [key, info] of Object.entries(packages)) {
-            if (key === "") continue
+        for (const info of await lockedPackages()) {
             if (info.dev || info.optional || info.devOptional) continue
-            const name =
-                key
-                    .replace(/^node_modules\//, "")
-                    .split("/node_modules/")
-                    .pop() ?? key
-            const display = `\`${name}\` ${info.version}`
-            if (!notice.includes(display)) missing.push(display)
+            if (!notice.includes(info.display)) missing.push(info.display)
         }
         expect(missing).toEqual([])
     })
 
     it("excludes optional npm packages", async () => {
-        const lockfile = await readJson("package-lock.json")
-        const packages = lockfile.packages as Record<
-            string,
-            {
-                version?: string
-                dev?: boolean
-                optional?: boolean
-                devOptional?: boolean
-            }
-        >
         const notice = await readFile(path.join(siteRoot, "THIRD-PARTY-NOTICES.md"), "utf8")
         const required = new Set<string>()
         const optional = new Set<string>()
 
-        for (const [key, info] of Object.entries(packages)) {
-            if (key === "" || info.dev || info.devOptional) continue
-            const name =
-                key
-                    .replace(/^node_modules\//, "")
-                    .split("/node_modules/")
-                    .pop() ?? key
-            const display = `\`${name}\` ${info.version}`
-            if (info.optional) optional.add(display)
-            else required.add(display)
+        for (const info of await lockedPackages()) {
+            if (info.dev || info.devOptional) continue
+            if (info.optional) optional.add(info.display)
+            else required.add(info.display)
         }
 
         const includedOptional = [...optional].filter(
@@ -75,11 +79,8 @@ describe("THIRD-PARTY-NOTICES.md", () => {
     })
 
     it("reproduces every bundled-asset license file", async () => {
-        const manifest = await readJson("scripts/licenses/assets.json")
-        const assets = manifest.assets as Array<{ license_file?: string }>
-        const files = assets
-            .filter((asset) => asset.license_file)
-            .map((asset) => asset.license_file!)
+        const manifest = await readJson("scripts/licenses/assets.json", AssetsManifestSchema)
+        const files = manifest.assets.map((asset) => asset.license_file).filter(Boolean)
         const contents = await Promise.all(
             files.map((file) => readFile(path.join(siteRoot, file), "utf8")),
         )

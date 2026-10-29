@@ -1,6 +1,6 @@
 import path from "node:path"
 
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
 import { resolveDatalithSource, resolveLocalSource } from "../scripts/lib/source.ts"
 

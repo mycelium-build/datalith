@@ -1,13 +1,14 @@
-/* oxlint-disable no-await-in-loop */
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { parseWith } from "./lib/schema.ts"
 import {
     cssDeclarationLines,
     CURATED_DARK,
     CURATED_LIGHT,
     slug,
+    ThemeFileSchema,
     translateTheme,
     type ThemeMode,
     type ThemeVariables,
@@ -37,10 +38,12 @@ async function main(): Promise<void> {
     const files = (await readdir(themesDirectory)).filter((file) => file.endsWith(".json"))
     const themes: Theme[] = []
     for (const file of files) {
-        const data = JSON.parse(await readFile(path.join(themesDirectory, file), "utf8")) as {
-            themes?: Array<{ name: string }>
-        }
-        for (const entry of data.themes ?? []) {
+        const { themes: entries } = parseWith(
+            ThemeFileSchema,
+            JSON.parse(await readFile(path.join(themesDirectory, file), "utf8")),
+            file,
+        )
+        for (const entry of entries) {
             const mode: ThemeMode | null = CURATED_DARK.includes(entry.name)
                 ? "dark"
                 : CURATED_LIGHT.includes(entry.name)
@@ -79,7 +82,7 @@ async function main(): Promise<void> {
     await writeFile(
         path.join(siteRoot, "src", "data", "themes.json"),
         `${JSON.stringify(
-            themes.map(({ variables, ...theme }) => theme),
+            themes.map(({ variables: _variables, ...theme }) => theme),
             null,
             2,
         )}\n`,
