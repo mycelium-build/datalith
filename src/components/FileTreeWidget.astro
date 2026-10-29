@@ -63,14 +63,14 @@ const rows = flatten(root, 0, [])
         {rows.map((row) => (
             <li
                 style={`--depth: ${row.depth}`}
-                data-tree-path={row.path.join(" ")}
+                data-tree-path={JSON.stringify(row.path)}
                 hidden={row.path.length > 0}
             >
                 {row.kind === "folder" ? (
                     <button
                         type="button"
                         class="tree-row"
-                        data-tree-folder={row.name}
+                        data-tree-folder={JSON.stringify([...row.path, row.name])}
                         aria-expanded="false"
                     >
                         <span class="folder-icon" aria-hidden="true">
@@ -96,20 +96,22 @@ const rows = flatten(root, 0, [])
         const rows = Array.from(tree.querySelectorAll<HTMLElement>("li[data-tree-path]"))
         const apply = () => {
             for (const row of rows) {
-                const path = (row.dataset.treePath ?? "").split(" ").filter(Boolean)
-                row.hidden = !path.every((folder) => open.has(folder))
+                const path = JSON.parse(row.dataset.treePath ?? "[]") as string[]
+                row.hidden = !path.every((_, index) =>
+                    open.has(JSON.stringify(path.slice(0, index + 1))),
+                )
             }
         }
         tree.addEventListener("click", (event) => {
             const button = (event.target as HTMLElement).closest<HTMLElement>("[data-tree-folder]")
             if (!button) return
-            const name = button.dataset.treeFolder ?? ""
-            if (open.has(name)) {
-                open.delete(name)
+            const path = button.dataset.treeFolder ?? "[]"
+            if (open.has(path)) {
+                open.delete(path)
             } else {
-                open.add(name)
+                open.add(path)
             }
-            button.setAttribute("aria-expanded", String(open.has(name)))
+            button.setAttribute("aria-expanded", String(open.has(path)))
             apply()
         })
         apply()
