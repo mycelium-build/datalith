@@ -1,6 +1,6 @@
 ---
-import Icon from "./Icon.astro"
 import releaseData from "../data/releases.json"
+import Icon from "./Icon.astro"
 
 const repositoryUrl = `https://github.com/${releaseData.repository}`
 const sourceReleases = releaseData.releases ?? []
@@ -29,15 +29,16 @@ const asset = (release, platform) => release?.assets.find((item) => item.platfor
     <div class="variant variant-c">
         <div class="compact-heading">
             <div>
-                <p class="overline">Desktop app</p><h3>
-                    {hasStableRelease ? `Datalith ${version(stable?.tagName)}` : "Datalith"}
-                </h3>
+                <p class="overline">Desktop app</p>
+                <h3>{hasStableRelease ? `Datalith ${version(stable?.tagName)}` : "Datalith"}</h3>
             </div>
-            <span class:list={["stable-badge", { unavailable: !hasStableRelease }]}
-                >{hasStableRelease ? "Stable" : "Coming soon"}</span
-            >
+            <span class:list={["stable-badge", { unavailable: !hasStableRelease }]}>
+                {hasStableRelease ? "Stable" : "Coming soon"}
+            </span>
         </div>
-        <div class="download-controls"><Fragment set:html={""} /></div>
+        <div class="download-controls">
+            <Fragment set:html={""} />
+        </div>
     </div>
 
     <template data-controls-template>
@@ -49,12 +50,12 @@ const asset = (release, platform) => release?.assets.find((item) => item.platfor
                     href={asset(stable, "macos")?.browserDownloadUrl}
                 >
                     <span class="platform-logo" data-current-logo aria-hidden="true"></span>
-                    <span
-                        ><strong data-stable-label>Download for macOS</strong><small
-                            data-stable-meta
-                            >{version(stable?.tagName)} · Apple silicon · .dmg</small
-                        ></span
-                    >
+                    <span>
+                        <strong data-stable-label>Download for macOS</strong>
+                        <small data-stable-meta>
+                            {version(stable?.tagName)} · Apple silicon · .dmg
+                        </small>
+                    </span>
                     <Icon name="download" class="download-glyph" />
                 </a>
                 <details
@@ -63,37 +64,43 @@ const asset = (release, platform) => release?.assets.find((item) => item.platfor
                     <summary
                         aria-disabled={String(!hasStableRelease)}
                         tabindex={hasStableRelease ? undefined : "-1"}
-                        ><span class="package-icon" aria-hidden="true"
-                            ><svg viewBox="0 0 24 24" fill="none"
-                                ><path
+                    >
+                        <span class="package-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path
                                     d="m4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10"
                                     stroke="currentColor"
                                     stroke-width="1.7"
-                                    stroke-linejoin="round"></path></svg
-                            ></span
-                        >Other packages <Icon name="chevronDown" /></summary
-                    >
+                                    stroke-linejoin="round"
+                                ></path>
+                            </svg>
+                        </span>
+                        Other packages <Icon name="chevronDown" />
+                    </summary>
                     <div class="menu-card">
                         <p class="menu-title">
                             Other packages{hasStableRelease ? ` · ${version(stable?.tagName)}` : ""}
-                        </p><div data-other-platforms></div>
+                        </p>
+                        <div data-other-platforms></div>
                     </div>
                 </details>
             </div>
             <div class="secondary-row">
                 <details class="download-menu preview-menu">
-                    <summary
-                        ><span class="spark" aria-hidden="true">✦</span> Download preview <span
-                            class="rc-badge">RC</span
-                        ><Icon name="chevronDown" /></summary
-                    >
+                    <summary>
+                        <span class="spark" aria-hidden="true">
+                            ✦
+                        </span>{" "}
+                        Download preview <span class="rc-badge">RC</span>
+                        <Icon name="chevronDown" />
+                    </summary>
                     <div class="menu-card">
                         <div class="preview-heading">
                             <div>
-                                <p class="menu-title">
-                                    Preview {version(latestPreview?.tagName)}
-                                </p><small>Try upcoming features before release.</small>
-                            </div><span class="rc-badge">RC</span>
+                                <p class="menu-title">Preview {version(latestPreview?.tagName)}</p>
+                                <small>Try upcoming features before release.</small>
+                            </div>
+                            <span class="rc-badge">RC</span>
                         </div>
                         <div data-preview-platforms></div>
                     </div>
@@ -102,11 +109,13 @@ const asset = (release, platform) => release?.assets.find((item) => item.platfor
                     <a
                         href={`${repositoryUrl}/blob/main/CHANGELOG.md`}
                         target="_blank"
-                        rel="noreferrer">Changelog <Icon name="arrowUpRight" /></a
+                        rel="noreferrer"
                     >
-                    <a href={`${repositoryUrl}/releases`} target="_blank" rel="noreferrer"
-                        >All releases <Icon name="arrowUpRight" /></a
-                    >
+                        Changelog <Icon name="arrowUpRight" />
+                    </a>
+                    <a href={`${repositoryUrl}/releases`} target="_blank" rel="noreferrer">
+                        All releases <Icon name="arrowUpRight" />
+                    </a>
                 </nav>
             </div>
         </div>

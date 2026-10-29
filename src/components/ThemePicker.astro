@@ -1,6 +1,6 @@
 ---
-import Icon from "./Icon.astro"
 import themes from "../data/themes.json"
+import Icon from "./Icon.astro"
 
 interface Props {
     variant?: "full" | "compact"
@@ -12,64 +12,64 @@ const darks = themes.filter((theme) => theme.mode === "dark")
 ---
 
 <section class:list={["theme-picker", variant === "compact" && "is-compact"]} data-theme-picker>
-    {
-        variant === "compact" && (
-            <button
-                class="theme-trigger"
-                type="button"
-                data-theme-trigger
-                aria-haspopup="true"
-                aria-expanded="false"
-            >
-                <Icon name="palette" />
-                <span>Theme</span>
-            </button>
-        )
-    }
+    {variant === "compact" && (
+        <button
+            class="theme-trigger"
+            type="button"
+            data-theme-trigger
+            aria-haspopup="true"
+            aria-expanded="false"
+        >
+            <Icon name="palette" />
+            <span>Theme</span>
+        </button>
+    )}
     <div class="theme-panel" data-theme-panel hidden={variant === "compact" || undefined}>
         <div class="mode-toggle" role="group" aria-label="Color mode">
-            <button type="button" data-mode-btn="light"><Icon name="sun" />Light</button>
-            <button type="button" data-mode-btn="dark"><Icon name="moon" />Dark</button>
+            <button type="button" data-mode-btn="light">
+                <Icon name="sun" />
+                Light
+            </button>
+            <button type="button" data-mode-btn="dark">
+                <Icon name="moon" />
+                Dark
+            </button>
         </div>
         <div class="theme-groups">
             <div class="theme-group" data-mode-group="light">
                 <p class="group-label">Light</p>
                 <div class="theme-options">
-                    {
-                        lights.map((theme) => (
-                            <button
-                                class="theme-option"
-                                type="button"
-                                data-theme-option={theme.id}
-                                data-option-mode="light"
-                            >
-                                <span class="swatch" aria-hidden="true">
-                                    <i style={`background:${theme.accent}`} />
-                                </span>
-                                <span class="option-name">{theme.name}</span>
-                            </button>
-                        ))
-                    }
+                    {lights.map((theme) => (
+                        <button
+                            class="theme-option"
+                            type="button"
+                            data-theme-option={theme.id}
+                            data-option-mode="light"
+                        >
+                            <span class="swatch" aria-hidden="true">
+                                <i style={`background:${theme.accent}`} />
+                            </span>
+                            <span class="option-name">{theme.name}</span>
+                        </button>
+                    ))}
                 </div>
             </div>
             <div class="theme-group" data-mode-group="dark">
                 <p class="group-label">Dark</p>
                 <div class="theme-options">
-                    {
-                        darks.map((theme) => (
-                            <button
-                                class="theme-option"
-                                type="button"
-                                data-theme-option={theme.id}
-                                data-option-mode="dark"
-                            >
-                                <span class="swatch" aria-hidden="true">
-                                    <i style={`background:${theme.accent}`} />
-                                </span>
-                                <span class="option-name">{theme.name}</span>
-                            </button>
-                        ))
-                    }
+                    {darks.map((theme) => (
+                        <button
+                            class="theme-option"
+                            type="button"
+                            data-theme-option={theme.id}
+                            data-option-mode="dark"
+                        >
+                            <span class="swatch" aria-hidden="true">
+                                <i style={`background:${theme.accent}`} />
+                            </span>
+                            <span class="option-name">{theme.name}</span>
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>

@@ -9,18 +9,16 @@ import { docUrl } from "../lib/route"
         <span role="columnheader">category</span>
     </div>
     <div class="base-body">
-        {
-            bases.rows.map((row) => (
-                <div class="base-row" role="row">
-                    <span class="base-name" role="cell">
-                        <a href={docUrl(row.route)}>{row.name}</a>
-                    </span>
-                    <span class="base-category" role="cell">
-                        {row.category}
-                    </span>
-                </div>
-            ))
-        }
+        {bases.rows.map((row) => (
+            <div class="base-row" role="row">
+                <span class="base-name" role="cell">
+                    <a href={docUrl(row.route)}>{row.name}</a>
+                </span>
+                <span class="base-category" role="cell">
+                    {row.category}
+                </span>
+            </div>
+        ))}
     </div>
 </div>
 

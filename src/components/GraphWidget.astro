@@ -5,13 +5,13 @@ import Icon from "./Icon.astro"
 <section class="graph-widget" data-graph-widget aria-label="Documentation graph">
     <svg data-graph-canvas role="img" aria-label="Documentation graph"></svg>
     <div class="graph-hint">
-        <Icon name="graph" /><span>Drag to pan · scroll to zoom · click a node to open it</span>
+        <Icon name="graph" />
+        <span>Drag to pan · scroll to zoom · click a node to open it</span>
     </div>
 </section>
 
 <script>
     import { drag } from "d3-drag"
-    import { select } from "d3-selection"
     import {
         forceCenter,
         forceCollide,
@@ -20,10 +20,11 @@ import Icon from "./Icon.astro"
         forceSimulation,
         type SimulationNodeDatum,
     } from "d3-force"
+    import { select } from "d3-selection"
     import { zoom, zoomIdentity } from "d3-zoom"
 
-    import { docUrl } from "../lib/route"
     import graphData from "../data/graph.json"
+    import { docUrl } from "../lib/route"
 
     const root = document.querySelector("[data-graph-widget]")
     if (!root) throw new Error("graph widget missing host")

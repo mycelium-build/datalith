@@ -60,35 +60,33 @@ const rows = flatten(root, 0, [])
 
 <nav class="file-tree" data-file-tree aria-label="The Docs Vault, a folder of open files">
     <ul>
-        {
-            rows.map((row) => (
-                <li
-                    style={`--depth: ${row.depth}`}
-                    data-tree-path={row.path.join(" ")}
-                    hidden={row.path.length > 0}
-                >
-                    {row.kind === "folder" ? (
-                        <button
-                            type="button"
-                            class="tree-row"
-                            data-tree-folder={row.name}
-                            aria-expanded="false"
-                        >
-                            <span class="folder-icon" aria-hidden="true">
-                                <Icon name="folder" class="icon-closed" />
-                                <Icon name="folderOpen" class="icon-open" />
-                            </span>
-                            <span class="tree-name">{row.name}</span>
-                        </button>
-                    ) : (
-                        <a class="tree-row" href={docUrl(row.route ?? "")}>
-                            <Icon name="note" />
-                            <span class="tree-name">{row.name}.md</span>
-                        </a>
-                    )}
-                </li>
-            ))
-        }
+        {rows.map((row) => (
+            <li
+                style={`--depth: ${row.depth}`}
+                data-tree-path={row.path.join(" ")}
+                hidden={row.path.length > 0}
+            >
+                {row.kind === "folder" ? (
+                    <button
+                        type="button"
+                        class="tree-row"
+                        data-tree-folder={row.name}
+                        aria-expanded="false"
+                    >
+                        <span class="folder-icon" aria-hidden="true">
+                            <Icon name="folder" class="icon-closed" />
+                            <Icon name="folderOpen" class="icon-open" />
+                        </span>
+                        <span class="tree-name">{row.name}</span>
+                    </button>
+                ) : (
+                    <a class="tree-row" href={docUrl(row.route ?? "")}>
+                        <Icon name="note" />
+                        <span class="tree-name">{row.name}.md</span>
+                    </a>
+                )}
+            </li>
+        ))}
     </ul>
 </nav>
 

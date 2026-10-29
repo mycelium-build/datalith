@@ -35,7 +35,9 @@ import Icon from "./Icon.astro"
                     <select data-todo-sort aria-label="Sort by">
                         <option value="priority">Priority</option>
                         <option value="description">Description</option>
-                        <option value="date" selected>Date</option>
+                        <option value="date" selected>
+                            Date
+                        </option>
                     </select>
                     <Icon name="chevronDown" class="sort-chevron" />
                 </label>
@@ -43,8 +45,10 @@ import Icon from "./Icon.astro"
                     class="todo-sort-dir"
                     type="button"
                     data-todo-sort-dir
-                    aria-label="Toggle sort direction"><Icon name="arrowDownAZ" /></button
+                    aria-label="Toggle sort direction"
                 >
+                    <Icon name="arrowDownAZ" />
+                </button>
             </div>
         </div>
     </header>
@@ -60,7 +64,9 @@ import Icon from "./Icon.astro"
             autocomplete="off"
             spellcheck="false"
         />
-        <button type="submit" aria-label="Add task"><Icon name="plus" /></button>
+        <button type="submit" aria-label="Add task">
+            <Icon name="plus" />
+        </button>
     </form>
 </section>
 

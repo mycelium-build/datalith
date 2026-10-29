@@ -1,10 +1,9 @@
 ---
 import "../styles/base.css"
 import "../styles/themes.css"
-
+import { themeInitScript } from "../../scripts/theme-init.ts"
 import Icon from "../components/Icon.astro"
 import stars from "../data/stars.json"
-import { themeInitScript } from "../../scripts/theme-init.ts"
 
 interface Props {
     title: string
@@ -36,19 +35,19 @@ const starCount = Number(stars.stargazersCount ?? 0)
     <body>
         <div class="page-shell">
             <header class="site-header">
-                <a class="brand" href={baseUrl}>Datalith</a>
+                <a class="brand" href={baseUrl}>
+                    Datalith
+                </a>
                 <nav aria-label="Main navigation">
                     <a href={docsUrl}>Documentation</a>
                     <a class="github-link" href={githubUrl} target="_blank" rel="noreferrer">
                         <Icon name="star" />
                         <span>GitHub</span>
-                        {
-                            starCount > 0 && (
-                                <span class="star-count" aria-label={`${starCount} stars`}>
-                                    {starCount}
-                                </span>
-                            )
-                        }
+                        {starCount > 0 && (
+                            <span class="star-count" aria-label={`${starCount} stars`}>
+                                {starCount}
+                            </span>
+                        )}
                     </a>
                 </nav>
             </header>
