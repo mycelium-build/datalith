@@ -41,11 +41,8 @@ jobs:
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
               run: npm run sync-assets
 
-            - name: Lint
-              run: npm run lint
-
-            - name: Check formatting
-              run: npm run fmt:check
+            - name: Check formatting, lint and types
+              run: npm run check
 
             - name: Run tests
               run: npm test
