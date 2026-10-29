@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 
-import { afterEach, expect, it } from "vitest"
+import { afterEach, expect, it } from "vite-plus/test"
 
 import { importVault } from "../scripts/sync-docs.ts"
 

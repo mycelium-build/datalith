@@ -1,9 +1,10 @@
 ---
-import DocsChannelSelect from "./DocsChannelSelect.astro"
-import { formatReleaseVersion } from "../lib/release-version"
+import SiteTitle from "@astrojs/starlight/components/SiteTitle.astro"
+
 import { latestDocsTags } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
-import SiteTitle from "@astrojs/starlight/components/SiteTitle.astro"
+import { formatReleaseVersion } from "../lib/release-version"
+import DocsChannelSelect from "./DocsChannelSelect.astro"
 
 const tags = latestDocsTags(releaseData.releases ?? [])
 const preview = Astro.locals.starlightRoute.entry.id.startsWith("docs/preview/")

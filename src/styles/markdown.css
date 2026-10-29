@@ -26,8 +26,8 @@
     }
 
     blockquote {
-        border-inline-start-color: var(--dl-accent);
         color: var(--dl-muted);
+        border-inline-start-color: var(--dl-accent);
     }
 
     hr {

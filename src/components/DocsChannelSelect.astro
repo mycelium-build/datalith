@@ -1,8 +1,9 @@
 ---
-import { formatReleaseVersion } from "../lib/release-version"
 import { getCollection } from "astro:content"
+
 import { latestDocsTags } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
+import { formatReleaseVersion } from "../lib/release-version"
 
 interface Props {
     /** Unique per instance: the header and the mobile menu each render one. */
@@ -39,9 +40,11 @@ const previewVersion = formatReleaseVersion(tags.preview)
     aria-disabled={href ? undefined : "true"}
     aria-label="Preview documentation"
     aria-describedby={`${id}-versions`}
-    title={href
-        ? `Switch to ${target.label} documentation`
-        : `No ${target.label} documentation available`}
+    title={
+        href
+            ? `Switch to ${target.label} documentation`
+            : `No ${target.label} documentation available`
+    }
     data-docs-channel-switch
 >
     <span class="side stable">

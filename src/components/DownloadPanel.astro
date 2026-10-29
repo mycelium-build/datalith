@@ -1,8 +1,8 @@
 ---
-import { formatReleaseVersion } from "../lib/release-version"
-import Icon from "./Icon.astro"
 import { isPreviewAheadOfStable } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
+import { formatReleaseVersion } from "../lib/release-version"
+import Icon from "./Icon.astro"
 
 const repositoryUrl = `https://github.com/${releaseData.repository}`
 const assetBase = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/`
@@ -47,7 +47,8 @@ const nativeLinuxPackages = [
     { id: "linux-rpm", label: "Fedora / RHEL", extension: ".rpm" },
     { id: "linux-arch", label: "Arch Linux", extension: ".pkg.tar.zst" },
 ]
-const asset = (release, platform, arch) =>
+type Release = (typeof sourceReleases)[number]
+const asset = (release: Release | undefined, platform: string, arch: string) =>
     release?.assets.find((item) => item.platform === platform && item.arch === arch)
 ---
 
@@ -55,19 +56,20 @@ const asset = (release, platform, arch) =>
     <div class="variant variant-c">
         <div class="compact-heading">
             <div>
-                <p class="overline">Desktop app</p><h3>
-                    {
-                        hasStableRelease
-                            ? `Datalith ${formatReleaseVersion(stable?.tagName)}`
-                            : "Datalith"
-                    }
+                <p class="overline">Desktop app</p>
+                <h3>
+                    {hasStableRelease
+                        ? `Datalith ${formatReleaseVersion(stable?.tagName)}`
+                        : "Datalith"}
                 </h3>
             </div>
-            <span class:list={["stable-badge", { unavailable: !hasStableRelease }]}
-                >{hasStableRelease ? "Stable" : "Coming soon"}</span
-            >
+            <span class:list={["stable-badge", { unavailable: !hasStableRelease }]}>
+                {hasStableRelease ? "Stable" : "Coming soon"}
+            </span>
         </div>
-        <div class="download-controls"><Fragment set:html={""} /></div>
+        <div class="download-controls">
+            <Fragment set:html={""} />
+        </div>
     </div>
 
     <template data-controls-template>
@@ -79,89 +81,90 @@ const asset = (release, platform, arch) =>
                     href={asset(stable, "macos", "arm64")?.browserDownloadUrl}
                 >
                     <span class="platform-logo" data-current-logo aria-hidden="true"></span>
-                    <span
-                        ><strong data-stable-label>Download for macOS</strong><small
-                            data-stable-meta
-                            >{formatReleaseVersion(stable?.tagName)} · Apple Silicon · .dmg</small
-                        ></span
-                    >
+                    <span>
+                        <strong data-stable-label>Download for macOS</strong>
+                        <small data-stable-meta>
+                            {formatReleaseVersion(stable?.tagName)} · Apple Silicon · .dmg
+                        </small>
+                    </span>
                     <Icon name="download" class="download-glyph" />
                 </a>
                 <details
                     class:list={["download-menu", "stable-menu", { disabled: !hasStableRelease }]}
                 >
                     <summary
-                        aria-disabled={String(!hasStableRelease)}
-                        tabindex={hasStableRelease ? undefined : "-1"}
-                        ><span class="package-icon" aria-hidden="true"
-                            ><svg viewBox="0 0 24 24" fill="none"
-                                ><path
+                        aria-disabled={hasStableRelease ? "false" : "true"}
+                        tabindex={hasStableRelease ? undefined : -1}
+                    >
+                        <span class="package-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path
                                     d="m4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10"
                                     stroke="currentColor"
                                     stroke-width="1.7"
-                                    stroke-linejoin="round"></path></svg
-                            ></span
-                        >All downloads <Icon name="chevronDown" /></summary
-                    >
+                                    stroke-linejoin="round"
+                                ></path>
+                            </svg>
+                        </span>
+                        All downloads <Icon name="chevronDown" />
+                    </summary>
                     <div class="menu-card">
                         <p class="menu-title">
-                            All downloads{
-                                hasStableRelease
-                                    ? ` · ${formatReleaseVersion(stable?.tagName)}`
-                                    : ""
-                            }
-                        </p><div data-other-platforms></div>
+                            All downloads
+                            {hasStableRelease ? ` · ${formatReleaseVersion(stable?.tagName)}` : ""}
+                        </p>
+                        <div data-other-platforms></div>
                     </div>
                 </details>
             </div>
             <div class="secondary-row">
-                {
-                    latestPreview && (
-                        <details class="download-menu preview-menu">
-                            <summary>
-                                <img
-                                    class="preview-icon"
-                                    src={`${assetBase}datalith-preview.png`}
-                                    width="24"
-                                    height="24"
-                                    alt=""
-                                    aria-hidden="true"
-                                />
-                                Download preview{" "}
+                {latestPreview && (
+                    <details class="download-menu preview-menu">
+                        <summary>
+                            <img
+                                class="preview-icon"
+                                src={`${assetBase}datalith-preview.png`}
+                                width="24"
+                                height="24"
+                                alt=""
+                                aria-hidden="true"
+                            />
+                            Download preview{" "}
+                            <>
+                                <span class="rc-badge">RC</span>
+                                <Icon name="chevronDown" />
+                            </>
+                        </summary>
+                        <div class="menu-card">
+                            <div class="preview-heading">
                                 <>
+                                    <div>
+                                        <>
+                                            <p class="menu-title">
+                                                Preview{" "}
+                                                {formatReleaseVersion(latestPreview.tagName)}
+                                            </p>
+                                            <small>Try upcoming features before release.</small>
+                                        </>
+                                    </div>
                                     <span class="rc-badge">RC</span>
-                                    <Icon name="chevronDown" />
                                 </>
-                            </summary>
-                            <div class="menu-card">
-                                <div class="preview-heading">
-                                    <>
-                                        <div>
-                                            <>
-                                                <p class="menu-title">
-                                                    Preview{" "}
-                                                    {formatReleaseVersion(latestPreview.tagName)}
-                                                </p>
-                                                <small>Try upcoming features before release.</small>
-                                            </>
-                                        </div>
-                                        <span class="rc-badge">RC</span>
-                                    </>
-                                </div>
-                                <div data-preview-platforms />
                             </div>
-                        </details>
-                    )
-                }
+                            <div data-preview-platforms />
+                        </div>
+                    </details>
+                )}
                 <nav class="release-links" aria-label="Release links">
                     <a
                         href={`${repositoryUrl}/blob/main/CHANGELOG.md`}
                         target="_blank"
-                        rel="noreferrer">Changelog <Icon name="arrowUpRight" /></a
+                        rel="noreferrer"
                     >
-                    <a href={`${repositoryUrl}/releases`} target="_blank" rel="noreferrer"
-                        >All releases <Icon name="arrowUpRight" /></a
-                    >
+                        Changelog <Icon name="arrowUpRight" />
+                    </a>
+                    <a href={`${repositoryUrl}/releases`} target="_blank" rel="noreferrer">
+                        All releases <Icon name="arrowUpRight" />
+                    </a>
                 </nav>
             </div>
         </div>
@@ -184,7 +187,39 @@ const asset = (release, platform, arch) =>
 <script>
     import downloadIcon from "../assets/icons/download.svg?raw"
     import { formatReleaseVersion } from "../lib/release-version"
-    const logos = {
+
+    type Arch = "x64" | "arm64"
+    interface Asset {
+        platform: string
+        arch?: string
+        browserDownloadUrl: string
+    }
+    interface Release {
+        tagName: string
+        assets: Asset[]
+    }
+    interface Platform {
+        id: string
+        label: string
+        downloadLabel: string
+        extension: string
+        defaultArch: Arch
+    }
+    interface NativePackage {
+        id: string
+        label: string
+        extension: string
+    }
+    interface DownloadData {
+        stable?: Release
+        hasStableRelease: boolean
+        latestPreview?: Release
+        platforms: Platform[]
+        nativeLinuxPackages: NativePackage[]
+        archLabels: Record<string, Record<string, string>>
+    }
+
+    const logos: Record<string, string> = {
         macos: '<svg viewBox="0 0 24 24"><path d="M16.8 12.8c0-2 1.6-3 1.7-3.1a3.8 3.8 0 0 0-3-1.6c-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.8-2.8-.8a4.2 4.2 0 0 0-3.5 2.2c-1.5 2.6-.4 6.5 1 8.7.7 1.1 1.5 2.3 2.6 2.3 1 0 1.4-.7 2.7-.7s1.7.7 2.8.7 1.8-1.1 2.5-2.2c.8-1.2 1.1-2.4 1.1-2.5-.1 0-2-.8-2-3.8Zm-2-6c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.5-.9 2.4.9.1 1.8-.4 2.4-1.1Z"/></svg>',
         windows:
             '<svg viewBox="0 0 24 24"><path d="M2.5 4.6 10.7 3.5v7.7H2.5V4.6Zm9.5-1.3L21.5 2v9.2H12V3.3ZM2.5 12.5h8.2v7.8l-8.2-1.1v-6.7Zm9.5 0h9.5V22L12 20.7v-8.2Z"/></svg>',
@@ -196,37 +231,45 @@ const asset = (release, platform, arch) =>
         "linux-arch":
             '<svg viewBox="0 0 24 24"><path d="M11.39.605C10.376 3.092 9.764 4.72 8.635 7.132c.693.734 1.543 1.589 2.923 2.554-1.484-.61-2.496-1.224-3.252-1.86C6.86 10.842 4.596 15.138 0 23.395c3.612-2.085 6.412-3.37 9.021-3.862a6.61 6.61 0 01-.171-1.547l.003-.115c.058-2.315 1.261-4.095 2.687-3.973 1.426.12 2.534 2.096 2.478 4.409a6.52 6.52 0 01-.146 1.243c2.58.505 5.352 1.787 8.914 3.844-.702-1.293-1.33-2.459-1.929-3.57-.943-.73-1.926-1.682-3.933-2.713 1.38.359 2.367.772 3.137 1.234-6.09-11.334-6.582-12.84-8.67-17.74zM22.898 21.36v-.623h-.234v-.084h.562v.084h-.234v.623h.331v-.707h.142l.167.5.034.107a2.26 2.26 0 01.038-.114l.17-.493H24v.707h-.091v-.593l-.206.593h-.084l-.205-.602v.602h-.091"/></svg>',
     }
-    const panel = document.querySelector("[data-download-panel]")
+    const panel = document.querySelector<HTMLElement>("[data-download-panel]")
     if (panel) {
-        const data = JSON.parse(panel.querySelector("[data-download-data]")?.textContent ?? "{}")
+        const data: DownloadData = JSON.parse(
+            panel.querySelector("[data-download-data]")?.textContent ?? "{}",
+        )
         const detectPlatform = () => {
             const agent =
-                `${navigator.userAgentData?.platform ?? ""} ${navigator.platform ?? ""} ${navigator.userAgent}`.toLowerCase()
+                `${(navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform ?? ""} ${navigator.platform ?? ""} ${navigator.userAgent}`.toLowerCase()
             if (agent.includes("win")) return "windows"
             if (agent.includes("linux")) return "linux"
             return "macos"
         }
         const current = detectPlatform()
-        const info = (id) => data.platforms.find((item) => item.id === id)
-        const releaseAsset = (release, id, arch) =>
+        const info = (id: string) => data.platforms.find((item) => item.id === id)
+        const releaseAsset = (release: Release | undefined, id: string, arch: string) =>
             release?.assets.find((item) => item.platform === id && item.arch === arch)
-        const availableArchs = (release, id) =>
-            ["x64", "arm64"].filter((arch) => releaseAsset(release, id, arch))
-        const otherArch = (arch) => (arch === "x64" ? "arm64" : "x64")
-        const archLabel = (osId, arch) => data.archLabels[osId]?.[arch] ?? arch
-        const versionMeta = (release, isPreview) =>
+        const availableArchs = (release: Release, id: string): string[] =>
+            (["x64", "arm64"] as const).filter((arch) => releaseAsset(release, id, arch))
+        const otherArch = (arch: string): Arch => (arch === "x64" ? "arm64" : "x64")
+        const archLabel = (osId: string, arch: string) => data.archLabels[osId]?.[arch] ?? arch
+        const versionMeta = (release: Release, isPreview: boolean) =>
             isPreview ? `${formatReleaseVersion(release.tagName)} · ` : ""
-        const archState = Object.fromEntries(
+        const archState: Record<string, string> = Object.fromEntries(
             data.platforms.map((platform) => [platform.id, platform.defaultArch]),
         )
-        const archToggle = (platform, archs, selected) =>
+        const archToggle = (platform: Platform, archs: readonly string[], selected: string) =>
             `<div class="arch-toggle" role="group" aria-label="${platform.label} architecture">${archs
                 .map(
                     (arch) =>
                         `<button type="button" data-os="${platform.id}" data-arch="${arch}" aria-pressed="${arch === selected}">${archLabel(platform.id, arch)}</button>`,
                 )
                 .join("")}</div>`
-        const osAssetLink = (release, platform, arch, isPreview, enabled = true) => {
+        const osAssetLink = (
+            release: Release,
+            platform: Platform,
+            arch: string,
+            isPreview: boolean,
+            enabled = true,
+        ) => {
             const item = releaseAsset(release, platform.id, arch)
             if (!item) return ""
             const state = enabled
@@ -234,7 +277,13 @@ const asset = (release, platform, arch) =>
                 : 'aria-disabled="true" tabindex="-1"'
             return `<a class="platform-option" ${state}><span class="platform-logo">${logos[platform.id]}</span><span><strong>${platform.downloadLabel}</strong><small>${versionMeta(release, isPreview)}${archLabel(platform.id, arch)} · ${platform.extension}</small></span>${downloadIcon}</a>`
         }
-        const nativePackageLink = (release, pkg, arch, isPreview, enabled = true) => {
+        const nativePackageLink = (
+            release: Release,
+            pkg: NativePackage,
+            arch: string,
+            isPreview: boolean,
+            enabled = true,
+        ) => {
             const item = releaseAsset(release, pkg.id, arch)
             if (!item) return ""
             const state = enabled
@@ -242,9 +291,9 @@ const asset = (release, platform, arch) =>
                 : 'aria-disabled="true" tabindex="-1"'
             return `<a class="platform-option" ${state}><span class="platform-logo">${logos[pkg.id]}</span><span><strong>${pkg.label}</strong><small>${versionMeta(release, isPreview)}${archLabel("linux", arch)} · ${pkg.extension}</small></span>${downloadIcon}</a>`
         }
-        const nativePackagesFor = (release, arch) =>
+        const nativePackagesFor = (release: Release, arch: string) =>
             data.nativeLinuxPackages.filter((item) => releaseAsset(release, item.id, arch))
-        const nativePackageGroup = (release, isPreview, enabled = true) => {
+        const nativePackageGroup = (release: Release, isPreview: boolean, enabled = true) => {
             let arch = archState.linux
             let packages = nativePackagesFor(release, arch)
             if (!packages.length) {
@@ -257,7 +306,12 @@ const asset = (release, platform, arch) =>
                 .map((item) => nativePackageLink(release, item, arch, isPreview, enabled))
                 .join("")}</div></details>`
         }
-        const osGroup = (release, platform, isPreview, enabled = true) => {
+        const osGroup = (
+            release: Release | undefined,
+            platform: Platform,
+            isPreview: boolean,
+            enabled = true,
+        ) => {
             if (!release) return ""
             const archs = availableArchs(release, platform.id)
             const selected = archs.includes(archState[platform.id])
@@ -271,10 +325,11 @@ const asset = (release, platform, arch) =>
             return `<div class="os-group"><div class="os-header"><strong>${platform.label}</strong>${toggle}</div>${link}${nativeGroup}</div>`
         }
 
-        const template = panel.querySelector("[data-controls-template]")
-        panel
-            .querySelectorAll(".download-controls")
-            .forEach((slot) => slot.replaceChildren(template.content.cloneNode(true)))
+        const template = panel.querySelector<HTMLTemplateElement>("[data-controls-template]")
+        if (template)
+            panel
+                .querySelectorAll(".download-controls")
+                .forEach((slot) => slot.replaceChildren(template.content.cloneNode(true)))
         panel
             .querySelectorAll("[data-current-logo]")
             .forEach((node) => (node.innerHTML = logos[current]))
@@ -283,7 +338,7 @@ const asset = (release, platform, arch) =>
         const stableAsset =
             releaseAsset(data.stable, current, defaultArch) ??
             releaseAsset(data.stable, current, otherArch(defaultArch))
-        panel.querySelectorAll("[data-stable-download]").forEach((link) => {
+        panel.querySelectorAll<HTMLAnchorElement>("[data-stable-download]").forEach((link) => {
             if (data.hasStableRelease && stableAsset) {
                 link.href = stableAsset.browserDownloadUrl
                 link.removeAttribute("aria-disabled")
@@ -298,20 +353,26 @@ const asset = (release, platform, arch) =>
             .querySelectorAll("[data-stable-label]")
             .forEach(
                 (node) =>
-                    (node.textContent = data.hasStableRelease
-                        ? `Download for ${currentInfo.label}`
-                        : "No stable release yet"),
+                    (node.textContent =
+                        data.hasStableRelease && currentInfo
+                            ? `Download for ${currentInfo.label}`
+                            : "No stable release yet"),
             )
         panel
             .querySelectorAll("[data-stable-meta]")
             .forEach(
                 (node) =>
                     (node.textContent =
-                        data.hasStableRelease && stableAsset
-                            ? `${formatReleaseVersion(data.stable.tagName)} · ${archLabel(current, stableAsset.arch)} · ${currentInfo.extension}`
+                        data.stable && stableAsset && currentInfo
+                            ? `${formatReleaseVersion(data.stable.tagName)} · ${archLabel(current, stableAsset.arch ?? defaultArch)} · ${currentInfo.extension}`
                             : "Check back soon"),
             )
-        const renderMenuList = (list, release, isPreview, enabled) => {
+        const renderMenuList = (
+            list: Element,
+            release: Release | undefined,
+            isPreview: boolean,
+            enabled = true,
+        ) => {
             const nativeWasOpen = list.querySelector(".native-package-menu")?.hasAttribute("open")
             list.innerHTML = data.platforms
                 .map((platform) => osGroup(release, platform, isPreview, enabled))
@@ -333,24 +394,26 @@ const asset = (release, platform, arch) =>
         renderMenus()
         panel.addEventListener("click", (event) => {
             const target = event.target instanceof Element ? event.target : null
-            const button = target?.closest("[data-arch]")
+            const button = target?.closest<HTMLElement>("[data-arch]")
             if (!button?.dataset.os) return
             event.preventDefault()
             event.stopPropagation()
             const { os, arch } = button.dataset
-            if (!os || archState[os] === arch) return
+            if (!os || !arch || archState[os] === arch) return
             archState[os] = arch
             renderMenus()
             const container = button.closest("[data-other-platforms], [data-preview-platforms]")
-            container?.querySelector(`[data-os="${os}"][data-arch="${arch}"]`)?.focus()
+            container?.querySelector<HTMLElement>(`[data-os="${os}"][data-arch="${arch}"]`)?.focus()
         })
 
         panel.addEventListener(
             "toggle",
             (event) => {
-                if (!event.target.matches(".download-menu") || !event.target.open) return
+                const menu = event.target
+                if (!(menu instanceof HTMLDetailsElement)) return
+                if (!menu.matches(".download-menu") || !menu.open) return
                 panel.querySelectorAll(".download-menu[open]").forEach((details) => {
-                    if (details !== event.target) details.removeAttribute("open")
+                    if (details !== menu) details.removeAttribute("open")
                 })
             },
             true,

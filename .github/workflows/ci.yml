@@ -35,17 +35,15 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
-            - name: Sync assets
+            - name: Generate site data
               env:
+                  RELEASE_REPOSITORY: mycelium-build/datalith-app
                   DATALITH_SOURCE_REF: main
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
-              run: npm run sync-assets
+              run: npm run prebuild
 
-            - name: Lint
-              run: npm run lint
-
-            - name: Check formatting
-              run: npm run fmt:check
+            - name: Check formatting, lint and types
+              run: npm run check
 
             - name: Run tests
               run: npm test

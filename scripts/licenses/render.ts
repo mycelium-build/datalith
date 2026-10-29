@@ -4,20 +4,11 @@ import { fileURLToPath } from "node:url"
 
 import { getProjectLicenses, type ILicense } from "generate-license-file"
 
+import { parseWith } from "../lib/schema.ts"
 import { renderBundledAssets } from "./assets.ts"
+import { LockfileSchema } from "./lockfile.ts"
 
 export const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..")
-
-interface LockfilePackage {
-    version?: string
-    dev?: boolean
-    optional?: boolean
-    devOptional?: boolean
-}
-
-interface Lockfile {
-    packages: Record<string, LockfilePackage>
-}
 
 function splitDependency(dependency: string): [string, string] {
     const at = dependency.lastIndexOf("@")
@@ -54,18 +45,22 @@ function normalizeLicenseText(content: string): string {
 }
 
 async function productionDependencies(): Promise<Set<string>> {
-    const lockfile = JSON.parse(
-        await readFile(path.join(siteRoot, "package-lock.json"), "utf-8"),
-    ) as Lockfile
+    const lockfile = parseWith(
+        LockfileSchema,
+        JSON.parse(await readFile(path.join(siteRoot, "package-lock.json"), "utf-8")),
+        "package-lock.json",
+    )
     const dependencies = new Set<string>()
 
     for (const [key, info] of Object.entries(lockfile.packages)) {
         if (!key || !info.version || info.dev || info.optional || info.devOptional) continue
         const name =
+            info.name ??
             key
                 .replace(/^node_modules\//, "")
                 .split("/node_modules/")
-                .pop() ?? key
+                .pop() ??
+            key
         dependencies.add(`${name}@${info.version}`)
     }
 

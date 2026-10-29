@@ -23,8 +23,8 @@ We welcome contributions! Here's how you can get involved:
 Before submitting a pull request, please ensure that:
 
 1. The project builds without errors (`npm run build`)
-2. You run the formatter (`npm run fmt:check`)
-3. You run the linter and fix all issues (`npm run lint`)
+2. You run the formatter (`npm run fmt`)
+3. Formatting, lint and type checks pass (`npm run check`)
 4. All tests pass (`npm test`)
 5. The code follows the project guidelines
 6. New functionality includes appropriate tests
@@ -103,9 +103,9 @@ For GitHub Pages validation, set `SITE_BASE=/datalith` when running `npm run bui
     npm test
     ```
 
-3. Check for lint issues:
+3. Check formatting, lint and types:
     ```bash
-    npm run lint
+    npm run check
     ```
 
 ## Our stance on AI

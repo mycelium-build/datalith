@@ -1,10 +1,19 @@
+import * as v from "valibot"
+
 import { whiten } from "../../src/lib/colors.ts"
 
-export interface ThemeEntry {
-    name: string
-    colors?: Record<string, string>
-    highlight?: Record<string, string>
-}
+// Upstream theme values are mostly color strings, but `highlight` also nests objects
+// (`syntax: { … }`); `first()` picks out only the string values it needs.
+const ThemeEntrySchema = v.object({
+    name: v.string(),
+    colors: v.optional(v.record(v.string(), v.unknown())),
+    highlight: v.optional(v.record(v.string(), v.unknown())),
+})
+
+/** One theme file from the Datalith repository (`src/data/themes/*.json`). */
+export const ThemeFileSchema = v.object({ themes: v.optional(v.array(ThemeEntrySchema), []) })
+
+export type ThemeEntry = v.InferOutput<typeof ThemeEntrySchema>
 
 export type ThemeMode = "light" | "dark"
 
@@ -33,7 +42,7 @@ export const CURATED_DARK = [
 
 const DEFAULT_ACCENT = "#1e8dff"
 
-function first(colors: Record<string, string>, keys: string[], fallback: string): string {
+function first(colors: Record<string, unknown>, keys: string[], fallback: string): string {
     for (const key of keys) {
         const value = colors[key]
         if (typeof value === "string" && value) return value

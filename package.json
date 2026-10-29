@@ -17,37 +17,59 @@
         "prebuild": "npm run fetch-releases && npm run sync-docs && npm run sync-assets && npm run build-icons && npm run build-themes",
         "build": "astro build",
         "preview": "astro preview",
-        "test": "vitest run",
-        "lint": "oxlint && stylelint \"src/styles/*.css\"",
-        "lint:fix": "oxlint --fix && stylelint --fix \"src/styles/*.css\"",
-        "fmt": "oxfmt . && prettier --write \"src/**/*.astro\"",
-        "fmt:check": "oxfmt --check . && prettier --check \"src/**/*.astro\"",
+        "test": "vp test",
+        "check": "astro sync && vp check && astro check && stylelint \"src/styles/*.css\"",
+        "lint": "vp lint && stylelint \"src/styles/*.css\"",
+        "lint:fix": "vp lint --fix && stylelint --fix \"src/styles/*.css\"",
+        "fmt": "vp fmt",
+        "fmt:check": "vp fmt --check",
         "astro": "astro"
     },
     "dependencies": {
-        "@astrojs/starlight": "^0.41.7",
-        "astro": "^7.1.6",
+        "@astrojs/starlight": "^0.42.7",
+        "astro": "^7.4.4",
         "d3-drag": "^3.0.0",
         "d3-force": "^3.0.0",
         "d3-selection": "^3.0.0",
         "d3-zoom": "^3.0.0",
-        "dompurify": "^3.4.13",
-        "marked": "^18.0.9",
-        "sharp": "^0.35.3"
+        "dompurify": "^3.4.17",
+        "marked": "^18.1.2",
+        "sharp": "^0.35.5",
+        "valibot": "^1.5.0"
     },
     "devDependencies": {
+        "@astrojs/check": "^0.9.12",
+        "@astrojs/compiler-rs": "^0.5.2",
         "@types/d3-drag": "^3.0.7",
         "@types/d3-force": "^3.0.10",
-        "@types/d3-selection": "^3.0.11",
-        "@types/d3-zoom": "^3.0.8",
-        "generate-license-file": "4.2.1",
-        "oxfmt": "^0.63.0",
-        "oxlint": "^1.78.0",
-        "policygen": "^0.6.0",
-        "prettier": "^3.9.6",
-        "prettier-plugin-astro": "^0.14.1",
-        "stylelint": "^17.14.1",
+        "@types/d3-selection": "^3.0.12",
+        "@types/d3-zoom": "^3.0.9",
+        "generate-license-file": "4.2.5",
+        "policygen": "^0.7.1",
+        "stylelint": "^17.16.0",
+        "stylelint-config-recess-order": "^7.9.0",
         "stylelint-config-standard": "^40.0.0",
-        "vitest": "^4.1.10"
+        "typescript": "^6.0.3",
+        "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+        "vite-plus": "1.4.0"
+    },
+    "overrides": {
+        "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+        "vitest": "5.0.5"
+    },
+    "devEngines": {
+        "runtime": {
+            "name": "node",
+            "version": "^22.18.0 || ^24.11.0 || >=26.0.0",
+            "onFail": "error"
+        },
+        "packageManager": {
+            "name": "npm",
+            "version": ">=10 <12",
+            "onFail": "error"
+        }
+    },
+    "allowScripts": {
+        "fsevents@2.3.3": true
     }
 }

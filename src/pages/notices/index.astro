@@ -1,10 +1,11 @@
 ---
 import "../../styles/markdown.css"
-import SiteLayout from "../../layouts/SiteLayout.astro"
-
-import { fileURLToPath } from "node:url"
-import { Marked } from "marked"
 import { readFile } from "node:fs/promises"
+import { fileURLToPath } from "node:url"
+
+import { Marked } from "marked"
+
+import SiteLayout from "../../layouts/SiteLayout.astro"
 
 const noticesSource = await readFile(
     fileURLToPath(new URL("../../../THIRD-PARTY-NOTICES.md", import.meta.url)),
