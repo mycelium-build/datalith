@@ -41,7 +41,6 @@ const NOTE_NAMES = [
 const CELLS = LOGO_GRID.cells
 const LOGO_MIN_X = Math.min(...CELLS.map((cell) => cell.x))
 const LOGO_MAX_X = Math.max(...CELLS.map((cell) => cell.x))
-const INSCRIPTION = CELLS.flatMap((cell, index) => (cell.color === "inscription" ? [index] : []))
 
 // What the static scenery holds at each scene pixel.
 const SKY = 0
@@ -98,7 +97,6 @@ interface Palette {
     haloAmount: number
     logo: Record<Tier, number>
     flash: number
-    rune: number
 }
 
 interface Star {
@@ -262,7 +260,6 @@ function buildPalette(probe: CanvasRenderingContext2D | null): Palette {
             inscription: pack(hexToRgb(logoHex.inscription)),
         },
         flash: pack(dark ? WHITE : mix(accent, WHITE, 0.5)),
-        rune: pack(accent),
     }
 }
 
@@ -284,7 +281,6 @@ class HeroScene {
     private mistRows = 0
     private readonly motes: Mote[]
     private readonly landed: Float64Array
-    private readonly runeUntil: Float64Array
     private readonly fireflies: Firefly[]
     private links: Link[] = []
     private hovered = -1
@@ -302,7 +298,6 @@ class HeroScene {
         this.fb = new Uint32Array(this.image.data.buffer)
 
         this.landed = new Float64Array(CELLS.length).fill(Number.NaN)
-        this.runeUntil = new Float64Array(CELLS.length)
         this.motes = CELLS.map((_, cell) => {
             const appear = Math.random() * 600
             return {
@@ -676,10 +671,7 @@ class HeroScene {
             if (Number.isNaN(landed)) continue
             let color = P.logo[cell.color]
             if (t - landed < 140) color = P.flash
-            else if (cell.color === "inscription") {
-                if (this.runeUntil[i] > t) color = P.rune
-                else if (cell.y >= written) color = P.logo.left
-            }
+            else if (cell.color === "inscription" && cell.y >= written) color = P.logo.left
             const left = monoLeft + cell.x * k
             const top = monoTop + bob + cell.y * k
             for (let y = Math.max(0, top); y < Math.min(horizon, top + k); y += 1) {
@@ -734,11 +726,6 @@ class HeroScene {
                 this.links.push({ a, b, until: t + 220 })
                 break
             }
-        }
-
-        if (t > INTRO_END && INSCRIPTION.length > 0 && Math.random() < 0.06) {
-            const rune = INSCRIPTION[Math.floor(Math.random() * INSCRIPTION.length)]
-            this.runeUntil[rune] = t + 300 + Math.random() * 500
         }
 
         const active = narrow ? 7 : this.fireflies.length
