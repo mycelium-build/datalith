@@ -247,8 +247,28 @@ site-search button[data-open-modal]::before {
 }
 
 /* Mobile menu button */
-.mobile-menu-toggle {
+.sl-menu-button {
+    align-items: center;
+    justify-content: center;
+    color: var(--dl-fg);
     background-color: var(--dl-surface-alt);
+    border-radius: 0;
+
+    > svg {
+        display: none;
+    }
+
+    &::before {
+        width: 14px;
+        height: 14px;
+        content: "";
+        background-color: currentcolor;
+        mask: url("../assets/icons/menu.svg") no-repeat center / contain;
+    }
+
+    &:has(~ :popover-open)::before {
+        mask-image: url("../assets/icons/close.svg");
+    }
 }
 
 /* Notice/aside styling */
