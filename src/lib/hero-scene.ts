@@ -47,8 +47,7 @@ const INSCRIPTION = CELLS.flatMap((cell, index) => (cell.color === "inscription"
 const SKY = 0
 const FAR = 1
 const NEAR = 2
-const RIM = 3
-const MOON = 4
+const MOON = 3
 
 const WHITE: RGB = [255, 255, 255]
 const BLACK: RGB = [0, 0, 0]
@@ -83,7 +82,6 @@ interface Palette {
     sky: number[]
     far: number
     near: number
-    rim: number
     water: RGB
     waterDeep: RGB
     shimmer: RGB
@@ -242,7 +240,6 @@ function buildPalette(probe: CanvasRenderingContext2D | null): Palette {
         ),
         far: pack(mix(horizon, ink, dark ? 0.55 : 0.2)),
         near: pack(near),
-        rim: pack(mix(near, accent, 0.3)),
         water: mix(horizon, ink, dark ? 0.25 : 0.06),
         waterDeep: dark ? mix(horizon, ink, 0.7) : mix(horizon, mix(accent, ink, 0.3), 0.4),
         shimmer: dark ? mix(horizon, fg, 0.3) : mix(horizon, WHITE, 0.75),
@@ -417,7 +414,7 @@ class HeroScene {
             k,
             cx,
             monoLeft: cx - Math.round(((LOGO_MIN_X + LOGO_MAX_X + 1) * k) / 2),
-            monoTop: horizon - (3 * k + 3) - LOGO_GRID.height * k,
+            monoTop: horizon - (2 * k + 2) - LOGO_GRID.height * k,
             stage,
             copy,
         }
@@ -439,7 +436,7 @@ class HeroScene {
         this.paintBase()
     }
 
-    /** Lays out the hills, pines, island, moon, stars, clouds and ripples for this size. */
+    /** Lays out the hills, pines, moon, stars, clouds and ripples for this size. */
     private placeScenery(): void {
         const { cols, rows, horizon, k, cx, narrow, stage, copy } = this.layout
         const rnd = seeded(7)
@@ -481,15 +478,6 @@ class HeroScene {
             }
         }
 
-        const halfIsland = Math.round(((LOGO_MAX_X - LOGO_MIN_X + 1) * k) / 2 + 2 * k)
-        for (let dx = -halfIsland; dx <= halfIsland; dx += 1) {
-            const round = (1 - (dx / (halfIsland + 1)) ** 2) ** 0.6
-            const height = Math.max(1, Math.round((2 * k + 1) * round + (rnd() < 0.3 ? 1 : 0)))
-            for (let r = 0; r < height; r += 1) {
-                set(cx + dx, horizon - 1 - r, r === height - 1 ? RIM : NEAR)
-            }
-        }
-
         this.moon = null
         if (!narrow) {
             const r = 2 + Math.floor(k / 2)
@@ -513,7 +501,7 @@ class HeroScene {
         const nearMoon = (x: number, y: number) =>
             this.moon !== null && Math.hypot(x - this.moon.x, y - this.moon.y) < this.moon.r * 3.4
         this.stars = []
-        const starCount = Math.round((cols * horizon) / 85)
+        const starCount = Math.round((cols * horizon) / 200)
         for (let i = 0; i < starCount; i += 1) {
             const x = Math.floor(rnd() * cols)
             const y = Math.floor(rnd() * horizon * 0.85)
@@ -559,7 +547,7 @@ class HeroScene {
         )
     }
 
-    /** Paints the still scenery (sky, hills, island, moon) in the current theme. */
+    /** Paints the still scenery (sky, hills, moon) in the current theme. */
     private paintBase(): void {
         const { cols, rows, horizon, cx } = this.layout
         const P = this.palette
@@ -575,7 +563,6 @@ class HeroScene {
                 const kind = this.kinds[i]
                 if (kind === FAR) base[i] = P.far
                 else if (kind === NEAR) base[i] = P.near
-                else if (kind === RIM) base[i] = P.rim
                 else if (kind === MOON && moon) base[i] = P.moon
                 else {
                     const glow = Math.exp(-(((x - cx) / spread) ** 2))
