@@ -34,7 +34,8 @@ export function hslToRgb([h, s, l]: HSL): RGB {
     else if (arm === 3) rgb = [m, x + m, c + m]
     else if (arm === 4) rgb = [x + m, m, c + m]
     else rgb = [c + m, m, x + m]
-    return rgb.map((v) => Math.min(255, Math.max(0, Math.round(v * 255)))) as RGB
+    const channel = (v: number) => Math.min(255, Math.max(0, Math.round(v * 255)))
+    return [channel(rgb[0]), channel(rgb[1]), channel(rgb[2])]
 }
 
 export function hexToRgb(hex: string): RGB {

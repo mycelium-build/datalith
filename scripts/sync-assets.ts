@@ -1,4 +1,3 @@
-/* oxlint-disable no-await-in-loop */
 import { mkdir, readdir, copyFile, rm, stat } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
