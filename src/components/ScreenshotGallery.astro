@@ -1,55 +1,59 @@
 ---
+import type { ImageMetadata } from "astro"
 import { Image } from "astro:assets"
 
-import covers from "../assets/screenshots/covers.avif"
-import editor from "../assets/screenshots/editor.avif"
-import graph from "../assets/screenshots/graph.avif"
-import search from "../assets/screenshots/search.avif"
-import table from "../assets/screenshots/table.avif"
-import todo from "../assets/screenshots/todo.avif"
-import welcome from "../assets/screenshots/welcome.avif"
+// Each shot exists as `light-<name>.avif` and `dark-<name>.avif`; the site's theme mode picks one.
+const files = import.meta.glob<{ default: ImageMetadata }>("../assets/screenshots/*.avif", {
+    eager: true,
+})
+const modes = ["light", "dark"] as const
+const screenshot = (mode: (typeof modes)[number], name: string) => {
+    const file = files[`../assets/screenshots/${mode}-${name}.avif`]
+    if (!file) throw new Error(`Missing screenshot: ${mode}-${name}.avif`)
+    return file.default
+}
 
 const shots = [
     {
         id: "notes",
         label: "Notes",
-        image: welcome,
+        image: "note",
         caption: "Markdown notes with properties and wiki links, beside your Vault's file tree.",
     },
     {
         id: "editor",
         label: "Editor",
-        image: editor,
+        image: "editor",
         caption: "Switch to the source: plain Markdown, highlighted as you write.",
     },
     {
         id: "search",
         label: "Search",
-        image: search,
+        image: "search",
         caption: "Relevance-ranked results with highlighted matches, as you type.",
     },
     {
         id: "graph",
         label: "Graph",
-        image: graph,
+        image: "graph",
         caption: "A Base rendered as a graph of linked notes, colored by category.",
     },
     {
         id: "table",
         label: "Table",
-        image: table,
+        image: "table",
         caption: "The same Base as a table, grouped by status with summaries per group.",
     },
     {
         id: "cards",
         label: "Cards",
-        image: covers,
+        image: "covers",
         caption: "Or as cards, each one carrying its cover.",
     },
     {
         id: "tasks",
         label: "Tasks",
-        image: todo,
+        image: "todo",
         caption: "A todo.txt file with priorities, projects, contexts and subtasks.",
     },
 ]
@@ -82,14 +86,20 @@ const shots = [
                 data-active={String(i === 0)}
                 data-shot-panel
             >
-                <Image
-                    src={shot.image}
-                    alt={`Datalith: ${shot.caption}`}
-                    widths={[800, 1600, 2400, shot.image.width]}
-                    sizes="(max-width: 74rem) 100vw, 68rem"
-                    format="avif"
-                    loading="lazy"
-                />
+                {modes.map((mode) => {
+                    const image = screenshot(mode, shot.image)
+                    return (
+                        <Image
+                            class={`shot-${mode}`}
+                            src={image}
+                            alt={`Datalith: ${shot.caption}`}
+                            widths={[800, 1600, 2400, image.width]}
+                            sizes="(max-width: 74rem) 100vw, 68rem"
+                            format="avif"
+                            loading="lazy"
+                        />
+                    )
+                })}
                 <figcaption>{shot.caption}</figcaption>
             </figure>
         ))}
@@ -189,6 +199,12 @@ const shots = [
             font-size: 0.9rem;
             text-align: center;
         }
+    }
+
+    /* Only the variant matching the theme mode is displayed, so only it gets loaded. */
+    :global(:root:not([data-mode="dark"])) .shot-dark,
+    :global(:root[data-mode="dark"]) .shot-light {
+        display: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
