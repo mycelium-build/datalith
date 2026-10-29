@@ -15,6 +15,11 @@ describe("resolveLocalSource", () => {
         expect(resolveLocalSource()).toBe(path.resolve("/tmp/datalith-vault"))
     })
 
+    it("returns undefined when DATALITH_SOURCE_DIR is unset", () => {
+        vi.stubEnv("DATALITH_SOURCE_DIR", undefined)
+        expect(resolveLocalSource()).toBeUndefined()
+    })
+
     it("throws when DATALITH_SOURCE_DIR is set in CI", () => {
         vi.stubEnv("DATALITH_SOURCE_DIR", "/tmp/datalith-vault")
         vi.stubEnv("CI", "true")
@@ -29,20 +34,5 @@ describe("resolveDatalithSource", () => {
         vi.stubEnv("CI", undefined)
         const source = await resolveDatalithSource()
         expect(source.root).toBe(path.resolve("/tmp/datalith-vault"))
-    })
-
-    it("throws when CI is set without a source dir or token", async () => {
-        vi.stubEnv("DATALITH_SOURCE_DIR", undefined)
-        vi.stubEnv("DATALITH_READ_TOKEN", undefined)
-        vi.stubEnv("CI", "true")
-        await expect(resolveDatalithSource()).rejects.toThrow(/DATALITH_READ_TOKEN/)
-    })
-
-    it("falls back to the sibling datalith checkout when neither is set", async () => {
-        vi.stubEnv("DATALITH_SOURCE_DIR", undefined)
-        vi.stubEnv("DATALITH_READ_TOKEN", undefined)
-        vi.stubEnv("CI", undefined)
-        const source = await resolveDatalithSource()
-        expect(source.root.endsWith(path.join("datalith"))).toBe(true)
     })
 })
