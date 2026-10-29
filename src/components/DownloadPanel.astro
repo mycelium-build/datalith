@@ -1,4 +1,5 @@
 ---
+import { formatReleaseVersion } from "../lib/release-version"
 import Icon from "./Icon.astro"
 import { isPreviewAheadOfStable } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
@@ -46,7 +47,6 @@ const nativeLinuxPackages = [
     { id: "linux-rpm", label: "Fedora / RHEL", extension: ".rpm" },
     { id: "linux-arch", label: "Arch Linux", extension: ".pkg.tar.zst" },
 ]
-const version = (tagName: string) => tagName?.replace(/^v/, "") ?? ""
 const asset = (release, platform, arch) =>
     release?.assets.find((item) => item.platform === platform && item.arch === arch)
 ---
@@ -56,7 +56,11 @@ const asset = (release, platform, arch) =>
         <div class="compact-heading">
             <div>
                 <p class="overline">Desktop app</p><h3>
-                    {hasStableRelease ? `Datalith ${version(stable?.tagName)}` : "Datalith"}
+                    {
+                        hasStableRelease
+                            ? `Datalith ${formatReleaseVersion(stable?.tagName)}`
+                            : "Datalith"
+                    }
                 </h3>
             </div>
             <span class:list={["stable-badge", { unavailable: !hasStableRelease }]}
@@ -78,7 +82,7 @@ const asset = (release, platform, arch) =>
                     <span
                         ><strong data-stable-label>Download for macOS</strong><small
                             data-stable-meta
-                            >{version(stable?.tagName)} · Apple Silicon · .dmg</small
+                            >{formatReleaseVersion(stable?.tagName)} · Apple Silicon · .dmg</small
                         ></span
                     >
                     <Icon name="download" class="download-glyph" />
@@ -101,7 +105,11 @@ const asset = (release, platform, arch) =>
                     >
                     <div class="menu-card">
                         <p class="menu-title">
-                            All downloads{hasStableRelease ? ` · ${version(stable?.tagName)}` : ""}
+                            All downloads{
+                                hasStableRelease
+                                    ? ` · ${formatReleaseVersion(stable?.tagName)}`
+                                    : ""
+                            }
                         </p><div data-other-platforms></div>
                     </div>
                 </details>
@@ -131,7 +139,8 @@ const asset = (release, platform, arch) =>
                                         <div>
                                             <>
                                                 <p class="menu-title">
-                                                    Preview {version(latestPreview.tagName)}
+                                                    Preview{" "}
+                                                    {formatReleaseVersion(latestPreview.tagName)}
                                                 </p>
                                                 <small>Try upcoming features before release.</small>
                                             </>
@@ -174,6 +183,7 @@ const asset = (release, platform, arch) =>
 
 <script>
     import downloadIcon from "../assets/icons/download.svg?raw"
+    import { formatReleaseVersion } from "../lib/release-version"
     const logos = {
         macos: '<svg viewBox="0 0 24 24"><path d="M16.8 12.8c0-2 1.6-3 1.7-3.1a3.8 3.8 0 0 0-3-1.6c-1.3-.1-2.5.8-3.1.8-.7 0-1.7-.8-2.8-.8a4.2 4.2 0 0 0-3.5 2.2c-1.5 2.6-.4 6.5 1 8.7.7 1.1 1.5 2.3 2.6 2.3 1 0 1.4-.7 2.7-.7s1.7.7 2.8.7 1.8-1.1 2.5-2.2c.8-1.2 1.1-2.4 1.1-2.5-.1 0-2-.8-2-3.8Zm-2-6c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.5-.9 2.4.9.1 1.8-.4 2.4-1.1Z"/></svg>',
         windows:
@@ -203,10 +213,9 @@ const asset = (release, platform, arch) =>
         const availableArchs = (release, id) =>
             ["x64", "arm64"].filter((arch) => releaseAsset(release, id, arch))
         const otherArch = (arch) => (arch === "x64" ? "arm64" : "x64")
-        const cleanVersion = (tag) => tag?.replace(/^v/, "") ?? ""
         const archLabel = (osId, arch) => data.archLabels[osId]?.[arch] ?? arch
         const versionMeta = (release, isPreview) =>
-            isPreview ? `${cleanVersion(release.tagName)} · ` : ""
+            isPreview ? `${formatReleaseVersion(release.tagName)} · ` : ""
         const archState = Object.fromEntries(
             data.platforms.map((platform) => [platform.id, platform.defaultArch]),
         )
@@ -299,7 +308,7 @@ const asset = (release, platform, arch) =>
                 (node) =>
                     (node.textContent =
                         data.hasStableRelease && stableAsset
-                            ? `${cleanVersion(data.stable.tagName)} · ${archLabel(current, stableAsset.arch)} · ${currentInfo.extension}`
+                            ? `${formatReleaseVersion(data.stable.tagName)} · ${archLabel(current, stableAsset.arch)} · ${currentInfo.extension}`
                             : "Check back soon"),
             )
         const renderMenuList = (list, release, isPreview, enabled) => {

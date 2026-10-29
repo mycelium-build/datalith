@@ -43,6 +43,19 @@ export function isPreviewAheadOfStable(
     return false
 }
 
+/** Documentation tags from releases.json (already sorted newest first); drafts are never documented. */
+export function latestDocsTags(
+    releases: Array<{ tagName: string; prerelease: boolean; draft?: boolean }>,
+): { stable?: string; preview?: string } {
+    const published = releases.filter((release) => !release.draft)
+    return {
+        stable: published.find(
+            (release) => !release.prerelease && /^v?\d+\.\d+\.\d+$/.test(release.tagName),
+        )?.tagName,
+        preview: published.find((release) => /-rc\.\d+$/i.test(release.tagName))?.tagName,
+    }
+}
+
 export type AssetArch = "x64" | "arm64"
 
 export function archForAsset(name: string): AssetArch | null {

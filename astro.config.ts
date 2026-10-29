@@ -25,7 +25,10 @@ export default defineConfig({
                 "./src/styles/markdown.css",
                 "./src/styles/starlight.css",
             ],
+            routeMiddleware: "./src/docs-route-data.ts",
             components: {
+                MobileMenuFooter: "./src/components/DocsMobileMenuFooter.astro",
+                SiteTitle: "./src/components/DocsSiteTitle.astro",
                 ThemeSelect: "./src/components/StarlightThemeSelect.astro",
             },
             head: [
@@ -38,6 +41,10 @@ export default defineConfig({
                 {
                     label: "Datalith documentation",
                     items: [{ autogenerate: { directory: "vault" } }],
+                },
+                {
+                    label: "Preview documentation",
+                    items: [{ autogenerate: { directory: "preview/vault" } }],
                 },
             ],
         }),

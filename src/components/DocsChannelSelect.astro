@@ -1,0 +1,182 @@
+---
+import { formatReleaseVersion } from "../lib/release-version"
+import { getCollection } from "astro:content"
+import { latestDocsTags } from "../../scripts/lib/releases.ts"
+import releaseData from "../data/releases.json"
+
+interface Props {
+    /** Unique per instance: the header and the mobile menu each render one. */
+    id: string
+    variant?: "chip" | "row"
+}
+
+const { id, variant = "row" } = Astro.props
+
+// Same selection as sync-docs, so the labels match the imported vaults.
+const tags = latestDocsTags(releaseData.releases ?? [])
+const ids = new Set((await getCollection("docs")).map((entry) => entry.id))
+const current = Astro.locals.starlightRoute.entry.id
+const page = current.replace(/^docs\/(?:preview\/)?vault\//, "")
+const base = import.meta.env.BASE_URL.replace(/\/$/, "")
+const preview = current.startsWith("docs/preview/")
+
+// Stay on the same page when it exists in the other channel, else its welcome page.
+const target = preview
+    ? { label: "stable", tag: tags.stable, prefix: "docs/vault/" }
+    : { label: "preview", tag: tags.preview, prefix: "docs/preview/vault/" }
+const targetId = ids.has(target.prefix + page) ? target.prefix + page : `${target.prefix}welcome`
+// Without a release for the other channel, the switch stays locked on the current one.
+const href = target.tag && ids.has(targetId) ? `${base}/${targetId}/` : undefined
+const stable = formatReleaseVersion(tags.stable)
+const previewVersion = formatReleaseVersion(tags.preview)
+---
+
+<a
+    class:list={["docs-channel", variant]}
+    href={href}
+    role="switch"
+    aria-checked={preview ? "true" : "false"}
+    aria-disabled={href ? undefined : "true"}
+    aria-label="Preview documentation"
+    aria-describedby={`${id}-versions`}
+    title={href
+        ? `Switch to ${target.label} documentation`
+        : `No ${target.label} documentation available`}
+    data-docs-channel-switch
+>
+    <span class="side stable">
+        <span class="label">Stable</span>
+        <span class="version">{stable || "none"}</span>
+    </span>
+    <span class="track">
+        <span class="thumb"></span>
+    </span>
+    <span class="side preview">
+        <span class="label">Preview</span>
+        <span class="version">{previewVersion || "none"}</span>
+    </span>
+    <span id={`${id}-versions`} hidden>
+        {`Stable ${stable || "unavailable"}, preview ${previewVersion || "unavailable"}`}
+    </span>
+</a>
+
+<script>
+    // Links only activate on Enter; a switch should also toggle with Space.
+    document.addEventListener("keydown", (event) => {
+        const target = event.target
+        if (event.key !== " " || !(target instanceof HTMLAnchorElement)) return
+        if (!target.matches("[data-docs-channel-switch][href]")) return
+        event.preventDefault()
+        target.click()
+    })
+</script>
+
+<style>
+    /*
+     * row: full-width in the mobile menu, track centred between the channels.
+     * chip: compact and transparent beside the desktop title.
+     */
+    .docs-channel {
+        --on: #1e8dff;
+        --track-w: 2.5rem;
+        --track-h: 1.25rem;
+        --thumb: 0.75rem;
+        --inset: 0.125rem;
+
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--dl-muted);
+        text-decoration: none;
+    }
+    .docs-channel[aria-checked="true"] {
+        --on: #e8b920;
+    }
+    .row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        background: var(--dl-surface);
+    }
+    .row[href]:hover {
+        background: var(--dl-surface-alt);
+    }
+    .chip {
+        height: 2.5rem;
+    }
+    .docs-channel:focus-visible {
+        outline: 2px solid var(--dl-ring);
+        outline-offset: 2px;
+    }
+    .docs-channel[aria-disabled="true"] {
+        cursor: not-allowed;
+    }
+
+    /* Each side reads towards the track: label over version. */
+    .side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        white-space: nowrap;
+    }
+    .stable {
+        align-items: flex-end;
+    }
+    .preview {
+        align-items: flex-start;
+    }
+    .label {
+        font-family: var(--font-pixel);
+        font-size: 0.8125rem;
+        line-height: 1.1;
+    }
+    .version {
+        font-family: var(--font-mono);
+        font-size: 0.6875rem;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.1;
+    }
+    [aria-checked="false"] .stable .label,
+    [aria-checked="true"] .preview .label {
+        color: var(--on);
+    }
+    /* Hint the destination channel on hover. */
+    [href][aria-checked="false"]:hover .preview .label,
+    [href][aria-checked="true"]:hover .stable .label {
+        color: var(--dl-fg);
+    }
+
+    .track {
+        position: relative;
+        flex-shrink: 0;
+        width: var(--track-w);
+        height: var(--track-h);
+        border: 2px solid var(--on);
+        background: color-mix(in srgb, var(--on) 18%, transparent);
+    }
+    .thumb {
+        position: absolute;
+        inset-block-start: var(--inset);
+        inset-inline-start: var(--inset);
+        width: var(--thumb);
+        height: var(--thumb);
+        background: var(--on);
+        transition: transform 0.12s steps(3, jump-none);
+    }
+    [aria-checked="true"] .thumb {
+        transform: translateX(calc(var(--track-w) - 4px - var(--thumb) - 2 * var(--inset)));
+    }
+    .docs-channel[href]:hover .thumb {
+        background: color-mix(in srgb, var(--on) 82%, #000 18%);
+    }
+    [aria-disabled="true"] .track {
+        opacity: 0.6;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .thumb {
+            transition: none;
+        }
+    }
+</style>

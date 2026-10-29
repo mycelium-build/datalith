@@ -3,21 +3,20 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { resolveDatalithSource } from "./lib/source.ts"
+import { latestDocsTags } from "./lib/releases.ts"
+import { resolveTagSource } from "./lib/source.ts"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const { root: sourceRoot } = await resolveDatalithSource()
-const sourceVault = path.join(sourceRoot, "docs", "vault")
-const destinationVault = path.join(siteRoot, "src", "content", "docs", "vault")
-const sourceUrl = "https://github.com/mycelium-build/datalith-app/blob/main/docs/vault"
 
-const markdownFiles: string[] = []
-
-async function collectMarkdown(directory: string, relativeDirectory = ""): Promise<void> {
+async function collectMarkdown(
+    directory: string,
+    markdownFiles: string[],
+    relativeDirectory = "",
+): Promise<void> {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
         const relativePath = path.join(relativeDirectory, entry.name)
         const absolutePath = path.join(directory, entry.name)
-        if (entry.isDirectory()) await collectMarkdown(absolutePath, relativePath)
+        if (entry.isDirectory()) await collectMarkdown(absolutePath, markdownFiles, relativePath)
         else if (entry.isFile() && entry.name.endsWith(".md")) markdownFiles.push(relativePath)
     }
 }
@@ -33,32 +32,39 @@ function parseFrontmatter(markdown: string): { body: string; frontmatter: string
     return { body: markdown.slice(match[0].length), frontmatter: match[1] }
 }
 
-function routeFor(relativePath: string): string {
+/** `channelPath` is "vault" for Stable and "preview/vault" for Preview. */
+function routeFor(relativePath: string, channelPath: string): string {
     const withoutExtension = relativePath.replace(/\.md$/i, "")
-    return `docs/vault/${withoutExtension
+    return `docs/${channelPath}/${withoutExtension
         .split(path.sep)
         .map((segment) => segment.toLowerCase())
         .join("/")}`
 }
 
 interface DocumentIndex {
+    channelPath: string
+    sourceUrl: string
     byPath: Map<string, string>
     byStem: Map<string, Array<{ normalizedPath: string; route: string }>>
 }
 
-function buildDocumentIndex(): DocumentIndex {
+function buildDocumentIndex(
+    markdownFiles: string[],
+    channelPath: string,
+    sourceUrl: string,
+): DocumentIndex {
     const byPath = new Map<string, string>()
     const byStem = new Map<string, Array<{ normalizedPath: string; route: string }>>()
     for (const relativePath of markdownFiles) {
         const normalizedPath = relativePath.split(path.sep).join("/").replace(/\.md$/i, "")
-        const route = routeFor(relativePath)
+        const route = routeFor(relativePath, channelPath)
         byPath.set(normalizedPath.toLowerCase(), route)
         const stem = path.posix.basename(normalizedPath).toLowerCase()
         const matches = byStem.get(stem) ?? []
         matches.push({ normalizedPath, route })
         byStem.set(stem, matches)
     }
-    return { byPath, byStem }
+    return { channelPath, sourceUrl, byPath, byStem }
 }
 
 function wikiTarget(target: string, currentPath: string, index: DocumentIndex): string {
@@ -81,13 +87,13 @@ function wikiTarget(target: string, currentPath: string, index: DocumentIndex): 
         index.byStem.get(path.posix.basename(targetWithSlashes).toLowerCase())?.[0]?.route
     if (fallbackRoute) return `/${fallbackRoute}/`
 
-    return `${sourceUrl}/${target.replaceAll("\\", "/")}`
+    return `${index.sourceUrl}/${target.replaceAll("\\", "/")}`
 }
 
 function relativeMarkdownLink(currentRoute: string, targetRoute: string): string {
     const fromDirectory = `/${currentRoute}`
     const relative = path.posix.relative(fromDirectory, `/${targetRoute}`)
-    return `${relative || "."}/`
+    return `${encodeURI(relative || ".")}/`
 }
 
 function rewriteWikiLinks(
@@ -96,7 +102,7 @@ function rewriteWikiLinks(
     index: DocumentIndex,
     edges: Set<string>,
 ): string {
-    const currentRoute = routeFor(currentPath)
+    const currentRoute = routeFor(currentPath, index.channelPath)
     let inFence = false
     return markdown
         .split(/\r?\n/)
@@ -136,72 +142,122 @@ function searchContent(markdown: string): string {
         .trim()
 }
 
-function addStarlightFrontmatter(markdown: string, relativePath: string): string {
+function addStarlightFrontmatter(
+    markdown: string,
+    relativePath: string,
+    channelPath: string,
+): string {
     const { body, frontmatter } = parseFrontmatter(markdown)
     const title = titleFromMarkdown(body, path.basename(relativePath, ".md"))
-    const route = routeFor(relativePath)
+    const route = routeFor(relativePath, channelPath)
     let fields = frontmatter ? `${frontmatter}\n` : ""
     if (!/^title\s*:/m.test(fields)) fields += `title: ${JSON.stringify(title)}\n`
-    if (!/^slug\s*:/m.test(fields)) fields += `slug: ${route}\n`
+    // The slug carries the channel prefix, so a source slug would escape its channel.
+    fields = fields.replace(/^slug\s*:.*\n?/gm, "")
+    fields += `slug: ${route}\n`
     return `---\n${fields}---\n\n${body.trimStart()}`
 }
 
-await collectMarkdown(sourceVault)
-const index = buildDocumentIndex()
-await rm(destinationVault, { recursive: true, force: true })
-await mkdir(destinationVault, { recursive: true })
+/** Import one release vault; Preview lives under /docs/preview/ and only Stable feeds the homepage graph and search. */
+export async function importVault(
+    sourceRoot: string,
+    channel: "stable" | "preview",
+    tag: string,
+    outputRoot: string,
+    repository: string,
+): Promise<void> {
+    const channelPath = channel === "stable" ? "vault" : "preview/vault"
+    const sourceVault = path.join(sourceRoot, "docs", "vault")
+    const destinationVault = path.join(outputRoot, "src", "content", "docs", channelPath)
+    const sourceUrl = `https://github.com/${repository}/blob/${encodeURIComponent(tag)}/docs/vault`
 
-const edges = new Set<string>()
-const documents: Array<{
-    route: string
-    name: string
-    path: string
-    title: string
-    content: string
-}> = []
+    const markdownFiles: string[] = []
+    await collectMarkdown(sourceVault, markdownFiles)
+    if (!markdownFiles.length) throw new Error(`No Markdown documentation found for ${tag}`)
+    const index = buildDocumentIndex(markdownFiles, channelPath, sourceUrl)
+    await rm(destinationVault, { recursive: true, force: true })
+    await mkdir(destinationVault, { recursive: true })
 
-for (const relativePath of markdownFiles) {
-    const sourcePath = path.join(sourceVault, relativePath)
-    const destinationPath = path.join(destinationVault, relativePath)
-    const original = await readFile(sourcePath, "utf8")
-    const rewritten = rewriteWikiLinks(original, relativePath, index, edges)
-    const document = addStarlightFrontmatter(rewritten, relativePath)
-    await mkdir(path.dirname(destinationPath), { recursive: true })
-    await writeFile(destinationPath, `${document}\n`)
-    documents.push({
-        route: `/${routeFor(relativePath)}/`,
-        name: path.posix.basename(relativePath, ".md"),
-        path: relativePath.split(path.sep).join("/").replace(/\.md$/i, ""),
-        title: titleFromMarkdown(rewritten, path.basename(relativePath, ".md")),
-        content: searchContent(rewritten),
-    })
+    const edges = new Set<string>()
+    const documents: Array<{
+        route: string
+        name: string
+        path: string
+        title: string
+        content: string
+    }> = []
+
+    for (const relativePath of markdownFiles) {
+        const sourcePath = path.join(sourceVault, relativePath)
+        const destinationPath = path.join(destinationVault, relativePath)
+        const original = await readFile(sourcePath, "utf8")
+        const rewritten = rewriteWikiLinks(original, relativePath, index, edges)
+        const document = addStarlightFrontmatter(rewritten, relativePath, channelPath)
+        await mkdir(path.dirname(destinationPath), { recursive: true })
+        await writeFile(destinationPath, `${document}\n`)
+        documents.push({
+            route: `/${routeFor(relativePath, channelPath)}/`,
+            name: path.posix.basename(relativePath, ".md"),
+            path: relativePath.split(path.sep).join("/").replace(/\.md$/i, ""),
+            title: titleFromMarkdown(rewritten, path.basename(relativePath, ".md")),
+            content: searchContent(rewritten),
+        })
+    }
+    console.log(`Imported ${markdownFiles.length} Markdown files from ${tag} into ${channelPath}`)
+    if (channel !== "stable") return
+
+    const dataDirectory = path.join(outputRoot, "src", "data")
+    await mkdir(dataDirectory, { recursive: true })
+
+    const nodeRoutes = new Set(documents.map((document) => document.route.slice(1, -1)))
+    const graphNodes = documents.map((document) => ({
+        id: document.route,
+        label: document.title,
+        route: document.route,
+    }))
+    const graphEdges = [...edges]
+        .filter((edge) => edge.split("|").every((route) => nodeRoutes.has(route)))
+        .map((edge) => {
+            const [source, target] = edge.split("|")
+            return { source: `/${source}/`, target: `/${target}/` }
+        })
+    await writeFile(
+        path.join(dataDirectory, "graph.json"),
+        `${JSON.stringify({ nodes: graphNodes, edges: graphEdges }, null, 2)}\n`,
+    )
+    await writeFile(
+        path.join(dataDirectory, "search.json"),
+        `${JSON.stringify({ documents }, null, 2)}\n`,
+    )
+    console.log(
+        `Wrote docs graph (${graphNodes.length} nodes, ${graphEdges.length} edges) and search index (${documents.length} documents)`,
+    )
 }
 
-const dataDirectory = path.join(siteRoot, "src", "data")
-await mkdir(dataDirectory, { recursive: true })
+async function main(): Promise<void> {
+    // Written by fetch-releases, which runs first in prebuild.
+    const { repository, releases } = JSON.parse(
+        await readFile(path.join(siteRoot, "src", "data", "releases.json"), "utf8"),
+    )
+    const tags = latestDocsTags(releases)
+    if (!tags.stable) throw new Error("No published stable release found for documentation")
 
-const nodeRoutes = new Set(documents.map((document) => document.route.slice(1, -1)))
-const graphNodes = documents.map((document) => ({
-    id: document.route,
-    label: document.title,
-    route: document.route,
-}))
-const graphEdges = [...edges]
-    .filter((edge) => edge.split("|").every((route) => nodeRoutes.has(route)))
-    .map((edge) => {
-        const [source, target] = edge.split("|")
-        return { source: `/${source}/`, target: `/${target}/` }
+    await rm(path.join(siteRoot, "src", "content", "docs", "preview"), {
+        recursive: true,
+        force: true,
     })
-await writeFile(
-    path.join(dataDirectory, "graph.json"),
-    `${JSON.stringify({ nodes: graphNodes, edges: graphEdges }, null, 2)}\n`,
-)
-await writeFile(
-    path.join(dataDirectory, "search.json"),
-    `${JSON.stringify({ documents }, null, 2)}\n`,
-)
+    for (const channel of ["stable", "preview"] as const) {
+        const tag = tags[channel]
+        if (!tag) continue
+        const { root } = await resolveTagSource(tag)
+        await importVault(root, channel, tag, siteRoot, repository)
+    }
+}
 
-console.log(`Imported ${markdownFiles.length} Markdown files from ${sourceVault}`)
-console.log(
-    `Wrote docs graph (${graphNodes.length} nodes, ${graphEdges.length} edges) and search index (${documents.length} documents)`,
-)
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+if (isMain) {
+    main().catch((error: unknown) => {
+        console.error(error)
+        process.exitCode = 1
+    })
+}

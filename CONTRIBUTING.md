@@ -85,7 +85,9 @@ npm run licenses:check
 
 No icon generation or image resizing is needed. Fonts, themes, pixel icons, and the text logo also come from the selected application checkout. Generated assets are ignored by Git; run `npm run sync-assets` before tests and license checks on a clean checkout. `npm run build` synchronizes documentation and assets again through `prebuild`.
 
-For local development, set `DATALITH_SOURCE_DIR` to the application checkout. To fetch a branch or release tag, leave that variable unset and provide `DATALITH_READ_TOKEN` plus `DATALITH_SOURCE_REF` (default: `main`). CI uses the existing GitHub App token and forbids a local source directory.
+For local development, set `DATALITH_SOURCE_DIR` to the application checkout. For assets, to fetch a branch or release tag, leave that variable unset and provide `DATALITH_READ_TOKEN` plus `DATALITH_SOURCE_REF` (default: `main`). CI uses the existing GitHub App token and forbids a local source directory.
+
+Documentation follows the release tags already fetched for downloads (`src/data/releases.json`, so `fetch-releases` runs first in `prebuild`): the latest stable tag is imported to `/docs/vault/` and the latest RC to `/docs/preview/vault/`. Drafts are never documented. The header's Stable / Preview switch shows each tag and keeps the current page when it exists in the other channel, otherwise opening that channel's welcome page. On mobile, the header shows the active channel and version, and the switch is in the navigation menu. Without an RC the switch is disabled; without a stable release the build fails. `DATALITH_SOURCE_REF` only controls assets. With `DATALITH_SOURCE_DIR`, documentation is exported from those tags in the local repository (fetch them first); uncommitted changes are not imported.
 
 Use application `main`, `v0.2.0-rc.1`, or a later ref containing both channel icons. Older refs such as `v0.1.0` only have a legacy logo and no yellow Preview icon; they are rejected with the missing source path instead of substituting the Stable artwork for Preview. To rebuild that historical site, use its historical website revision.
 

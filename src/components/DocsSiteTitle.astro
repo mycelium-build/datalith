@@ -1,0 +1,99 @@
+---
+import DocsChannelSelect from "./DocsChannelSelect.astro"
+import { formatReleaseVersion } from "../lib/release-version"
+import { latestDocsTags } from "../../scripts/lib/releases.ts"
+import releaseData from "../data/releases.json"
+import SiteTitle from "@astrojs/starlight/components/SiteTitle.astro"
+
+const tags = latestDocsTags(releaseData.releases ?? [])
+const preview = Astro.locals.starlightRoute.entry.id.startsWith("docs/preview/")
+const version = preview ? tags.preview : tags.stable
+---
+
+<!--
+    The docs channel is part of the brand.
+    Desktop: title | channel switch. Mobile: title with a read-only badge; the switch lives in the menu.
+-->
+<div class="brand">
+    <SiteTitle />
+    <span class:list={["channel-badge", { preview }]}>
+        <span class="label">{preview ? "Preview" : "Stable"}</span>
+        <span class="version">{formatReleaseVersion(version) || "none"}</span>
+    </span>
+    <div class="channel">
+        <DocsChannelSelect id="docs-channel-header" variant="chip" />
+    </div>
+</div>
+
+<style>
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        min-width: 0;
+    }
+
+    .channel-badge {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        gap: 0.125rem;
+        padding-inline-start: 0.625rem;
+        border-inline-start: 1px solid var(--sl-color-gray-5);
+        white-space: nowrap;
+    }
+    .channel-badge .label {
+        color: #1e8dff;
+        font-family: var(--font-pixel);
+        font-size: 0.75rem;
+        line-height: 1.1;
+    }
+    .channel-badge.preview .label {
+        color: #e8b920;
+    }
+    .channel-badge .version {
+        color: var(--dl-muted);
+        font-family: var(--font-mono);
+        font-size: 0.625rem;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.1;
+    }
+    .channel {
+        display: none;
+    }
+
+    @media (min-width: 50rem) {
+        .brand {
+            gap: 0.75rem;
+        }
+        .channel-badge {
+            display: none;
+        }
+        .channel {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        /* Same divider as the one after Starlight's social icons. */
+        .channel::before {
+            content: "";
+            height: 2rem;
+            border-inline-start: 1px solid var(--sl-color-gray-5);
+        }
+
+        /*
+         * Starlight's header aligns search with the content column, which leaves it off-centre
+         * once the brand carries the switch. Centre it between the brand and the right group.
+         */
+        :global(.header:has(> .title-wrapper)) {
+            grid-template-columns: auto minmax(0, 1fr) auto;
+        }
+        :global(.header > .title-wrapper + div) {
+            justify-content: center;
+            min-width: 0;
+        }
+        :global(.header > .title-wrapper + div site-search) {
+            width: min(100%, 22rem);
+        }
+    }
+</style>

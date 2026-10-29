@@ -1,0 +1,19 @@
+---
+import DocsChannelSelect from "./DocsChannelSelect.astro"
+import MobileMenuFooter from "@astrojs/starlight/components/MobileMenuFooter.astro"
+---
+
+<!-- The mobile header only shows the channel; switching happens here. -->
+<div class="channel">
+    <DocsChannelSelect id="docs-channel-menu" />
+</div>
+<MobileMenuFooter />
+
+<style>
+    .channel {
+        display: flex;
+        flex-direction: column;
+        padding-block: 1rem;
+        border-top: 1px solid var(--sl-color-gray-6);
+    }
+</style>
