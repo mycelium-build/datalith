@@ -1,13 +1,11 @@
 import { execFile } from "node:child_process"
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises"
+import { readFile, rm, stat, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
 const execFileAsync = promisify(execFile)
 
-const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const DEFAULT_REPOSITORY = "mycelium-build/datalith-app"
 const DEFAULT_SOURCE_REF = "main"
 // Deterministic temp clone so every prebuild step shares one checkout instead of cloning the repository once per script.
@@ -19,56 +17,26 @@ export interface DatalithSource {
     root: string
 }
 
-export function resolveLocalSource(): string {
+/** Local application checkout from DATALITH_SOURCE_DIR, for testing uncommitted assets. */
+export function resolveLocalSource(): string | undefined {
     const sourceDir = process.env.DATALITH_SOURCE_DIR
-    if (sourceDir) {
-        if (process.env.CI) {
-            throw new Error(
-                "DATALITH_SOURCE_DIR must not be set in CI: documentation and assets are fetched with DATALITH_READ_TOKEN",
-            )
-        }
-        return path.resolve(sourceDir)
-    }
-    return path.join(siteRoot, "..", "datalith")
-}
-
-export async function resolveDatalithSource(): Promise<DatalithSource> {
-    if (process.env.DATALITH_SOURCE_DIR) {
-        return { root: resolveLocalSource() }
-    }
-
-    if (process.env.DATALITH_READ_TOKEN) {
-        return cloneRepository(
-            process.env.DATALITH_SOURCE_REF ?? DEFAULT_SOURCE_REF,
-            CLONE_DIRECTORY,
-        )
-    }
-
+    if (!sourceDir) return undefined
     if (process.env.CI) {
-        throw new Error("DATALITH_READ_TOKEN must be set in CI")
+        throw new Error("DATALITH_SOURCE_DIR must not be set in CI: assets are cloned from the ref")
     }
-    return { root: path.join(siteRoot, "..", "datalith") }
+    return path.resolve(sourceDir)
 }
 
-/** Source for a release tag; a local checkout exports the committed tag, never its working tree. */
-export async function resolveTagSource(tag: string): Promise<DatalithSource> {
-    const directory = path.join(os.tmpdir(), `datalith-source-${tag}`)
-    if (!process.env.DATALITH_SOURCE_DIR) return cloneRepository(tag, directory)
+/** Assets source: the local checkout when set, otherwise a clone of DATALITH_SOURCE_REF. */
+export async function resolveDatalithSource(): Promise<DatalithSource> {
+    const local = resolveLocalSource()
+    if (local) return { root: local }
+    return cloneRepository(process.env.DATALITH_SOURCE_REF ?? DEFAULT_SOURCE_REF, CLONE_DIRECTORY)
+}
 
-    await rm(directory, { recursive: true, force: true })
-    await mkdir(directory, { recursive: true })
-    const archive = `${directory}.tar`
-    await execFileAsync("git", [
-        "-C",
-        resolveLocalSource(),
-        "archive",
-        `--output=${archive}`,
-        `refs/tags/${tag}`,
-        "docs/vault",
-    ])
-    await execFileAsync("tar", ["-xf", archive, "-C", directory])
-    await rm(archive)
-    return { root: directory }
+/** Documentation source: always a clone of the release tag, never a working tree. */
+export async function resolveTagSource(tag: string): Promise<DatalithSource> {
+    return cloneRepository(tag, path.join(os.tmpdir(), `datalith-source-${tag}`))
 }
 
 async function isUsableClone(directory: string, ref: string): Promise<boolean> {
