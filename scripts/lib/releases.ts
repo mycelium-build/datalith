@@ -48,11 +48,15 @@ export function latestDocsTags(
     releases: Array<{ tagName: string; prerelease: boolean; draft?: boolean }>,
 ): { stable?: string; preview?: string } {
     const published = releases.filter((release) => !release.draft)
+    const stable = published.find(
+        (release) => !release.prerelease && /^v?\d+\.\d+\.\d+$/.test(release.tagName),
+    )
     return {
-        stable: published.find(
-            (release) => !release.prerelease && /^v?\d+\.\d+\.\d+$/.test(release.tagName),
+        stable: stable?.tagName,
+        preview: published.find(
+            (release) =>
+                /-rc\.\d+$/i.test(release.tagName) && isPreviewAheadOfStable(release, stable),
         )?.tagName,
-        preview: published.find((release) => /-rc\.\d+$/i.test(release.tagName))?.tagName,
     }
 }
 

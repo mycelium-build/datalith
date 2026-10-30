@@ -10,6 +10,27 @@ import {
 } from "../scripts/lib/releases.ts"
 
 describe("latestDocsTags", () => {
+    it.each(["v2.0.0-rc.2", "v1.9.0-rc.9"])(
+        "excludes %s when stable has caught up or moved ahead",
+        (tagName) => {
+            expect(
+                latestDocsTags([
+                    { tagName: "v2.0.0", prerelease: false },
+                    { tagName, prerelease: true },
+                ]),
+            ).toEqual({ stable: "v2.0.0", preview: undefined })
+        },
+    )
+
+    it("keeps a preview for the next patch release", () => {
+        expect(
+            latestDocsTags([
+                { tagName: "v2.0.1-rc.1", prerelease: true },
+                { tagName: "v2.0.0", prerelease: false },
+            ]),
+        ).toEqual({ stable: "v2.0.0", preview: "v2.0.1-rc.1" })
+    })
+
     it("uses RC tags even if GitHub's prerelease flag is inconsistent", () => {
         expect(
             latestDocsTags([
@@ -19,7 +40,7 @@ describe("latestDocsTags", () => {
         ).toEqual({ stable: "v1.0.0", preview: "v2.0.0-rc.1" })
     })
 
-    it("picks the newest stable and RC independently, ignoring drafts", () => {
+    it("picks the newest stable and upcoming RC, ignoring drafts", () => {
         const release = (tagName: string, prerelease: boolean, draft = false) => ({
             tagName,
             prerelease,
@@ -29,11 +50,11 @@ describe("latestDocsTags", () => {
             latestDocsTags([
                 release("v3.0.0", false, true),
                 release("v3.0.0-rc.1", true, true),
+                release("v2.1.0-rc.2", true),
                 release("v2.0.0", false),
-                release("v2.0.0-rc.2", true),
                 release("v1.0.0", false),
             ]),
-        ).toEqual({ stable: "v2.0.0", preview: "v2.0.0-rc.2" })
+        ).toEqual({ stable: "v2.0.0", preview: "v2.1.0-rc.2" })
         expect(latestDocsTags([release("v1.0.0", false)]).preview).toBeUndefined()
         expect(latestDocsTags([]).stable).toBeUndefined()
     })

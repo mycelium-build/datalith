@@ -23,7 +23,7 @@ The App installation must include the `datalith-app` repository with read-only C
 4. Enter the application Git ref to import, or keep `main`. The current website requires both channel icons, available in `v0.2.0-rc.1` and current `main`; see [application asset compatibility](../CONTRIBUTING.md#application-assets-and-source-refs).
 5. Start the workflow and wait for the GitHub Pages deployment to complete.
 
-The workflow sets `SITE_BASE` to `/datalith` and passes the selected ref to asset synchronization. Download choices and documentation use the application's published release metadata, independently of the source ref: Stable docs come from the latest stable tag and Preview docs from the latest RC.
+The workflow sets `SITE_BASE` to `/datalith` and passes the selected ref to asset synchronization. Download choices and documentation use the application's published release metadata, independently of the source ref: Stable docs come from the latest stable tag and Preview docs from the latest RC only when its target version is newer than Stable, matching downloads.
 
 After a website fix reaches `main` and CI passes, start a new run so it uses the corrected website code:
 
@@ -31,7 +31,7 @@ After a website fix reaches `main` and CI passes, start a new run so it uses the
 gh workflow run deploy.yml --repo mycelium-build/datalith --ref main -f source_ref=v0.2.0-rc.1
 ```
 
-Re-running an old failed run would reuse its old website revision. Wait for the new Pages deployment to succeed, then verify `/datalith/`, `/datalith/docs/vault/welcome/`, `/datalith/docs/preview/vault/welcome/` (when an RC exists), `/datalith/datalith.png`, and `/datalith/datalith-preview.png`, plus the Preview download links.
+Re-running an old failed run would reuse its old website revision. Wait for the new Pages deployment to succeed, then verify `/datalith/`, `/datalith/docs/vault/welcome/`, `/datalith/docs/preview/vault/welcome/` (when an RC newer than Stable exists), `/datalith/datalith.png`, and `/datalith/datalith-preview.png`, plus the Preview download links.
 
 ## Build requirements
 

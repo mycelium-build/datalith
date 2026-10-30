@@ -78,7 +78,7 @@ npm run licenses:check
 `npm run build` fetches everything from the [application repository](https://github.com/mycelium-build/datalith-app) through `prebuild`. On a clean checkout, run `npm run sync-assets` before tests and license checks.
 
 - **Assets** (logos, fonts, themes, icons) come from `DATALITH_SOURCE_REF` (default: `main`, `v0.2.0-rc.1` or later).
-- **Documentation** comes from the latest stable release (`/docs/vault/`) and the latest RC (`/docs/preview/vault/`).
+- **Documentation** comes from the latest stable release (`/docs/vault/`) and the latest RC (`/docs/preview/vault/`) only when its target version is newer than Stable, matching downloads.
 
 Optional environment variables:
 
