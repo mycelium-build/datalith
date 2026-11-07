@@ -4,7 +4,7 @@ The official website for [Datalith](https://github.com/mycelium-build/datalith-a
 
 Datalith is a desktop application for building a private personal encyclopedia from files you own. Write notes, manage tasks, connect ideas, and search inside. Available on macOS, Windows, and Linux.
 
-For more info go to [Datalith's website](https://mycelium-build.github.io/datalith/)
+For more info go to [Datalith's website](https://datalith.work/)
 
 ## Support
 
