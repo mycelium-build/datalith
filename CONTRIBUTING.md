@@ -61,14 +61,34 @@ npm run licenses:check
     cd datalith
     ```
 
-2. Build the project (application assets and documentation are cloned from GitHub):
+2. Install [prek](https://prek.j178.dev) and enable the Git hooks:
+
+    ```bash
+    brew install prek        # or: uv tool install prek, or: cargo install --locked prek
+    prek install
+    ```
+
+    `prek install` reads `.pre-commit-config.yaml` and installs both hooks once for the clone:
+
+    | Hook       | Runs when                          | Checks                                   |
+    | ---------- | ---------------------------------- | ---------------------------------------- |
+    | pre-commit | source or config files are staged  | `vp fmt --check`, `vp lint`, `stylelint` |
+    | pre-commit | dependency or license files change | `npm run licenses:check`                 |
+    | pre-commit | policy inputs change               | `npm run policies:check`                 |
+    | pre-push   | the pushed commits touch code      | `npm run check` and `npm test`           |
+
+    The pre-push hooks and `vp lint` need the generated site data: run `npm run prebuild` once
+    (see below). Run every pre-commit hook on the whole tree with `prek run --all-files`.
+    Bypass a hook once with `--no-verify`.
+
+3. Build the project (application assets and documentation are cloned from GitHub):
 
     ```bash
     npm ci
     npm run build
     ```
 
-3. Run the project:
+4. Run the project:
     ```bash
     npm run dev
     ```
