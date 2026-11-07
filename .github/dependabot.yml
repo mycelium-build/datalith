@@ -1,0 +1,41 @@
+version: 2
+
+updates:
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: weekly
+          day: monday
+      open-pull-requests-limit: 5
+      commit-message:
+          prefix: fix(deps)
+          prefix-development: chore(deps)
+      groups:
+          npm-patch:
+              update-types:
+                  - patch
+          npm-minor:
+              update-types:
+                  - minor
+          npm-major:
+              update-types:
+                  - major
+
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: weekly
+          day: monday
+      open-pull-requests-limit: 3
+      commit-message:
+          prefix: chore(ci)
+      groups:
+          actions-patch:
+              update-types:
+                  - patch
+          actions-minor:
+              update-types:
+                  - minor
+          actions-major:
+              update-types:
+                  - major
