@@ -5,7 +5,7 @@ import { themeInitScript } from "./scripts/theme-init.ts"
 
 // https://astro.build/config
 export default defineConfig({
-    site: "https://mycelium-build.github.io",
+    site: "https://datalith.work",
     base: process.env.SITE_BASE ?? "/",
     integrations: [
         starlight({
