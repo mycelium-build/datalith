@@ -9,8 +9,41 @@ on:
 permissions:
     contents: read
 
+# Cancel superseded pull request runs. Runs on main are never cancelled: each one gates a deployment.
+concurrency:
+    group: ci-${{ github.event.pull_request.number || github.sha }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+    # On main, skip the checks when the pull request that was just merged already verified this tree.
+    reuse:
+        if: github.event_name == 'push'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: read
+            checks: read
+        outputs:
+            verified: ${{ steps.verified.outputs.verified }}
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  sparse-checkout: scripts/ci
+                  persist-credentials: false
+
+            - name: Look for a verified pull request
+              id: verified
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  REPO: ${{ github.repository }}
+                  SHA: ${{ github.sha }}
+              run: scripts/ci/verified-tree.sh
+
     quality:
+        needs: reuse
+        # Pull requests (reuse is skipped) always run. On main, an unverified or failed lookup runs the full CI.
+        if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository

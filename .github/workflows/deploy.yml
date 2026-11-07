@@ -87,6 +87,16 @@ jobs:
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
               run: npm run sync-assets
 
+            # Astro writes optimized images to node_modules/.astro/assets (about 20 s cold, 1 s warm).
+            # Only runs on main write caches, which every later run (and any branch) can read.
+            - name: Restore image cache
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: node_modules/.astro/assets
+                  key: astro-images-${{ runner.os }}-${{ hashFiles('src/assets/**', 'package-lock.json') }}
+                  restore-keys: |
+                      astro-images-${{ runner.os }}-
+
             - name: Build site
               env:
                   RELEASE_REPOSITORY: mycelium-build/datalith-app
