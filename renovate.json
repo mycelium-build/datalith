@@ -10,6 +10,13 @@
                 "fileFilters": ["THIRD-PARTY-NOTICES.md"],
                 "executionMode": "branch"
             }
+        },
+        {
+            "description": "vite is both a devDependency and an override, with the same value: update them together or npm fails with EOVERRIDE.",
+            "matchPackageNames": ["vite", "vite-plus", "vitest", "@voidzero-dev/**"],
+            "groupName": "vite-plus",
+            "separateMajorMinor": false,
+            "commitMessagePrefix": "chore(deps):"
         }
     ]
 }
