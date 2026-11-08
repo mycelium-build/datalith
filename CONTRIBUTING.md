@@ -70,16 +70,23 @@ npm run licenses:check
 
     `prek install` reads `.pre-commit-config.yaml` and installs both hooks once for the clone:
 
-    | Hook       | Runs when                          | Checks                                   |
-    | ---------- | ---------------------------------- | ---------------------------------------- |
-    | pre-commit | source or config files are staged  | `vp fmt --check`, `vp lint`, `stylelint` |
-    | pre-commit | dependency or license files change | `npm run licenses:check`                 |
-    | pre-commit | policy inputs change               | `npm run policies:check`                 |
-    | pre-push   | the pushed commits touch code      | `npm run check` and `npm test`           |
+    | Hook       | Runs when                          | What it does                                                                     |
+    | ---------- | ---------------------------------- | -------------------------------------------------------------------------------- |
+    | pre-commit | source or config files are staged  | `vp fmt` formats the staged files and stages the result                          |
+    | pre-commit | source files are staged            | `vp lint` and `stylelint` check; they never fix                                  |
+    | pre-commit | dependency or license files change | `licenses:check`; stale notices are regenerated and staged (`licenses:generate`) |
+    | pre-commit | policy inputs change               | `policies:check`; stale pages are regenerated and staged (`policies:generate`)   |
+    | pre-push   | the pushed commits touch code      | `npm run check` and `npm test`                                                   |
 
-    The pre-push hooks and `vp lint` need the generated site data: run `npm run prebuild` once
-    (see below). Run every pre-commit hook on the whole tree with `prek run --all-files`.
-    Bypass a hook once with `--no-verify`.
+    The formatting, the notices and the policy pages are fixed for you, so the commit goes through
+    with them. Lint is never fixed automatically: an automatic lint fix can change behavior.
+    prek sets your unstaged changes aside while the hooks run. If a fix touches a file that also has
+    unstaged changes, prek cannot put your changes back: it undoes the fix and stops the commit.
+    Stage the whole file (or stash the rest) and commit again.
+
+    The pre-push hooks, `vp lint` and the license hook need the generated site data: run
+    `npm run prebuild` once (see below). Run every pre-commit hook on the whole tree with
+    `prek run --all-files`. Bypass a hook once with `--no-verify`.
 
 3. Build the project (application assets and documentation are cloned from GitHub):
 

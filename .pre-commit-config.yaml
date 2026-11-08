@@ -10,9 +10,9 @@ repos:
       hooks:
           # Same tool as CI's "Check formatting, lint and types" step, on the staged files only.
           - id: format
-            name: vp fmt --check
+            name: vp fmt
             language: system
-            entry: npx --no-install vp fmt --check
+            entry: scripts/hooks/format.sh
             types_or: [ts, tsx, javascript, json, css, markdown, yaml, astro]
             exclude: ^(THIRD-PARTY-NOTICES\.md|src/pages/(privacy|terms)/index\.astro)$
 
@@ -29,20 +29,20 @@ repos:
             entry: npx --no-install stylelint
             files: ^src/styles/.*\.css$
 
-          # The inputs of CI's "Check license notices" step.
+          # The inputs of CI's "Check license notices" step. Regenerates stale notices and stages them.
           - id: licenses-check
             name: license notices
             language: system
-            entry: npm run --silent licenses:check
-            files: ^(package-lock\.json|THIRD-PARTY-NOTICES\.md|LICENSE|scripts/licenses/)
+            entry: scripts/hooks/licenses.sh
+            files: ^(package(-lock)?\.json|THIRD-PARTY-NOTICES\.md|LICENSE|scripts/(licenses|lib)/)
             pass_filenames: false
 
-          # The inputs of CI's "Check policy pages" step.
+          # The inputs of CI's "Check policy pages" step. Regenerates stale pages and stages them.
           - id: policies-check
             name: policy pages
             language: system
-            entry: npm run --silent policies:check
-            files: ^(policygen\.json|package-lock\.json|scripts/policies/|src/pages/(privacy|terms)/)
+            entry: scripts/hooks/policies.sh
+            files: ^(package(-lock)?\.json|policygen\.json|scripts/(policies|lib)/|src/pages/(privacy|terms)/)
             pass_filenames: false
 
           # Same commands as CI, on push only. They need the generated site data (`npm run prebuild`).
