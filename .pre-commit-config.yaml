@@ -13,6 +13,8 @@ repos:
             name: vp fmt
             language: system
             entry: scripts/hooks/format.sh
+            # One process: parallel batches would race on git add (.git/index.lock).
+            require_serial: true
             types_or: [ts, tsx, javascript, json, css, markdown, yaml, astro]
             exclude: ^(THIRD-PARTY-NOTICES\.md|src/pages/(privacy|terms)/index\.astro)$
 
