@@ -11,12 +11,13 @@
 set -uo pipefail
 
 # Files that neither the build, nor the checks, nor the tests read (see `ci_excluded`).
+# `scripts/hooks/` (prek) and `scripts/renovate-post-upgrade.sh` (Renovate) only run on developer machines and in Renovate.
 # `docs/` holds the repository's own notes: sync-docs reads docs/vault of *datalith-app*, not this
 # repository. `.github/` is only read by GitHub itself, except ci.yml, which defines the checks.
 ci_excluded() {
     case "$1" in
         .github/workflows/ci.yml) return 1 ;;
-        README.md | CHANGELOG.md | CONTRIBUTING.md | docs/* | .github/* | .pre-commit-config.yaml | renovate.json | .env.example) return 0 ;;
+        README.md | CHANGELOG.md | CONTRIBUTING.md | docs/* | .github/* | .pre-commit-config.yaml | renovate.json | .env.example | scripts/hooks/* | scripts/renovate-post-upgrade.sh) return 0 ;;
         *) return 1 ;;
     esac
 }
