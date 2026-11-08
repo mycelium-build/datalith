@@ -18,24 +18,64 @@ on:
 
 permissions:
     contents: read
-    pages: write
-    id-token: write
 
 concurrency:
     group: pages
     cancel-in-progress: true
 
 jobs:
-    build:
+    # A push to main that changes nothing the site is built from (README, docs, CI files...) does not
+    # need a new deployment. It is safe because the comparison is made against the commit of the last
+    # *successful* Pages deployment, not only against the push: a skipped, cancelled or failed
+    # deployment leaves its changes in the next comparison. A manual run (new application release,
+    # custom source_ref) always deploys. The exclusions are in scripts/ci/changes.sh.
+    changes:
         if: >-
             github.event_name == 'workflow_dispatch' ||
             (github.event.workflow_run.conclusion == 'success' &&
             github.event.workflow_run.event == 'push' &&
             github.event.workflow_run.head_branch == 'main')
         runs-on: ubuntu-latest
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
+        permissions:
+            contents: read
+            deployments: read
+        outputs:
+            shipped: ${{ steps.changes.outputs.shipped }}
+        steps:
+            - name: Check out website
+              if: github.event_name == 'workflow_run'
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+                  fetch-depth: 0
+                  persist-credentials: false
+
+            - name: Find the changes since the last deployment
+              id: changes
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  REPO: ${{ github.repository }}
+                  HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+              run: |
+                  if [ "${{ github.event_name }}" = workflow_dispatch ]; then
+                      echo "shipped=true" >> "$GITHUB_OUTPUT"
+                  else
+                      scripts/ci/changes.sh deploy "$HEAD_SHA"
+                  fi
+
+    build:
+        needs: changes
+        # A failed or unknown comparison deploys: only an explicit "false" skips the deployment.
+        if: >-
+            !cancelled() && needs.changes.outputs.shipped != 'false' && (
+            github.event_name == 'workflow_dispatch' ||
+            (github.event.workflow_run.conclusion == 'success' &&
+            github.event.workflow_run.event == 'push' &&
+            github.event.workflow_run.head_branch == 'main'))
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pages: write
         steps:
             - name: Check out website
               if: github.event_name == 'workflow_run'
@@ -87,6 +127,16 @@ jobs:
                   DATALITH_READ_TOKEN: ${{ steps.app-token.outputs.token }}
               run: npm run sync-assets
 
+            # Astro writes optimized images to node_modules/.astro/assets (about 20 s cold, 1 s warm).
+            # Only runs on main write caches, which every later run (and any branch) can read.
+            - name: Restore image cache
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: node_modules/.astro/assets
+                  key: astro-images-${{ runner.os }}-${{ hashFiles('src/assets/**', 'package-lock.json') }}
+                  restore-keys: |
+                      astro-images-${{ runner.os }}-
+
             - name: Build site
               env:
                   RELEASE_REPOSITORY: mycelium-build/datalith-app
@@ -102,6 +152,18 @@ jobs:
               with:
                   path: dist
 
+    # Separate job: "Re-run failed jobs" after a Pages failure reuses the uploaded artifact
+    # instead of building the site again.
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        permissions:
+            pages: write
+            id-token: write
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
             - name: Deploy to GitHub Pages
               id: deployment
               uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
