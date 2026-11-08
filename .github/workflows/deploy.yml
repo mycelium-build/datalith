@@ -24,12 +24,54 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    build:
+    # A push to main that changes nothing the site is built from (README, docs, CI files...) does not
+    # need a new deployment. It is safe because the comparison is made against the commit of the last
+    # *successful* Pages deployment, not only against the push: a skipped, cancelled or failed
+    # deployment leaves its changes in the next comparison. A manual run (new application release,
+    # custom source_ref) always deploys. The exclusions are in scripts/ci/changes.sh.
+    changes:
         if: >-
             github.event_name == 'workflow_dispatch' ||
             (github.event.workflow_run.conclusion == 'success' &&
             github.event.workflow_run.event == 'push' &&
             github.event.workflow_run.head_branch == 'main')
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            deployments: read
+        outputs:
+            shipped: ${{ steps.changes.outputs.shipped }}
+        steps:
+            - name: Check out website
+              if: github.event_name == 'workflow_run'
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+                  fetch-depth: 0
+                  persist-credentials: false
+
+            - name: Find the changes since the last deployment
+              id: changes
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  REPO: ${{ github.repository }}
+                  HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+              run: |
+                  if [ "${{ github.event_name }}" = workflow_dispatch ]; then
+                      echo "shipped=true" >> "$GITHUB_OUTPUT"
+                  else
+                      scripts/ci/changes.sh deploy "$HEAD_SHA"
+                  fi
+
+    build:
+        needs: changes
+        # A failed or unknown comparison deploys: only an explicit "false" skips the deployment.
+        if: >-
+            !cancelled() && needs.changes.outputs.shipped != 'false' && (
+            github.event_name == 'workflow_dispatch' ||
+            (github.event.workflow_run.conclusion == 'success' &&
+            github.event.workflow_run.event == 'push' &&
+            github.event.workflow_run.head_branch == 'main'))
         runs-on: ubuntu-latest
         permissions:
             contents: read

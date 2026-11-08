@@ -15,6 +15,34 @@ concurrency:
     cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+    # Which checks have inputs that changed? Skipping happens at the job and step level, so that a
+    # required check that is skipped still counts as passed. See scripts/ci/changes.sh.
+    changes:
+        runs-on: ubuntu-latest
+        outputs:
+            code: ${{ steps.changes.outputs.code }}
+            licenses: ${{ steps.changes.outputs.licenses }}
+            policies: ${{ steps.changes.outputs.policies }}
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  fetch-depth: 0
+                  persist-credentials: false
+
+            - name: Find the changed files
+              id: changes
+              env:
+                  EVENT: ${{ github.event_name }}
+                  BEFORE: ${{ github.event.before }}
+              run: |
+                  if [ "$EVENT" = pull_request ]; then
+                      # The checkout is the merge of the pull request into its base: parent 1 is the base.
+                      scripts/ci/changes.sh ci HEAD^1 HEAD
+                  else
+                      scripts/ci/changes.sh ci "$BEFORE" HEAD
+                  fi
+
     # On main, skip the checks when the pull request that was just merged already verified this tree.
     reuse:
         if: github.event_name == 'push'
@@ -41,9 +69,10 @@ jobs:
               run: scripts/ci/verified-tree.sh
 
     quality:
-        needs: reuse
-        # Pull requests (reuse is skipped) always run. On main, an unverified or failed lookup runs the full CI.
-        if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' }}
+        needs: [changes, reuse]
+        # Skipped only on an explicit answer: the tree was verified (main) or nothing tested changed.
+        # Pull requests (reuse is skipped), failed lookups and unknown bases run the full CI.
+        if: ${{ !cancelled() && needs.reuse.outputs.verified != 'true' && needs.changes.outputs.code != 'false' }}
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository
@@ -82,7 +111,9 @@ jobs:
               run: npm test
 
             - name: Check license notices
+              if: needs.changes.outputs.licenses != 'false'
               run: npm run licenses:check
 
             - name: Check policy pages
+              if: needs.changes.outputs.policies != 'false'
               run: npm run policies:check
