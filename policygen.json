@@ -16,7 +16,7 @@
         "address": "Registered address to be completed"
     },
     "privacy": {
-        "privacyEmail": "rom100main@proton.me",
+        "privacyEmail": "contact@datalith.work",
         "platforms": ["web", "desktop"],
         "locations": ["eu", "uk", "us", "other"],
         "socialSignIn": false,
@@ -45,7 +45,7 @@
         "coppaCompliance": false
     },
     "terms": {
-        "supportEmail": "rom100main@proton.me",
+        "supportEmail": "contact@datalith.work",
         "underEighteen": false,
         "underThirteen": false,
         "purchasableGoods": false,
