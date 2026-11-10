@@ -3,7 +3,6 @@ import { describe, expect, it } from "vite-plus/test"
 import {
     versionParts,
     compareVersions,
-    isPreviewAheadOfStable,
     platformForAsset,
     archForAsset,
     latestDocsTags,
@@ -11,14 +10,14 @@ import {
 
 describe("latestDocsTags", () => {
     it.each(["v2.0.0-rc.2", "v1.9.0-rc.9"])(
-        "excludes %s when stable has caught up or moved ahead",
+        "keeps %s as preview when stable has caught up or moved ahead",
         (tagName) => {
             expect(
                 latestDocsTags([
                     { tagName: "v2.0.0", prerelease: false },
                     { tagName, prerelease: true },
                 ]),
-            ).toEqual({ stable: "v2.0.0", preview: undefined })
+            ).toEqual({ stable: "v2.0.0", preview: tagName })
         },
     )
 
@@ -56,7 +55,7 @@ describe("latestDocsTags", () => {
             ]),
         ).toEqual({ stable: "v2.0.0", preview: "v2.1.0-rc.2" })
         expect(latestDocsTags([release("v1.0.0", false)]).preview).toBeUndefined()
-        expect(latestDocsTags([]).stable).toBeUndefined()
+        expect(latestDocsTags([])).toEqual({ stable: undefined, preview: undefined })
     })
 })
 
@@ -92,18 +91,6 @@ describe("compareVersions", () => {
             "v1.2.3-rc.2",
             "v1.2.3-rc.1",
         ])
-    })
-})
-
-describe("isPreviewAheadOfStable", () => {
-    it("hides a preview once its stable version has been released", () => {
-        expect(isPreviewAheadOfStable({ tagName: "v0.1.0-rc.4" }, { tagName: "v0.1.0" })).toBe(
-            false,
-        )
-    })
-
-    it("keeps the preview for a later release line", () => {
-        expect(isPreviewAheadOfStable({ tagName: "v0.1.1-rc.1" }, { tagName: "v0.1.0" })).toBe(true)
     })
 })
 

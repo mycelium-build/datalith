@@ -28,6 +28,21 @@
     --space-7: 3rem;
     --space-8: 4rem;
     --pixel-size: 4px;
+
+    /* Release channel colours: the theme accent, or the brand pair on Datalith themes. */
+    --dl-channel-stable: var(--dl-accent);
+    --dl-channel-stable-fg: var(--dl-accent-fg);
+    --dl-channel-preview: var(--dl-accent);
+    --dl-channel-preview-fg: var(--dl-accent-fg);
+}
+
+:root:not([data-datalith-theme]),
+:root[data-datalith-theme="datalith-light"],
+:root[data-datalith-theme="datalith-dark"] {
+    --dl-channel-stable: #1e8dff;
+    --dl-channel-stable-fg: #fff;
+    --dl-channel-preview: #e8b920;
+    --dl-channel-preview-fg: #141414;
 }
 
 *,
@@ -60,7 +75,10 @@ svg {
     vertical-align: middle;
 }
 
-svg {
+/* Pixel-art icons are drawn on an integer grid: snap their edges so the
+   squares stay sharp. Scoped on purpose — applied to every <svg>, it strips
+   anti-aliasing from curved artwork (brand logos, the docs graph). */
+.pixel-icon svg {
     shape-rendering: crispedges;
 }
 
