@@ -80,7 +80,7 @@ const previewVersion = formatReleaseVersion(tags.preview)
      * chip: compact and transparent beside the desktop title.
      */
     .docs-channel {
-        --on: #1e8dff;
+        --on: var(--dl-channel-stable);
         --track-w: 2.5rem;
         --track-h: 1.25rem;
         --thumb: 0.75rem;
@@ -93,7 +93,7 @@ const previewVersion = formatReleaseVersion(tags.preview)
         text-decoration: none;
     }
     .docs-channel[aria-checked="true"] {
-        --on: #e8b920;
+        --on: var(--dl-channel-preview);
     }
     .row {
         display: grid;
@@ -171,7 +171,7 @@ const previewVersion = formatReleaseVersion(tags.preview)
         transform: translateX(calc(var(--track-w) - 4px - var(--thumb) - 2 * var(--inset)));
     }
     .docs-channel[href]:hover .thumb {
-        background: color-mix(in srgb, var(--on) 82%, #000 18%);
+        background: color-mix(in oklch, var(--on) 88%, #000 12%);
     }
     [aria-disabled="true"] .track {
         opacity: 0.6;

@@ -44,13 +44,13 @@ const version = preview ? tags.preview : tags.stable
         white-space: nowrap;
     }
     .channel-badge .label {
-        color: #1e8dff;
+        color: var(--dl-channel-stable);
         font-family: var(--font-pixel);
         font-size: 0.75rem;
         line-height: 1.1;
     }
     .channel-badge.preview .label {
-        color: #e8b920;
+        color: var(--dl-channel-preview);
     }
     .channel-badge .version {
         color: var(--dl-muted);
