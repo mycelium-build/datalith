@@ -1,5 +1,4 @@
 ---
-import { isPreviewAheadOfStable } from "../../scripts/lib/releases.ts"
 import releaseData from "../data/releases.json"
 import Icon from "./Icon.astro"
 
@@ -10,8 +9,8 @@ const sourceReleases = releaseData.releases ?? []
 const stableReleases = sourceReleases.filter((release) => release.prerelease === false)
 const previewReleases = sourceReleases.filter((release) => release.prerelease === true)
 const stable = stableReleases[0]
-// Newest RC ahead of stable.
-const latestPreview = previewReleases.find((release) => isPreviewAheadOfStable(release, stable))
+// Newest RC, even when stable is ahead of it.
+const latestPreview = previewReleases[0]
 
 const packageRepository = "https://packages.datalith.work"
 const signingKeyFingerprint = "2926639D6FF19E8459C4F134C9C65D9D1B69CD63"

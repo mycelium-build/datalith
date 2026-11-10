@@ -24,26 +24,10 @@ export function compareVersions(left: ComparableRelease, right: ComparableReleas
     return new Date(right.publishedAt ?? 0).getTime() - new Date(left.publishedAt ?? 0).getTime()
 }
 
-export function isPreviewAheadOfStable(
-    preview: ComparableRelease,
-    stable: ComparableRelease | undefined,
-): boolean {
-    if (!stable) return true
-
-    const previewParts = versionParts(preview.tagName)
-    const stableParts = versionParts(stable.tagName)
-    if (!previewParts || !stableParts) return false
-
-    for (let index = 0; index < 3; index += 1) {
-        if (previewParts[index] !== stableParts[index]) {
-            return previewParts[index] > stableParts[index]
-        }
-    }
-
-    return false
-}
-
-/** Documentation tags from releases.json (already sorted newest first); drafts are never documented. */
+/**
+ * Documentation tags from releases.json (already sorted newest first); drafts are never documented.
+ * Preview is the newest RC, even when stable is ahead of it.
+ */
 export function latestDocsTags(
     releases: Array<{ tagName: string; prerelease: boolean; draft?: boolean }>,
 ): { stable?: string; preview?: string } {
@@ -53,10 +37,7 @@ export function latestDocsTags(
     )
     return {
         stable: stable?.tagName,
-        preview: published.find(
-            (release) =>
-                /-rc\.\d+$/i.test(release.tagName) && isPreviewAheadOfStable(release, stable),
-        )?.tagName,
+        preview: published.find((release) => /-rc\.\d+$/i.test(release.tagName))?.tagName,
     }
 }
 
