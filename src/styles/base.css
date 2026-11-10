@@ -60,7 +60,10 @@ svg {
     vertical-align: middle;
 }
 
-svg {
+/* Pixel-art icons are drawn on an integer grid: snap their edges so the
+   squares stay sharp. Scoped on purpose — applied to every <svg>, it strips
+   anti-aliasing from curved artwork (brand logos, the docs graph). */
+.pixel-icon svg {
     shape-rendering: crispedges;
 }
 
