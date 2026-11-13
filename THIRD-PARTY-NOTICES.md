@@ -7342,8 +7342,8 @@ SOFTWARE.
 
 Used by:
 
-- `@astrojs/compiler-binding` 0.5.2
-- `@astrojs/compiler-rs` 0.5.2
+- `@astrojs/compiler-binding` 0.5.3
+- `@astrojs/compiler-rs` 0.5.3
 
 ```
 MIT License
