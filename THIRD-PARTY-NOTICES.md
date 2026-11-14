@@ -6644,12 +6644,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Used by:
 
 - `@astrojs/internal-helpers` 0.13.0
+- `@astrojs/internal-helpers` 0.13.1
 - `@astrojs/markdown-satteri` 0.4.6
+- `@astrojs/markdown-satteri` 0.4.7
 - `@astrojs/mdx` 8.1.2
 - `@astrojs/prism` 4.1.2
 - `@astrojs/sitemap` 3.7.4
 - `@astrojs/telemetry` 3.4.2
-- `astro` 7.4.4
+- `astro` 7.4.7
 
 ```
 MIT License
@@ -7032,7 +7034,7 @@ SOFTWARE.
 
 Used by:
 
-- `rolldown` 1.2.15
+- `rolldown` 1.3.2
 
 ```
 MIT License
@@ -7068,6 +7070,7 @@ Used by:
 
 - `@oxc-project/runtime` 0.155.0
 - `@oxc-project/types` 0.155.0
+- `@oxc-project/types` 0.158.0
 
 ```
 MIT License
@@ -7282,6 +7285,7 @@ SOFTWARE.
 Used by:
 
 - `satteri` 0.10.5
+- `satteri` 0.11.7
 
 ```
 MIT License
@@ -7840,8 +7844,7 @@ Used by:
 - `is-docker` 4.0.0
 - `is-plain-obj` 4.1.0
 - `p-limit` 7.3.3
-- `p-queue` 9.3.5
-- `p-timeout` 7.0.2
+- `p-queue` 10.0.0
 - `url-extras` 0.1.0
 - `yocto-queue` 1.2.2
 
@@ -8045,36 +8048,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-```
-
-### The MIT License (MIT)
-
-Used by:
-
-- `eventemitter3` 5.0.4
-
-```
-The MIT License (MIT)
-
-Copyright (c) 2014 Arnout Kazemier
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 ```
 
 ### The MIT License (MIT)
