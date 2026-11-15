@@ -1232,7 +1232,7 @@ Apache License
 Used by:
 
 - `@types/debug` 4.1.13
-- `@types/estree` 1.0.9
+- `@types/estree` 1.0.10
 - `@types/estree-jsx` 1.0.5
 - `@types/hast` 3.0.5
 - `@types/mdast` 4.0.4
@@ -1719,7 +1719,7 @@ software or this license, under any kind of legal claim.***
 
 Used by:
 
-- `marked` 18.1.2
+- `marked` 18.2.0
 
 ```
 # License information
@@ -4143,7 +4143,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Used by:
 
-- `cookie` 2.0.1
+- `cookie` 2.0.2
 
 ```
 (The MIT License)
@@ -4609,12 +4609,12 @@ Used by:
 - `decode-named-character-reference` 1.3.0
 - `hast-util-format` 1.1.0
 - `hast-util-select` 6.0.4
-- `hast-util-to-html` 9.0.5
+- `hast-util-to-html` 9.0.6
 - `hast-util-to-text` 4.0.3
-- `hastscript` 9.0.1
-- `mdast-util-directive` 3.1.1
+- `hastscript` 9.0.3
+- `mdast-util-directive` 3.2.0
 - `mdast-util-from-markdown` 2.1.0
-- `mdast-util-to-markdown` 2.2.1
+- `mdast-util-to-markdown` 2.2.3
 - `micromark` 4.0.3
 - `micromark-core-commonmark` 2.0.4
 - `micromark-extension-directive` 4.0.0
@@ -4642,7 +4642,7 @@ Used by:
 - `retext-smartypants` 6.2.0
 - `unist-util-visit` 5.2.0
 - `unist-util-visit-parents` 6.1.0
-- `vfile-message` 4.0.3
+- `vfile-message` 4.0.4
 
 ```
 (The MIT License)
@@ -5279,7 +5279,7 @@ For more information, please see
 
 Used by:
 
-- `@babel/parser` 7.29.11
+- `@babel/parser` 7.29.14
 
 ```
 Copyright (C) 2012-2014 by various contributors (see AUTHORS)
@@ -5458,29 +5458,6 @@ Permission to use, copy, modify, and/or distribute this software for any purpose
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
-### Copyright (c) 2016, Contributors
-
-Used by:
-
-- `yargs-parser` 22.0.0
-
-```
-Copyright (c) 2016, Contributors
-
-Permission to use, copy, modify, and/or distribute this software
-for any purpose with or without fee is hereby granted, provided
-that the above copyright notice and this permission notice
-appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE
-LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES
-OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
-ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-```
-
 ### Copyright (c) 2018-19 [these people](https://github.com/rich-harris/devalue/g...
 
 Used by:
@@ -5501,7 +5478,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Used by:
 
-- `postcss-selector-parser` 7.1.7
+- `postcss-selector-parser` 7.2.1
 
 ```
 Copyright (c) Ben Briggs <beneb.info@gmail.com> (http://beneb.info)
@@ -5558,7 +5535,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Used by:
 
-- `@ctrl/tinycolor` 4.2.2
+- `@ctrl/tinycolor` 4.3.0
 
 ```
 Copyright (c) Scott Cooper <scttcper@gmail.com>
@@ -5603,18 +5580,23 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### Copyright 2010-2021 Mike Bostock
+### Copyright 2010-2026 Mike Bostock
 
 Used by:
 
-- `d3-dispatch` 3.0.1
-- `d3-interpolate` 3.0.1
-- `d3-quadtree` 3.0.1
-- `d3-timer` 3.0.1
-- `d3-transition` 3.0.1
+- `d3-color` 3.1.1
+- `d3-dispatch` 3.0.2
+- `d3-drag` 3.0.1
+- `d3-force` 3.0.1
+- `d3-interpolate` 3.0.2
+- `d3-quadtree` 3.0.2
+- `d3-selection` 3.0.1
+- `d3-timer` 3.0.2
+- `d3-transition` 3.0.2
+- `d3-zoom` 3.0.1
 
 ```
-Copyright 2010-2021 Mike Bostock
+Copyright 2010-2026 Mike Bostock
 
 Permission to use, copy, modify, and/or distribute this software for any purpose
 with or without fee is hereby granted, provided that the above copyright notice
@@ -5629,14 +5611,14 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ```
 
-### Copyright 2010-2021 Mike Bostock
+### Copyright 2010-2026 Mike Bostock
 
 Used by:
 
-- `d3-ease` 3.0.1
+- `d3-ease` 3.0.2
 
 ```
-Copyright 2010-2021 Mike Bostock
+Copyright 2010-2026 Mike Bostock
 Copyright 2001 Robert Penner
 All rights reserved.
 
@@ -5664,53 +5646,6 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
-### Copyright 2010-2022 Mike Bostock
-
-Used by:
-
-- `d3-color` 3.1.0
-
-```
-Copyright 2010-2022 Mike Bostock
-
-Permission to use, copy, modify, and/or distribute this software for any purpose
-with or without fee is hereby granted, provided that the above copyright notice
-and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
-THIS SOFTWARE.
-```
-
-### Copyright 2010-2026 Mike Bostock
-
-Used by:
-
-- `d3-drag` 3.0.1
-- `d3-force` 3.0.1
-- `d3-selection` 3.0.1
-- `d3-zoom` 3.0.1
-
-```
-Copyright 2010-2026 Mike Bostock
-
-Permission to use, copy, modify, and/or distribute this software for any purpose
-with or without fee is hereby granted, provided that the above copyright notice
-and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
-THIS SOFTWARE.
 ```
 
 ### Copyright 2016-2018 Kornel Lesiński
@@ -5811,35 +5746,6 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
-```
-
-### Copyright Mathias Bynens <https://mathiasbynens.be/>
-
-Used by:
-
-- `cssesc` 3.0.0
-
-```
-Copyright Mathias Bynens <https://mathiasbynens.be/>
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
 ### Copyright © 2025 Chris Swithinbank
@@ -6024,10 +5930,10 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Used by:
 
-- `@pagefind/default-ui` 1.5.2
+- `@pagefind/default-ui` 1.6.0
 - `@yuku-toolchain/types` 0.19.0
 - `am-i-vibing` 0.5.0
-- `pagefind` 1.5.2
+- `pagefind` 1.6.0
 - `process-ancestry` 0.1.0
 - `yuku-core` 0.19.0
 - `yuku-parser` 0.19.0
@@ -6167,9 +6073,9 @@ SOFTWARE.
 
 Used by:
 
-- `@babel/helper-string-parser` 7.29.11
+- `@babel/helper-string-parser` 7.29.14
 - `@babel/helper-validator-identifier` 7.29.7
-- `@babel/types` 7.29.11
+- `@babel/types` 7.29.14
 - `@oxc-project/runtime` 0.158.0
 
 ```
@@ -6231,7 +6137,7 @@ SOFTWARE.
 
 Used by:
 
-- `sisteransi` 1.0.5
+- `sisteransi` 2.0.0
 
 ```
 MIT License
@@ -6320,15 +6226,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Used by:
 
-- `@astrojs/internal-helpers` 0.13.0
-- `@astrojs/internal-helpers` 0.13.1
-- `@astrojs/markdown-satteri` 0.4.6
-- `@astrojs/markdown-satteri` 0.4.7
-- `@astrojs/mdx` 8.1.2
+- `@astrojs/internal-helpers` 0.13.2
+- `@astrojs/markdown-satteri` 0.4.9
+- `@astrojs/mdx` 8.1.5
 - `@astrojs/prism` 4.1.2
+- `@astrojs/runtime` 0.1.1
 - `@astrojs/sitemap` 3.7.4
 - `@astrojs/telemetry` 3.4.2
-- `astro` 7.4.7
+- `@astrojs/vite-plugin-astro` 0.1.2
+- `astro` 7.4.11
 
 ```
 MIT License
@@ -6396,14 +6302,14 @@ SOFTWARE.
 
 Used by:
 
-- `@shikijs/core` 4.5.0
-- `@shikijs/engine-javascript` 4.5.0
-- `@shikijs/engine-oniguruma` 4.5.0
-- `@shikijs/langs` 4.5.0
-- `@shikijs/primitive` 4.5.0
-- `@shikijs/themes` 4.5.0
-- `@shikijs/types` 4.5.0
-- `shiki` 4.5.0
+- `@shikijs/core` 4.6.0
+- `@shikijs/engine-javascript` 4.6.0
+- `@shikijs/engine-oniguruma` 4.6.0
+- `@shikijs/langs` 4.6.0
+- `@shikijs/primitive` 4.6.0
+- `@shikijs/themes` 4.6.0
+- `@shikijs/types` 4.6.0
+- `shiki` 4.6.0
 
 ```
 MIT License
@@ -6711,7 +6617,7 @@ SOFTWARE.
 
 Used by:
 
-- `rolldown` 1.3.2
+- `rolldown` 1.2.19
 
 ```
 MIT License
@@ -6745,6 +6651,7 @@ The licenses of externally maintained libraries from which parts of the Software
 
 Used by:
 
+- `@oxc-project/types` 0.156.0
 - `@oxc-project/types` 0.158.0
 
 ```
@@ -6991,7 +6898,7 @@ SOFTWARE.
 Used by:
 
 - `tinyclip` 1.0.3
-- `tinyps` 0.5.1
+- `tinyps` 0.5.2
 
 ```
 MIT License
@@ -7052,7 +6959,7 @@ SOFTWARE.
 
 Used by:
 
-- `@rolldown/pluginutils` 1.0.1
+- `@rolldown/pluginutils` 1.1.0
 
 ```
 MIT License
@@ -7180,7 +7087,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Used by:
 
-- `undici` 8.12.3
+- `undici` 8.12.4
 - `undici-types` 7.24.6
 
 ```
@@ -7486,7 +7393,7 @@ SOFTWARE.
 
 Used by:
 
-- `neotraverse` 1.0.1
+- `neotraverse` 1.0.2
 
 ```
 MIT License
@@ -7539,8 +7446,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Used by:
 
-- `@clack/core` 1.5.1
-- `@clack/prompts` 1.8.1
+- `@clack/core` 1.6.0
+- `@clack/prompts` 1.9.0
 
 ```
 MIT License
@@ -7645,7 +7552,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Used by:
 
-- `semver` 7.8.5
+- `semver` 7.8.6
 
 ```
 The ISC License
@@ -7669,7 +7576,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Used by:
 
-- `i18next` 26.5.11
+- `i18next` 26.7.2
 
 ```
 The MIT License (MIT)
@@ -7790,7 +7697,7 @@ THE SOFTWARE.
 
 Used by:
 
-- `ci-info` 4.4.0
+- `ci-info` 4.5.0
 
 ```
 The MIT License (MIT)
@@ -7975,6 +7882,7 @@ Used by:
 - `dequal` 2.0.3
 - `dset` 3.1.4
 - `flattie` 1.1.1
+- `mri` 1.2.0
 
 ```
 The MIT License (MIT)
