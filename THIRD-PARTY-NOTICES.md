@@ -6406,7 +6406,7 @@ SOFTWARE.
 
 Used by:
 
-- `@astrojs/starlight` 0.42.11
+- `@astrojs/starlight` 0.43.1
 
 ```
 MIT License
@@ -7576,7 +7576,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Used by:
 
-- `i18next` 26.7.2
+- `i18next` 27.1.1
 
 ```
 The MIT License (MIT)
