@@ -775,7 +775,7 @@ edit it by hand.
 
 Used by:
 
-- `dompurify` 3.4.17
+- `dompurify` 3.4.18
 
 ```
 Apache License
@@ -1719,7 +1719,7 @@ software or this license, under any kind of legal claim.***
 
 Used by:
 
-- `marked` 18.2.0
+- `marked` 18.2.1
 
 ```
 # License information
@@ -6227,14 +6227,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Used by:
 
 - `@astrojs/internal-helpers` 0.13.2
+- `@astrojs/markdown-satteri` 0.4.10
 - `@astrojs/markdown-satteri` 0.4.9
 - `@astrojs/mdx` 8.1.5
 - `@astrojs/prism` 4.1.2
 - `@astrojs/runtime` 0.1.1
 - `@astrojs/sitemap` 3.7.4
 - `@astrojs/telemetry` 3.4.2
-- `@astrojs/vite-plugin-astro` 0.1.2
-- `astro` 7.4.11
+- `@astrojs/vite-plugin-astro` 0.1.3
+- `astro` 7.4.12
 
 ```
 MIT License
