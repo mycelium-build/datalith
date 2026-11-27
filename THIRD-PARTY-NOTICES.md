@@ -6227,14 +6227,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Used by:
 
 - `@astrojs/internal-helpers` 0.13.2
+- `@astrojs/markdown-satteri` 0.4.10
 - `@astrojs/markdown-satteri` 0.4.9
 - `@astrojs/mdx` 8.1.5
 - `@astrojs/prism` 4.1.2
 - `@astrojs/runtime` 0.1.1
+- `@astrojs/runtime` 0.1.2
 - `@astrojs/sitemap` 3.7.4
 - `@astrojs/telemetry` 3.4.2
-- `@astrojs/vite-plugin-astro` 0.1.2
-- `astro` 7.4.11
+- `@astrojs/vite-plugin-astro` 0.1.3
+- `astro` 7.4.13
 
 ```
 MIT License
@@ -6618,6 +6620,7 @@ SOFTWARE.
 Used by:
 
 - `rolldown` 1.2.19
+- `rolldown` 1.3.3
 
 ```
 MIT License
@@ -6653,6 +6656,7 @@ Used by:
 
 - `@oxc-project/types` 0.156.0
 - `@oxc-project/types` 0.158.0
+- `@oxc-project/types` 0.159.0
 
 ```
 MIT License
