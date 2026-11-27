@@ -1863,7 +1863,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Used by:
 
-- `@voidzero-dev/vite-plus-core` 1.6.0
+- `@voidzero-dev/vite-plus-core` 8.3.8001
 
 ```
 # Vite-Plus core license
@@ -6076,7 +6076,7 @@ Used by:
 - `@babel/helper-string-parser` 7.29.14
 - `@babel/helper-validator-identifier` 7.29.7
 - `@babel/types` 7.29.14
-- `@oxc-project/runtime` 0.158.0
+- `@oxc-project/runtime` 0.159.0
 
 ```
 MIT License
@@ -6652,7 +6652,7 @@ The licenses of externally maintained libraries from which parts of the Software
 Used by:
 
 - `@oxc-project/types` 0.156.0
-- `@oxc-project/types` 0.158.0
+- `@oxc-project/types` 0.159.0
 
 ```
 MIT License
