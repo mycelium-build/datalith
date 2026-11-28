@@ -775,7 +775,7 @@ edit it by hand.
 
 Used by:
 
-- `dompurify` 3.4.17
+- `dompurify` 3.5.0
 
 ```
 Apache License
@@ -1719,7 +1719,7 @@ software or this license, under any kind of legal claim.***
 
 Used by:
 
-- `marked` 18.2.0
+- `marked` 18.3.0
 
 ```
 # License information
@@ -6406,7 +6406,7 @@ SOFTWARE.
 
 Used by:
 
-- `@astrojs/starlight` 0.42.11
+- `@astrojs/starlight` 0.43.1
 
 ```
 MIT License
@@ -7576,7 +7576,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Used by:
 
-- `i18next` 26.7.2
+- `i18next` 27.2.9
 
 ```
 The MIT License (MIT)
